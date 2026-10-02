@@ -212,7 +212,6 @@ The build checks JavaScript syntax. The test suite includes mocked integrations 
 
 <div align="center">
 
-**Built around your tools. Released with your approval.**
 
 [MIT License](LICENSE) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
