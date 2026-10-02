@@ -164,7 +164,7 @@ https://YOUR-APP-ADDRESS/api/service?op=sfCallback
 - **Traceability:** requirements, Jira links, generated files, reviews, and test evidence stay with the delivery.
 
 <details>
-<summary><strong>What this pilot does—and what comes next</strong></summary>
+<summary><strong>What this pilot does and what comes next?!</strong></summary>
 
 **Available:** BRD clarification, reviewed Jira story creation, allowlisted Apex / CustomObject / Flow / permission-set / LWC generation, isolated Git branches, Salesforce validation, sandbox deployment, and human acceptance evidence.
 
