@@ -1,91 +1,219 @@
-# Delivery Studio — Salesforce Delivery Agent
+<div align="center">
 
-A configurable web application that turns a business requirements document into reviewed Salesforce sandbox development work. Each workspace supplies its own Salesforce, Jira, GitHub, Copado pipeline, and development LLM settings. No organization, project, repository, or model is hardcoded.
+<img src="public/icon.svg" alt="Delivery Studio" width="76" />
 
-**Release v0.2.0: sandbox pilot.** This is source you can commit and deploy, not a claim of a tested production integration. Live accounts were not supplied during development. Automated Copado promotion and production deployment are deliberately unavailable in this release.
+# Delivery Studio
 
-## Upgrade from v0.1
+### Your BRD. Your tools. A reviewed Salesforce release.
 
-Run `database/migrations/002_release_safety.sql` against your existing Supabase database before deploying this version. New installations use the complete `database/schema.sql` instead. See [UPGRADE.md](docs/UPGRADE.md) for release and recovery changes.
+Turn business requirements into Jira stories, Salesforce changes, and sandbox test evidence—with human review at every release gate.
 
-## Run locally
+![Version](https://img.shields.io/badge/version-0.2.0-6366f1?style=flat-square)
+![Status](https://img.shields.io/badge/status-sandbox_pilot-f59e0b?style=flat-square)
+![Node](https://img.shields.io/badge/Node.js-22.x-339933?style=flat-square)
+[![License](https://img.shields.io/badge/license-MIT-0891b2?style=flat-square)](LICENSE)
 
-Requires Node.js 22 or newer. There are no runtime npm dependencies.
+**[Try it locally](#try-it-locally) · [Deploy to Vercel](#deploy-to-vercel) · [Connect your accounts](#connect-your-accounts) · [Documentation](#documentation)**
+
+</div>
+
+> [!IMPORTANT]
+> **Sandbox pilot:** production deployment is disabled. Copado uses a manual handoff. Live integrations must be verified with your accounts before team use.
+
+## From requirement to release
+
+| 📝 Understand | 🛠️ Build | ✅ Review & release |
+| :--- | :--- | :--- |
+| Start with a BRD and answer follow-up questions. | Create Jira stories and generate Salesforce metadata with your chosen LLM. | Review changes, validate in a sandbox, record acceptance evidence, and export the Copado handoff. |
+
+Every workspace uses **its own Salesforce org, Jira project, GitHub repository, Copado pipeline details, and model**. No company accounts are hardcoded.
+
+<details>
+<summary><strong>See the delivery workflow</strong></summary>
+
+
+**Workflow:** each action is requested by a user; this pilot does not run an autonomous development loop.
+
+```mermaid
+flowchart TD
+    A[BRD intake] --> B{Requirements clear?}
+    B -->|No| C[Follow-up questions]
+    C --> B
+    B -->|Yes| D[Human plan approval]
+    D --> E[Jira stories and generated changes]
+    E --> F[Human code review and Git commit]
+    F --> G{Sandbox validation passes?}
+    G -->|No| F
+    G -->|Yes| H[Human release approval]
+    H --> I[Sandbox deploy and acceptance]
+    I --> J[Copado handoff]
+```
+
+</details>
+
+## Try it locally
+
+**You need:** Node.js 22 and a copy of this repository.
+
+1. Download and extract the repository, or clone it with Git.
+2. Open a terminal in the folder containing `package.json`.
+3. Run:
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000 and choose **Open sample workspace** to inspect the workflow without accounts. Sample actions do not call external services or simulate successful tests/deployments.
+4. Open **http://localhost:3000** and select **Open sample workspace**.
 
-For live use, follow [SETUP.md](docs/SETUP.md): create a Supabase project, run `database/schema.sql`, and copy `.env.example` to `.env.local` with the actual server settings. Configure connections through the web application after signing in. Never commit `.env.local` or real credentials.
+**No API keys or package installation are needed for the sample.** It previews the interface without creating tickets, making model calls, or deploying changes.
+
+## Deploy to Vercel
+
+**Start with the sample; connect live accounts afterward.**
+
+1. In Vercel, choose **Add New → Project**.
+2. Import **`kamikaze1120/salesforce-delivery-agent`** from GitHub.
+3. Use these settings, then select **Deploy**:
+
+| Setting | Value |
+| :--- | :--- |
+| Framework preset | **Other** |
+| Root directory | **`./`** |
+| Build command | **`npm run build`** |
+| Output directory | **`public`** |
+| Node.js version | **22.x** |
+
+Your first deployment can run the sample without environment variables. To enable real sign-in and development, complete the account setup below.
+
+> [!TIP]
+> Keep the repository folders intact. Vercel needs `api/service.mjs`, `public/index.html`, and `scripts/check.mjs` in their original locations.
+
+## Connect your accounts
+
+### 1 · Set up sign-in and storage
+
+Create a Supabase project. In its SQL Editor, run [database/schema.sql](database/schema.sql) **once in a new project**, then create your pilot users in Supabase Auth and confirm their emails.
+
+**Upgrading an existing v0.1 database?** Use [the upgrade guide](docs/UPGRADE.md) instead of rerunning the full schema.
+
+### 2 · Add server settings
+
+In your Vercel project's **Settings → Environment Variables**, add the five required values below. Then **redeploy**.
+
+| Variable | What to enter |
+| :--- | :--- |
+| `APP_ORIGIN` | Your exact HTTPS app address, with no trailing slash |
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_ANON_KEY` | Your Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your server-only Supabase service-role key |
+| `ENCRYPTION_KEY` | A random 32-byte key encoded as base64 |
+
+<details>
+<summary><strong>Generate the encryption key / configure local development</strong></summary>
+
+Generate the key in your local terminal:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Keep a secure backup. The app uses this key to encrypt saved credentials; replacing it without migrating data makes those credentials unreadable.
+
+For local use, copy [.env.example](.env.example) to `.env.local`, fill in the values, and set `APP_ORIGIN=http://localhost:3000`.
+
+Never commit real keys or `.env.local`. Keep signup disabled unless you intentionally enable it. See [the full setup guide](docs/SETUP.md) for optional settings.
+
+</details>
+
+### 3 · Configure your workspace
+
+Sign in, create a workspace, and open **Connections**.
+
+| Connection | What you provide |
+| :--- | :--- |
+| **Salesforce** | Sandbox URL, OAuth client ID and secret; then authorize the org |
+| **Jira Cloud** | Site URL, project key, issue type ID, account email, and API token |
+| **GitHub** | The Salesforce repository Copado uses, base branch, metadata directory, and token |
+| **Copado** | Pipeline type/name, dev and UAT environments, and release owner for manual handoff |
+| **Development LLM** | Your OpenAI or Azure OpenAI model/deployment and API credentials |
+
+The Salesforce repository is separate from the repository hosting this web app. For Salesforce OAuth, use this callback with your actual app address:
+
+```text
+https://YOUR-APP-ADDRESS/api/service?op=sfCallback
+```
+
+📘 **Need help finding credentials or setting permissions?** Follow [the connection setup guide](docs/SETUP.md#3-configure-a-workspace).
+
+### 4 · Deliver your first small change
+
+1. Add a BRD as pasted text, `.txt`, or `.md`.
+2. Analyze it, answer blocking questions, and approve the plan.
+3. Create Jira stories, generate changes, and review the files.
+4. Approve the code, commit it, and validate in the sandbox.
+5. Approve the sandbox release, deploy, and record acceptance evidence.
+6. Download the Copado handoff for your existing release process.
+
+**Refresh Salesforce status** after validation or deployment to retrieve the actual outcome.
+
+## Built-in review controls
+
+- **Workspace roles:** owners configure accounts; developers build; reviewers approve; viewers inspect.
+- **Exact release approval:** sandbox approval binds the artifact, validation run, Git commit, account version, and target org. It expires after four hours.
+- **Safe recovery:** interrupted writes with unknown outcomes stay blocked until investigated.
+- **Traceability:** requirements, Jira links, generated files, reviews, and test evidence stay with the delivery.
+
+<details>
+<summary><strong>What this pilot does—and what comes next</strong></summary>
+
+**Available:** BRD clarification, reviewed Jira story creation, allowlisted Apex / CustomObject / Flow / permission-set / LWC generation, isolated Git branches, Salesforce validation, sandbox deployment, and human acceptance evidence.
+
+**Current limits:**
+
+- Copado is a manual handoff; automatic promotion and production deployment are unavailable.
+- BRDs must be text or Markdown. PDF and Word extraction are not included.
+- Org inspection is bounded; it is not a full source retrieval or dependency analysis.
+- Generated code needs human review. Apex validation is not a substitute for business acceptance or LWC/UI testing.
+- Jira projects requiring custom fields need additional mappings. Supported models must work with Chat Completions JSON mode.
+- The pilot owner may approve their own work; strict separation of duties is not enforced.
+- Connection changes require a new delivery. Password recovery is managed through Supabase.
+
+Future work includes an edition-specific Copado adapter, richer document intake, broader test runners, enterprise identity, and production release governance. These are roadmap items, not enabled features.
+
+</details>
+
+## Documentation
+
+| I want to… | Open this |
+| :--- | :--- |
+| Configure accounts or deploy | [Setup guide](docs/SETUP.md) |
+| Understand the controls | [Architecture](docs/ARCHITECTURE.md) |
+| See what has been tested | [Verification evidence](docs/VERIFICATION.md) |
+| Upgrade an existing installation | [Upgrade guide](docs/UPGRADE.md) |
+| Understand the Copado handoff | [Copado connector notes](docs/COPADO-CONNECTOR.md) |
+| Contribute a change | [Contributing](CONTRIBUTING.md) |
+| Report a security issue | [Security policy](SECURITY.md) |
+
+<details>
+<summary><strong>Developer checks</strong></summary>
+
+From the repository root:
 
 ```bash
 npm test
 npm run build
 ```
 
-## What works in the pilot
+The build checks JavaScript syntax. The test suite includes mocked integrations and a local HTTP smoke test; passing checks do not verify your live accounts or generated Salesforce solution.
 
-| Area | Implementation |
-| --- | --- |
-| Identity and workspaces | Supabase email/password authentication, encrypted HttpOnly session cookies, workspace roles: owner, reviewer, developer, viewer |
-| Connection setup | Per-workspace configuration; encrypted Jira/GitHub/LLM credentials; Salesforce OAuth with one-use, user-bound state |
-| BRD intake | Paste text or upload `.txt` / `.md`; document stored in the workspace |
-| Clarification and planning | User-selected OpenAI or Azure OpenAI model, structured requirements, exact BRD citations, stories, risks, acceptance criteria, follow-up questions |
-| Org context | Verifies `Organization.IsSandbox`; inspects object catalog, selected field schemas, Apex class names |
-| Jira | Creates approved stories one at a time, maps configurable issue type, records issue links, recovers matching markers |
-| Salesforce generation | Generates allowlisted Apex, CustomObject, Flow, permission set, and LWC metadata; builds package.xml on the server |
-| Human code review | File inspection/editing; exact artifact hash approval; edits reset approvals |
-| GitHub | Commits a reviewed release to a new isolated branch; no force push or automatic merge; converts supported Metadata API objects into source format |
-| Sandbox tests | Check-only Metadata API deployment with `RunLocalTests`; durable deployment IDs and actual failure messages |
-| Sandbox release | Four-hour reviewer approval bound to the exact validation run, artifact, Git commit, and org; live Git branch check before dispatch |
-| Business acceptance | Reviewer records observed evidence for every plan test scenario after sandbox deployment |
-| Copado handoff | Downloads metadata plus a release manifest containing Jira links, Git commit, review decisions, target, and test results |
-| Human intervention | Pause/resume, ten-minute operation leases, durable write checkpoints; unknown outcomes remain blocked |
-| Persistence and audit | Postgres-backed job state, optimistic concurrency, server-generated actor events, model usage tracking |
+</details>
 
-## Workflow
+---
 
-1. Sign in and create a workspace.
-2. Configure Salesforce, Jira, GitHub, Copado handoff, and your LLM. Authorize the sandbox.
-3. Create a delivery from a BRD. Choose **Analyze with development LLM**.
-4. Answer blocking questions and reanalyze. Review/edit the plan, then approve it.
-5. Create Jira work items and generate Salesforce changes.
-6. Review/edit every generated file and approve the code.
-7. Commit to its isolated Git branch and validate the package. Refresh Salesforce status until it finishes.
-8. Review validation evidence, approve the sandbox release, and deploy. Refresh its status.
-9. Run the business acceptance scenarios in the sandbox and record evidence.
-10. Download the Copado handoff. Your release manager continues UAT and production through the existing Copado process.
+<div align="center">
 
-Every write is an explicit user action in this pilot. The application does not run an autonomous repair loop or background development agent. Salesforce validation/deployment jobs execute asynchronously in Salesforce; their IDs and state persist in the database. The browser must refresh their status, so human review does not depend on a running server request.
+**Built around your tools. Released with your approval.**
 
-## Deploy to Vercel
+[MIT License](LICENSE) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-Import your committed GitHub repository. Select **Other** as the framework preset, `npm run build` as the build command, and `public` as the output directory. The API entry point is `api/service.mjs`; `vercel.json` includes function limits and security headers. Set the variables listed in `.env.example`. `APP_ORIGIN` must equal the exact HTTPS site origin, without a trailing slash. Use a stable deployment URL for OAuth callbacks; see [SETUP.md](docs/SETUP.md).
-
-Vercel hosting does not provide the application database or account credentials automatically. A Supabase project and the configured external accounts are required for live operation. No accounts, subscriptions, integrations, or resources have been provisioned by this source package.
-
-## Boundaries and next milestones
-
-- Copado is a **manual release handoff**, not a live automated connector. Pipeline edition/version and licensed API access must be identified before implementing that adapter. Production is disabled on the server.
-- Current connectors support Jira Cloud, GitHub.com, Salesforce My Domain sandboxes, and OpenAI/Azure models compatible with Chat Completions JSON mode. Enterprise GitHub, Jira Data Center, arbitrary model gateways, and other Git providers are not supported yet.
-- PDF and Word extraction are not included. Convert the BRD to text/Markdown first.
-- The org inspection is intentionally bounded and not a full dependency graph or source retrieval. Existing Flow logic, Apex bodies, managed package constraints, and every org feature are not inspected. Developer review remains mandatory.
-- Generated metadata is untrusted until reviewed and validated. Model generation does not guarantee correct Salesforce code, security, or business behavior.
-- Apex tests run through Salesforce. Browser-based LWC tests, automated UAT, Copado Robotic Testing, static analyzers, and external integration tests need separate runners.
-- No destructive changes, deletion manifests, data migrations, automatic merges, automatic PR creation, or production data access are supported.
-- Changing workspace connections requires a new delivery. Model calls have a per-user limit, but organization spending quotas must also be configured at the model provider.
-- Password recovery, enterprise SSO, managed invite emails, credential rotation UI, and compliance-grade immutable audit retention are next milestones. A Supabase administrator manages accounts and recovery for the pilot.
-
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md), [VERIFICATION.md](docs/VERIFICATION.md), and [COPADO-CONNECTOR.md](docs/COPADO-CONNECTOR.md) for the controls, evidence, and release-adapter contract.
-
-## Commit the source
-
-Extract this package and copy its contents into your existing `salesforce-delivery-agent` checkout. Review the source, then:
-
-```bash
-git add .
-git commit -m "Add configurable Salesforce delivery sandbox pilot"
-git push origin main
-```
+</div>
