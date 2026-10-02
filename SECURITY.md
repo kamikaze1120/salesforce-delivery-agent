@@ -6,7 +6,7 @@ Version 0.2 is a sandbox pilot. Live integration behavior and database migration
 
 ## Reporting a vulnerability
 
-Contact the repository owner, @kamikaze1120, through an established private channel. Do not put vulnerabilities, tokens, customer data, BRDs, or exploit details in public issues. If no private channel is available, ask the owner to arrange one without disclosing the vulnerability. Use GitHub private vulnerability reporting only if it is enabled for this repository.
+Contact the repository owner, @Mujtaba (mujtaba.mohammed720@gmail.com), through an established private channel. Do not put vulnerabilities, tokens, customer data, BRDs, or exploit details in public issues. If no private channel is available, ask the owner to arrange one without disclosing the vulnerability. Use GitHub private vulnerability reporting only if it is enabled for this repository.
 
 Include the affected version, reproduction steps using synthetic data, likely impact, and a suggested fix if available. Remove secrets from screenshots and logs. Coordinate disclosure with the maintainer and avoid testing systems or accounts you do not own or have authorization to assess.
 
