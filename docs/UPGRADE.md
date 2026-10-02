@@ -1,3 +1,12 @@
+# v0.3 upgrade
+
+This is the first v2 upgrade increment. Deploy the updated source; no new environment variables or database migration are required when upgrading from v0.2. Keep the existing encryption key and database schema.
+
+- Existing Jira connections can be checked as-is. If preflight reports required fields, add their JSON defaults, re-enter the token, and save. Saving changes increments the account version; create new deliveries against the new settings.
+- Run **Test model connection** explicitly to verify model compatibility. This makes one synthetic billable API request. Stored credentials alone no longer count as a ready model connection.
+- The sample workspace now offers four temporary test identities. These do not create real authentication accounts.
+- Jira metadata checks occur before the write checkpoint. A failed read-only preflight remains retryable; an ambiguous issue write still pauses the delivery and requires reconciliation.
+
 # v0.2 upgrade and recovery
 
 ## Install
