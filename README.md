@@ -89,5 +89,3 @@ git add .
 git commit -m "Add configurable Salesforce delivery sandbox pilot"
 git push origin main
 ```
-
-Do not upload the ZIP itself into the repository: commit the extracted source files.
