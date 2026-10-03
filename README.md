@@ -8,7 +8,7 @@
 
 Turn business requirements into Jira stories, Salesforce changes, and sandbox test evidence—with human review at every release gate.
 
-![Version](https://img.shields.io/badge/version-0.2.0-6366f1?style=flat-square)
+![Version](https://img.shields.io/badge/version-0.3.0-6366f1?style=flat-square)
 ![Status](https://img.shields.io/badge/status-sandbox_pilot-f59e0b?style=flat-square)
 ![Node](https://img.shields.io/badge/Node.js-22.x-339933?style=flat-square)
 [![License](https://img.shields.io/badge/license-MIT-0891b2?style=flat-square)](LICENSE)
@@ -19,6 +19,15 @@ Turn business requirements into Jira stories, Salesforce changes, and sandbox te
 
 > [!IMPORTANT]
 > **Sandbox pilot:** production deployment is disabled. Copado uses a manual handoff. Live integrations must be verified with your accounts before team use.
+
+## New in v0.3 — first v2 upgrade
+
+- **Practice reviews:** switch between four synthetic test identities in the sample workspace; answer questions, pause, resume, and approve a sample plan.
+- **Check your model:** run an explicit, small JSON compatibility test before sending a BRD. Provider usage charges may apply.
+- **Fit your Jira project:** configure field defaults and identify missing required fields before creating a story.
+- **See setup gaps:** the sign-in page lists missing server settings without exposing their values.
+
+The sample identities are browser-only fixtures, not real sign-in accounts. See [verification status](docs/VERIFICATION.md) for the distinction between automated tests and live service checks.
 
 ## From requirement to release
 
@@ -174,7 +183,7 @@ https://YOUR-APP-ADDRESS/api/service?op=sfCallback
 - BRDs must be text or Markdown. PDF and Word extraction are not included.
 - Org inspection is bounded; it is not a full source retrieval or dependency analysis.
 - Generated code needs human review. Apex validation is not a substitute for business acceptance or LWC/UI testing.
-- Jira projects requiring custom fields need additional mappings. Supported models must work with Chat Completions JSON mode.
+- Jira field defaults support required creation fields; Jira validates their values at creation. Supported models must work with Chat Completions JSON mode.
 - The pilot owner may approve their own work; strict separation of duties is not enforced.
 - Connection changes require a new delivery. Password recovery is managed through Supabase.
 

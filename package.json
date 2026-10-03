@@ -1,6 +1,6 @@
 {
   "name": "salesforce-delivery-agent",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Configurable BRD-to-Salesforce sandbox delivery pilot",
@@ -11,5 +11,7 @@
     "check": "node scripts/check.mjs",
     "build": "npm run check"
   },
-  "engines": { "node": "22.x" }
+  "engines": {
+    "node": "22.x"
+  }
 }

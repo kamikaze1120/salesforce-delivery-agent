@@ -61,7 +61,7 @@ The connected Salesforce identity is used for workspace operations. Use a dedica
 
 ### Jira Cloud
 
-Enter the Jira origin, project key, account email, API token, and numeric issue type ID. Use a Task or Story type with the fields supported by this app. **Check connection** verifies project access and the selected type. If your Jira project requires custom fields, add an explicitly validated mapping before using task creation; this pilot submits project, summary, description, issue type, and label only.
+Enter the Jira origin, project key, account email, API token, and numeric issue type ID. Use a Task or Story type with the fields supported by this app. **Check connection** verifies project access, the selected type, and paginated creation-field metadata. Add required values in **Jira field defaults (JSON)**, for example `{"customfield_10001":{"id":"10002"}}`. Use actual field/option IDs from your project. Defaults support custom fields, priority, components, versions, assignee, reporter, due date, and environment. Project, issue type, summary, description, and tracking labels remain controlled by the app. Labels must be available on the create screen. The same preflight runs before each new issue write; Jira validates field values when creating the issue. Subtasks are not supported.
 
 Descriptions use Atlassian Document Format. Each story includes its acceptance criteria, requirement IDs, delivery ID, and a unique marker label. Do not retry an ambiguous write until someone checks the project: Jira's search indexing can be eventually consistent.
 
@@ -80,6 +80,8 @@ Answer the pipeline-type question and enter its pipeline name, dev/UAT environme
 ### Development LLM
 
 Choose OpenAI API or Azure OpenAI, enter the model/deployment name and API key, and, for Azure, its approved endpoint and API version. There is no assumed model name. Use a model that supports Chat Completions with JSON mode (`response_format: {type: "json_object"}`). Providers using a different API or output format need an adapter.
+
+**Test model connection** sends one small synthetic request and verifies the returned JSON. It may incur provider charges; no BRD or org metadata is sent. Saving credentials alone does not mark the model verified. Verification records model usage in the audit log.
 
 Analyzing sends the BRD, clarification answers, and selected org context to this provider. Generating sends the approved plan, answers, and selected org context. No integration credentials are included in either prompt. Use the model provider's organization/project quotas and data handling policy; application-side requests are capped at 12 model operations per user per hour.
 
@@ -108,3 +110,11 @@ Do not reuse live credentials or the production database in untrusted preview de
 - Failed tests return the delivery to code review. Correct the files, approve again, commit a new revision to the isolated branch, and revalidate.
 - After sandbox deployment succeeds, record observed results and evidence references for each acceptance scenario. This is a human sign-off, not automated UI testing.
 - Backup the database and encryption key. Set your own retention, deletion, incident monitoring, and recovery policy before handling sensitive BRDs at scale.
+
+## Test identities and live pilot accounts
+
+The sample selector provides `owner@example.test`, `developer@example.test`, `reviewer@example.test`, and `viewer@example.test`. These are temporary browser fixtures; they do not have passwords, database records, or service permissions. Reloading resets the sample. It supports the included Service Request BRD and never generates fake deployment evidence.
+
+For real authentication and tenant-isolation checks, use a separate Supabase staging project with the schema installed. Create confirmed test users in Supabase Auth using email aliases you control, then sign in through the deployed app. Create two workspaces under different owners; assign developer, reviewer, and viewer memberships in Connections. Verify that the developer cannot approve, the reviewer cannot generate, the viewer cannot write, and an unrelated account cannot access another workspace. Keep test credentials outside Git and configure dedicated sandbox/Jira test resources.
+
+The public health response lists missing environment variable names only. `configured:true` means values are present, not that credentials or the database have been verified.

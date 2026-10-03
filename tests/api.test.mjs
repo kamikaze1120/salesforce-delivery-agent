@@ -63,6 +63,8 @@ test('a failed Jira write is checkpointed before dispatch and cannot be unlocked
     if(u.includes('/rpc/finish_job')){events.push('finish');job={...job,data:body.p_data,stage:body.p_stage,busy:false,version:job.version+1};return Response.json([job]);}
     if(u.includes('/jobs?')){if(opts.method==='PATCH'){events.push('checkpoint');job={...job,...body};}return Response.json([job]);}
     if(u.includes('/search/jql'))return Response.json({issues:[]});
+    if(u.includes('/createmeta/CRM/issuetypes/10001'))return Response.json({fields:[{fieldId:'labels',operations:['set']}],total:1});
+    if(u.includes('/createmeta/CRM/issuetypes'))return Response.json({issueTypes:[{id:'10001',name:'Story'}],total:1});
     if(u==='https://team.atlassian.net/rest/api/3/issue'){events.push('external-write');throw new Error('connection lost');}
     throw new Error('Unexpected endpoint: '+u);
   };
@@ -73,5 +75,26 @@ test('a failed Jira write is checkpointed before dispatch and cannot be unlocked
     assert.equal(job.data.paused,true);assert.equal(job.data.operation.phase,'write_started');
     const recovery=await request('reconcile',{workspaceId:wid,jobId:wid,note:'An operator looked at the remote system.'},headers);
     assert.equal(recovery.status,409);assert.match(recovery.body.error,/unknown/);
+  }finally{global.fetch=old;}
+});
+
+test('synthetic owner and outsider sessions stay isolated at the workspace boundary',async()=>{
+  const old=global.fetch;const writes=[];
+  global.fetch=async(url,opts={})=>{
+    const u=new URL(url);
+    if(u.pathname==='/auth/v1/user')return Response.json({id:opts.headers.Authorization==='Bearer owner-session'?'owner':'outsider',email:'test@example.test'});
+    if(u.pathname==='/rest/v1/members')return Response.json(u.searchParams.get('user_id')==='eq.owner'?[{role:'owner'}]:[]);
+    if(u.pathname==='/rest/v1/workspaces')return Response.json([{id:wid,connection_version:0}]);
+    if(u.pathname==='/rest/v1/jobs'){writes.push(JSON.parse(opts.body));return Response.json([{id:wid}]);}
+    if(u.pathname==='/rest/v1/audit_events')return Response.json([]);
+    throw new Error('Unexpected test request');
+  };
+  try{
+    for(const actor of ['owner','outsider']){
+      const headers={origin:process.env.APP_ORIGIN,cookie:'sfda_session='+seal({access_token:actor+'-session',expires:Date.now()+600000},'session')};
+      const response=await request('createJob',{workspaceId:wid,title:'Synthetic BRD',brd:'Create a test request with a subject and enforce access rules.'},headers);
+      assert.equal(response.status,actor==='owner'?201:403);
+    }
+    assert.equal(writes.length,1);assert.equal(writes[0].created_by,'owner');
   }finally{global.fetch=old;}
 });

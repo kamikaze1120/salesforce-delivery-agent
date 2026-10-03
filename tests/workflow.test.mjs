@@ -29,5 +29,5 @@ test('recovery refuses live leases, legacy locks, and unknown writes even after 
 });
 test('setup distinguishes verified connections from configured model and manual handoff',()=>{
   const checks=readiness([{type:'salesforce',verified:false},{type:'jira',verified:true},{type:'llm'},{type:'copado'}]);
-  assert.equal(checks.filter(c=>c.ready).length,3);assert.match(checks.find(c=>c.type==='copado').message,/Manual/);
+  assert.equal(checks.filter(c=>c.ready).length,2);assert.match(checks.find(c=>c.type==='copado').message,/Manual/);
 });
