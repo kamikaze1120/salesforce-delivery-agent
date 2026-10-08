@@ -27,7 +27,7 @@ test('recovery refuses live leases, legacy locks, and unknown writes even after 
   job.busy=true;job.data.operation.phase='response_recorded';assert.doesNotThrow(()=>canRecover(job,now));
   delete job.active_operation;delete job.data.operation;assert.throws(()=>canRecover(job,now),/no durable outcome/);
 });
-test('setup distinguishes verified connections from configured model and manual handoff',()=>{
+test('setup distinguishes verified connections from configured model without requiring Copado',()=>{
   const checks=readiness([{type:'salesforce',verified:false},{type:'jira',verified:true},{type:'llm'},{type:'copado'}]);
-  assert.equal(checks.filter(c=>c.ready).length,2);assert.match(checks.find(c=>c.type==='copado').message,/Manual/);
+  assert.equal(checks.filter(c=>c.ready).length,1);assert.equal(checks.some(c=>c.type==='copado'),false);
 });
