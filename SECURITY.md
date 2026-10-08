@@ -2,7 +2,7 @@
 
 ## Support status
 
-Version 0.2 is a sandbox pilot. Live integration behavior and database migrations require verification in your environment. There is no production-deployment capability or guaranteed security response SLA.
+Version 0.4 is a development release. Its gated production runner must not be enabled until live non-production verification and environment approvals are complete. There is no guaranteed security response SLA.
 
 ## Reporting a vulnerability
 
@@ -12,7 +12,10 @@ Include the affected version, reproduction steps using synthetic data, likely im
 
 ## Operating guidance
 
-- Use Salesforce sandboxes and least-privilege integration accounts.
+- Use distinct Salesforce orgs and least-privilege integration accounts. Keep production secrets behind required GitHub environment reviewers.
+- Pin the trusted runner commit and dependency versions; protect runner branches and administrator accounts.
+- Do not expose MCP transports publicly or allow arbitrary generated tool calls.
+- Treat browser storage-state files as credentials. Never upload them as run artifacts.
 - Keep Supabase service-role keys and the encryption key server-side.
 - Use separate credentials and databases for trusted deployments and previews.
 - Preserve the database and encryption key through a secure backup process.

@@ -1,25 +1,22 @@
 # Contributing
 
-This project is a Salesforce sandbox delivery pilot. Read README.md and docs/ARCHITECTURE.md before changing the workflow or connectors.
+Read README.md, docs/ARCHITECTURE.md and docs/PIPELINE.md before changing connectors or release behavior. Contributions are licensed under this repository's MIT license. Follow CODE_OF_CONDUCT.md.
 
-## Development
+## Development and pull requests
 
-Use Node.js 22. There are no runtime npm dependencies.
+Use Node.js 22. The web app has no runtime npm dependencies. Run `npm test` and `npm run build`. The separate runner needs reviewed exact Salesforce CLI and Playwright versions and authorized test orgs; do not use production credentials for contribution tests.
 
-1. Create a branch for a focused change.
-2. Run npm test and npm run build from the repository root.
-3. Describe the problem, behavior change, validation evidence, and remaining limitations in your pull request.
-4. Request review before merging.
+Create a focused branch and explain the problem, behavior change, validation and remaining limits. Include reproducible synthetic fixtures. Request review before merging, especially for authentication, generated metadata, OIDC, MCP tools, environment gates, automatic repairs or dependency updates. Do not modify trusted runner files on generated feature branches.
 
-Keep application files in their existing folders. Keep secrets out of Git; use .env.local locally and environment variables in Vercel. Commit only the example configuration.
+## Required controls
 
-## Safety requirements
+- Preserve server-side tenant/role checks, encrypted secrets and exact artifact/org binding.
+- Treat BRDs, metadata, logs, tool results and model output as untrusted data.
+- Never mark generated tests as executed or fabricate success evidence.
+- Do not weaken assertions, remove tests or alter business requirements to make a repair pass.
+- Preserve production reviewers, frozen tests, repair budgets and unknown-write stops.
+- Add regression coverage for changed security and workflow behavior.
+- Never commit credentials, private BRDs, browser storage state or customer data.
+- Keep documentation aligned with actual capabilities and clearly identify unverified live behavior.
 
-- Enforce authentication, workspace membership, and role checks on the server.
-- Preserve sandbox identity checks, human approvals, exact release binding, and production-deployment blocking.
-- Do not automatically retry an external write with an unknown outcome.
-- Treat BRDs and generated code as untrusted input.
-- Use dedicated sandbox accounts and synthetic data for integration testing.
-- Add meaningful regression coverage when changing security or workflow behavior.
-
-Follow CODE_OF_CONDUCT.md. Report vulnerabilities privately as described in SECURITY.md. Contributions are provided under the repository's MIT license.
+Report security issues privately as described in SECURITY.md. General bugs and feature requests can use repository issues with secrets removed. Maintainers may request changes or decline contributions that weaken release controls.
