@@ -1,0 +1,154 @@
+name: Salesforce delivery
+run-name: Delivery ${{ inputs.pipeline_id }}
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        required: true
+        type: string
+      delivery_id:
+        required: true
+        type: string
+      pipeline_id:
+        required: true
+        type: string
+      stage_order:
+        required: true
+        type: string
+        default: '["sandbox","qa","dev","uat","production"]'
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: delivery-${{ inputs.workspace_id }}-${{ inputs.delivery_id }}
+  cancel-in-progress: false
+jobs:
+  stage_0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: ${{ fromJSON(vars.DELIVERY_ENVIRONMENTS)[fromJSON(inputs.stage_order)[0]] }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install reviewed tooling (no environment credentials)
+        run: node runner/install.mjs
+        env:
+          SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
+          PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+      - name: Verify, validate, deploy and test through Salesforce MCP
+        run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
+        env:
+          DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
+          DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
+          DELIVERY_JOB: ${{ inputs.delivery_id }}
+          DELIVERY_PIPELINE: ${{ inputs.pipeline_id }}
+          DELIVERY_STAGE: ${{ fromJSON(inputs.stage_order)[0] }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
+          SF_BROWSER_STATE: ${{ secrets.SF_BROWSER_STATE }}
+  stage_1:
+    needs: stage_0
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: ${{ fromJSON(vars.DELIVERY_ENVIRONMENTS)[fromJSON(inputs.stage_order)[1]] }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install reviewed tooling (no environment credentials)
+        run: node runner/install.mjs
+        env:
+          SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
+          PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+      - name: Verify, validate, deploy and test through Salesforce MCP
+        run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
+        env:
+          DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
+          DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
+          DELIVERY_JOB: ${{ inputs.delivery_id }}
+          DELIVERY_PIPELINE: ${{ inputs.pipeline_id }}
+          DELIVERY_STAGE: ${{ fromJSON(inputs.stage_order)[1] }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
+          SF_BROWSER_STATE: ${{ secrets.SF_BROWSER_STATE }}
+  stage_2:
+    needs: stage_1
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: ${{ fromJSON(vars.DELIVERY_ENVIRONMENTS)[fromJSON(inputs.stage_order)[2]] }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install reviewed tooling (no environment credentials)
+        run: node runner/install.mjs
+        env:
+          SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
+          PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+      - name: Verify, validate, deploy and test through Salesforce MCP
+        run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
+        env:
+          DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
+          DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
+          DELIVERY_JOB: ${{ inputs.delivery_id }}
+          DELIVERY_PIPELINE: ${{ inputs.pipeline_id }}
+          DELIVERY_STAGE: ${{ fromJSON(inputs.stage_order)[2] }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
+          SF_BROWSER_STATE: ${{ secrets.SF_BROWSER_STATE }}
+  stage_3:
+    needs: stage_2
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: ${{ fromJSON(vars.DELIVERY_ENVIRONMENTS)[fromJSON(inputs.stage_order)[3]] }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install reviewed tooling (no environment credentials)
+        run: node runner/install.mjs
+        env:
+          SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
+          PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+      - name: Verify, validate, deploy and test through Salesforce MCP
+        run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
+        env:
+          DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
+          DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
+          DELIVERY_JOB: ${{ inputs.delivery_id }}
+          DELIVERY_PIPELINE: ${{ inputs.pipeline_id }}
+          DELIVERY_STAGE: ${{ fromJSON(inputs.stage_order)[3] }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
+          SF_BROWSER_STATE: ${{ secrets.SF_BROWSER_STATE }}
+  stage_4:
+    needs: stage_3
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: ${{ fromJSON(vars.DELIVERY_ENVIRONMENTS)[fromJSON(inputs.stage_order)[4]] }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install reviewed tooling (no environment credentials)
+        run: node runner/install.mjs
+        env:
+          SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
+          PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+      - name: Verify, validate, deploy and test through Salesforce MCP
+        run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
+        env:
+          DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
+          DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
+          DELIVERY_JOB: ${{ inputs.delivery_id }}
+          DELIVERY_PIPELINE: ${{ inputs.pipeline_id }}
+          DELIVERY_STAGE: ${{ fromJSON(inputs.stage_order)[4] }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
+          SF_BROWSER_STATE: ${{ secrets.SF_BROWSER_STATE }}
