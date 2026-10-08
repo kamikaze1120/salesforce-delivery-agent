@@ -118,3 +118,7 @@ The sample selector provides `owner@example.test`, `developer@example.test`, `re
 For real authentication and tenant-isolation checks, use a separate Supabase staging project with the schema installed. Create confirmed test users in Supabase Auth using email aliases you control, then sign in through the deployed app. Create two workspaces under different owners; assign developer, reviewer, and viewer memberships in Connections. Verify that the developer cannot approve, the reviewer cannot generate, the viewer cannot write, and an unrelated account cannot access another workspace. Keep test credentials outside Git and configure dedicated sandbox/Jira test resources.
 
 The public health response lists missing environment variable names only. `configured:true` means values are present, not that credentials or the database have been verified.
+
+## v0.4 CI/CD update
+
+Copado setup is no longer required for new pipelines. Follow [PIPELINE.md](PIPELINE.md) for the authoritative five-org GitHub Actions setup, MCP bridge, JWT credentials, Playwright sessions and production approval gates. Existing sections describing a sandbox-only/Copado pilot are historical. The web OAuth setup remains required for development analysis; runner JWT setup is separate.

@@ -40,3 +40,13 @@ The server requires a current approved plan, linked Jira stories, the exact comm
 Connection changes are blocked during active/unknown external operations. Refresh/verification updates use a connection revision so stale requests cannot overwrite newer credentials. Job completion and its audit event commit together; external APIs and the app database cannot form one transaction, so unknown-write states remain possible and fail closed.
 
 Copado remains a manual handoff. Production deployment and automated UAT are not implemented in this release.
+
+## v0.3 → v0.4
+
+1. Back up Supabase and preserve the encryption key securely.
+2. Run `database/migrations/003_pipeline.sql`. It blocks account edits during active pipelines and adds a schema readiness check. Existing stages and Copado records remain compatible.
+3. Deploy the v0.4 application. Existing direct development deployments still work; production remains blocked through that API.
+4. Follow `docs/PIPELINE.md` to install the trusted runner in the Salesforce source repository, provision five distinct orgs and protected GitHub environments, and configure the pipeline. No pipeline is enabled by default.
+5. Create a new delivery, approve mockup and tests, and verify non-production end to end before allowing a production run.
+
+OAuth reconnect may be needed after interrupted token refresh. Changing workspace connections invalidates existing account bindings. Do not delete old records or reset unknown-write markers to force a retry.
