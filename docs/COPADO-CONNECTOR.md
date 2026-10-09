@@ -1,3 +1,5 @@
+> **Retired integration reference.** Copado is not used by the current delivery pipeline. See [DELIVERY-FLOW.md](DELIVERY-FLOW.md) and [PIPELINE.md](PIPELINE.md). This file is retained only as historical migration context.
+
 # Copado integration milestone
 
 The current app records pipeline configuration and exports a release handoff. It does **not** create Copado records, invoke Copado jobs, promote changes, or deploy to production through Copado. The manual mode is clearly labeled in the UI and backend.

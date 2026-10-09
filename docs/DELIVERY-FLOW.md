@@ -30,7 +30,7 @@ flowchart TD
 
 ## Requirements and Jira
 
-Analysis produces exact-source requirements, user stories, acceptance criteria, blocking questions, risks and acceptance test scenarios together. The planning prompt requires requirement IDs, preconditions, steps and expected results for those scenarios. These initial scenarios are text and have not run. Executable test scripts are generated after implementation, using actual Apex class names and known UI locators. A future structured requirement-time test-case editor remains necessary.
+Analysis produces exact-source requirements, user stories, acceptance criteria, blocking questions, risks and acceptance test scenarios together. The planning prompt requires requirement IDs, preconditions, steps and expected results for those scenarios. Structured cases are generated simultaneously, cite requirement and acceptance-criterion index, and are always marked not_run. Executable test scripts are generated after implementation, using actual Apex class names and known UI locators. Executable scenarios must preserve the requirement case ID and exact expected result; dropping a case blocks test-suite approval. A dedicated test-case editor remains future UI work.
 
 Jira creation uses the configured workspace project and issue type, persists each created issue, and prevents starting CI/CD until every story has an issue. It currently creates one story per action. Ambiguous Jira writes require reconciliation; do not retry blindly. Automatic Jira transitions, comments with release evidence, and bidirectional synchronization are not implemented. The report links Jira issues to requirements and test evidence without posting potentially sensitive reports to Jira automatically.
 
@@ -80,3 +80,7 @@ The current report is an inspectable JSON view, not yet a polished PDF or dashbo
 5. Connect Jira and the model provider; run a small supplied BRD through every non-production layer.
 6. Test negative gates, interrupted operations, permissions and license restrictions.
 7. Enable production only after end-to-end evidence and explicit release approval.
+
+## Specialized agents and stack
+
+See [AGENTS-AND-STACK.md](AGENTS-AND-STACK.md) for all nine agent roles, the proposed Next.js/FastAPI/LangGraph migration, the current implementation, MCP lifecycle constraints and additional technical controls.
