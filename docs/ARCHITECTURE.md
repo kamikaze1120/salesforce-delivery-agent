@@ -25,3 +25,7 @@ Requirements, test expectations, credentials, policies and production approvals 
 ## Limits
 
 This is not formal verification or a guarantee of correct business behavior. Existing full Salesforce source and Flow logic are not exhaustively retrieved. Semantic compliance, UI selectors, sufficient test coverage, org-specific limits, browser sessions and business acceptance need validation. Browser tests use the same approved suite at each stage and allow writes only outside production. Hosted Salesforce MCP is not yet an adapter. Test evidence is trusted only from the pinned authenticated runner; protect its repository and dependency supply chain.
+
+## Revised flow and status
+
+[DELIVERY-FLOW.md](DELIVERY-FLOW.md) is the authoritative specification and implementation matrix. It adds the explicit architecture approval, fixed Dev/QA/UAT/production order, post-UAT business report approval, and mandatory quality evidence. Quality-analysis adapters, profile generation and live end-to-end verification remain incomplete; missing evidence now blocks promotion rather than falling back to generic successful tests.

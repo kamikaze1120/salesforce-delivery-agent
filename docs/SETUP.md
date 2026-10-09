@@ -121,4 +121,4 @@ The public health response lists missing environment variable names only. `confi
 
 ## v0.4 CI/CD update
 
-Copado setup is no longer required for new pipelines. Follow [PIPELINE.md](PIPELINE.md) for the authoritative five-org GitHub Actions setup, MCP bridge, JWT credentials, Playwright sessions and production approval gates. Existing sections describing a sandbox-only/Copado pilot are historical. The web OAuth setup remains required for development analysis; runner JWT setup is separate.
+Copado setup is no longer required for new pipelines. Follow [PIPELINE.md](PIPELINE.md) for the authoritative four-org GitHub Actions setup, MCP bridge, JWT credentials, Playwright sessions and production approval gates. Existing sections describing a sandbox-only/Copado pilot are historical. The web OAuth setup remains required for development analysis; runner JWT setup is separate.

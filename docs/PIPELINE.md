@@ -1,12 +1,12 @@
 # CI/CD setup — v0.4
 
-## 1. Know the two repositories and the five orgs
+## 1. Know the two repositories and the four orgs
 
 The application repository deploys the web UI/API to Vercel. A **private Salesforce source repository** contains the trusted deployment runner and feature branches. GitHub Actions is the long-running execution service; Supabase stores workflow state and evidence. No Copado connection is required.
 
-Provision five distinct Salesforce orgs for Sandbox, QA, Dev, UAT and production. QA, Dev and UAT should normally be sandboxes. A verified Developer Edition may be selected for an explicitly non-production pilot. Never relabel your production org as a development org. The server and MCP bridge verify actual organization IDs and editions before work.
+Provision four distinct Salesforce orgs for Dev, QA, UAT and production. QA, Dev and UAT should normally be sandboxes. A verified Developer Edition may be selected for an explicitly non-production pilot. Never relabel your production org as a development org. The server and MCP bridge verify actual organization IDs and editions before work.
 
-The default order follows the product requirement: Sandbox → QA → Dev → UAT → Production. Only the middle stages may be reordered. A repair always starts a new run from the first environment.
+The default order follows the product requirement: Dev → QA → UAT → Business approval → Production. The four stage names and their order are enforced. A repair always starts a new run from the first environment.
 
 ## 2. Install the trusted runner
 
@@ -22,7 +22,7 @@ The workflow must exist on the default branch for `workflow_dispatch` to work. I
 
 ## 3. Create protected GitHub environments
 
-Create `sandbox`, `qa`, `dev`, `uat`, `production` (or your chosen names).
+Create `dev`, `qa`, `uat`, `production` (or your chosen names).
 
 For **every environment**, restrict deployments to protected branches. Protect the trusted runner branch from force pushes/deletion and require status checks and code review. For **UAT and production**, add required human reviewers and enable **Prevent self-review**. Confirm these rules are actually enforced under your GitHub plan. A saved but unenforced rule is insufficient.
 
@@ -31,7 +31,7 @@ Set these repository variables:
 | Variable | Value |
 |---|---|
 | `DELIVERY_APP_ORIGIN` | Exact Vercel app origin, matching its `APP_ORIGIN` |
-| `DELIVERY_ENVIRONMENTS` | `{"sandbox":"sandbox","qa":"qa","dev":"dev","uat":"uat","production":"production"}`; values are your GitHub environment names |
+| `DELIVERY_ENVIRONMENTS` | `{"dev":"dev","qa":"qa","uat":"uat","production":"production"}`; values are your GitHub environment names |
 | `SALESFORCE_CLI_VERSION` | Exact reviewed `@salesforce/cli` version, no `latest` or version ranges |
 | `PLAYWRIGHT_VERSION` | Exact reviewed `playwright` version, no ranges |
 
@@ -72,16 +72,15 @@ Paste this structure into **Connections → GitHub CI/CD → CI/CD configuration
   "trustedCommit": "REPLACE_WITH_REVIEWED_40_CHARACTER_COMMIT_SHA",
   "maxRepairs": 2,
   "stages": [
-    {"name":"sandbox","environment":"sandbox","orgId":"REPLACE_ORG_ID","kind":"sandbox","url":"https://YOUR-SANDBOX.my.salesforce.com"},
-    {"name":"qa","environment":"qa","orgId":"REPLACE_ORG_ID","kind":"sandbox","url":"https://YOUR-QA.my.salesforce.com"},
     {"name":"dev","environment":"dev","orgId":"REPLACE_ORG_ID","kind":"sandbox","url":"https://YOUR-DEV.my.salesforce.com"},
+    {"name":"qa","environment":"qa","orgId":"REPLACE_ORG_ID","kind":"sandbox","url":"https://YOUR-QA.my.salesforce.com"},
     {"name":"uat","environment":"uat","orgId":"REPLACE_ORG_ID","kind":"sandbox","url":"https://YOUR-UAT.my.salesforce.com"},
     {"name":"production","environment":"production","orgId":"REPLACE_ORG_ID","kind":"production","url":"https://YOUR-PRODUCTION.my.salesforce.com"}
   ]
 }
 ```
 
-`maxRepairs` is 0–3. Zero disables automatic repairs. `kind: "developer"` is allowed only for a verified non-production Developer Edition org. All five org IDs must differ. `environment` must match both the GitHub environment and `DELIVERY_ENVIRONMENTS` mapping. Saving configuration invalidates existing approvals; create new deliveries after changing account bindings.
+`maxRepairs` is 0–3. Zero disables automatic repairs. `kind: "developer"` is allowed only for a verified non-production Developer Edition org. All four org IDs must differ. `environment` must match both the GitHub environment and `DELIVERY_ENVIRONMENTS` mapping. Saving configuration invalidates existing approvals; create new deliveries after changing account bindings.
 
 Run **Check connection**. The server verifies the runner SHA, active workflow, protected branch and environment rules. It does not prove the Salesforce JWT login or browser session works; the first stage preflight does that. Apply `database/migrations/003_pipeline.sql` to an existing database before starting a pipeline.
 
@@ -111,3 +110,7 @@ The Salesforce-hosted MCP services are a separate optional future adapter: their
 - [Playwright authentication](https://playwright.dev/docs/auth)
 
 Before production: run a synthetic BRD through all non-production stages, exercise failure/repair and approval rejection, verify role isolation, review rollback/recovery procedures, confirm API limits and runner costs, and verify that no secrets or private BRD content enter public logs or Git history.
+
+## Expanded quality and business gates
+
+Read [DELIVERY-FLOW.md](DELIVERY-FLOW.md) before enabling the runner. The shipped workflow currently lacks the required quality-evidence producers and will stop at the expanded gate. Do not substitute a manually authored successful report. After verified adapters are installed, UAT success creates the release report in the app. Approve that exact report in the app before approving the production environment job in GitHub. Account bindings remain locked during this approval wait. Re-pin the reviewed runner SHA after changing workflow or adapters.
