@@ -13,7 +13,7 @@
 
 </div>
 
-> **Release status:** v0.4 adds mockup review, test generation, a Salesforce MCP bridge and a gated GitHub Actions pipeline. Automated tests pass locally. The five-org pipeline has **not** been verified end to end against live accounts. Configure and validate non-production environments before enabling production.
+> **Release status:** v0.4 adds mockup review, test generation, a Salesforce MCP bridge and a gated GitHub Actions pipeline. Automated tests pass locally. The four-org pipeline has **not** been verified end to end against live accounts. Configure and validate non-production environments before enabling production.
 
 ## What you can do
 
@@ -25,7 +25,7 @@
 | A reviewed release | Validation, deployment and tests across your environments | UAT and production approvals in GitHub |
 | An observed non-production failure | A bounded AI repair using the original BRD and frozen tests | Repair budget, pause, evidence and escalation |
 
-**Default deployment order:** Salesforce Sandbox → QA → Dev → UAT → Production. QA/Dev/UAT are named, separate Salesforce orgs—not environments hosted by Vercel. You can reorder the middle stages; the first stage remains Sandbox and production remains last. Developer Edition can substitute for a non-production sandbox only when explicitly selected and verified by org ID and edition.
+**Default deployment order:** Salesforce Dev → QA → UAT → Business approval → Production. QA/Dev/UAT are named, separate Salesforce orgs—not environments hosted by Vercel. Stage order is fixed. Dev can be a sandbox or an explicitly verified Developer Edition org. Developer Edition can substitute for a non-production sandbox only when explicitly selected and verified by org ID and edition.
 
 Copado is no longer required. Old Copado connection records are retained for compatibility but are not used by the pipeline.
 
@@ -75,7 +75,7 @@ All settings are per workspace; there are no hardcoded customer accounts.
 |---|---|
 | Salesforce development | My Domain login URL, environment kind, expected org ID for Developer Edition, External Client App client ID/secret, OAuth authorization |
 | Jira Cloud | Site URL, project key, issue type ID, account email, API token and any required field defaults |
-| GitHub CI/CD | Private Salesforce source repository, source folder, base branch, fine-grained token, trusted runner commit, five environment definitions |
+| GitHub CI/CD | Private Salesforce source repository, source folder, base branch, fine-grained token, trusted runner commit, four environment definitions |
 | Development LLM | OpenAI or Azure OpenAI API credentials and a JSON-capable Chat Completions model/deployment |
 
 Salesforce OAuth callback: `https://YOUR-APP/api/service?op=sfCallback`. Enable Web Server OAuth with `api` and `refresh_token` scopes, PKCE and client-secret validation. Rotated refresh tokens are persisted with a database revision claim; interrupted exchanges require reauthorization instead of token replay.
@@ -95,7 +95,7 @@ The Salesforce source repository is separate from the repository hosting this ap
 7. Open **CI/CD** and start the reviewed pipeline. Review the real runner evidence and GitHub environment approval requests.
 8. Approve UAT and production through GitHub. Verify business behavior and retain release evidence.
 
-A successful non-production repair creates a new artifact and Git commit, preserves approved tests, and restarts from Sandbox. UAT/production approvals apply again to that new run. Repairs cannot change permission-set files, test classes, requirement text, mockups, or acceptance expectations. No-op repairs, ambiguity, exhausted budget, authentication failures and unknown write outcomes stop the automation. There is no automatic production repair or rollback; a failed production release needs investigation.
+A successful non-production repair creates a new artifact and Git commit, preserves approved tests, and restarts from Dev. UAT/production approvals apply again to that new run. Repairs cannot change permission-set files, test classes, requirement text, mockups, or acceptance expectations. No-op repairs, ambiguity, exhausted budget, authentication failures and unknown write outcomes stop the automation. There is no automatic production repair or rollback; a failed production release needs investigation.
 
 ## Grounding and safety boundaries
 
@@ -105,7 +105,7 @@ A successful non-production repair creates a new artifact and Git commit, preser
 - UAT/production environments require reviewers with self-review prevented. Every environment must restrict deployment to protected branches.
 - The MCP bridge exposes only org inspection, immutable-package validation/deployment, status polling and named Apex tests. It does not expose arbitrary shell, SOQL or unrestricted tool execution.
 - Playwright interprets an approved declarative test plan. It does not evaluate model-generated JavaScript. Browser traffic is restricted to the configured Salesforce login and Lightning hosts; unsupported CDN/SSO dependencies fail closed and require reviewed adapter changes.
-- Production browser tests must be read-only. Write-based browser scenarios currently block production; use read-only smoke assertions for a full five-stage run.
+- Production browser tests must be read-only. Write-based browser scenarios currently block production; use read-only smoke assertions for a full four-stage run.
 - Salesforce validation and deployment always use `RunLocalTests`, `rollbackOnError` and warnings-as-failures. Validation is not a substitute for business acceptance.
 - Generated Flows remain Draft. Activation, destructive changes, data migration, managed packages and broad org administration are outside the current automation scope.
 
@@ -113,7 +113,7 @@ A successful non-production repair creates a new artifact and Git commit, preser
 
 | Need | Read |
 |---|---|
-| Full backend credentials, runner installation and five-org configuration | [CI/CD setup](docs/PIPELINE.md) |
+| Full backend credentials, runner installation and four-org configuration | [CI/CD setup](docs/PIPELINE.md) |
 | Existing web app setup | [Setup](docs/SETUP.md) |
 | Trust boundaries and repair flow | [Architecture](docs/ARCHITECTURE.md) |
 | Tested behavior and live gaps | [Verification](docs/VERIFICATION.md) |
@@ -130,3 +130,9 @@ The MIT license covers this project’s code. Salesforce, GitHub, Vercel, Supaba
 Salesforce authorization now collects an evidence report: org edition (including Developer Edition), the connected user's license when available, user/feature/package license inventories, API limits and effective object CRUD flags. Refresh it under **Workspace setup → Salesforce → Refresh license & capability report**. BRD analysis obtains a new snapshot and asks blocking questions about unverified licensed features, with alternatives to investigate.
 
 A denied probe is **unknown**, not “unlicensed.” Inventories are capped at 200 rows and disclose truncation. License fields are discovered before querying; unavailable counts are never invented. Inventory does not establish assignment to every user. CRUD access does not establish metadata deployment permission. Exact-package validation and destination-specific testing remain mandatory. These reports cannot verify commercial contracts or promise zero hallucinations; the current requirement assessment is model-assisted, not a complete deterministic entitlement rules engine.
+
+### Revised delivery architecture (October 2026)
+
+The authoritative flow and implementation matrix are in [Delivery flow](docs/DELIVERY-FLOW.md). Jira story creation and GitHub Actions CI/CD are core integrations. Copado is not used. New deliveries require a resolved, approved Salesforce architecture before code generation. After UAT, the app generates a traceable release report; a reviewer records business approval before the production runner can claim its package. Approve the report in the app **before** releasing the protected production job in GitHub.
+
+**Current rollout blocker:** the expanded quality gate deliberately blocks promotion until the trusted runner supplies coverage, security, performance, license, regression, business and Flow applicability/results evidence. The full production quality adapters are not yet shipped or live-verified. Do not enable this pipeline for production simply because web-app unit tests pass. See the implementation matrix for remaining work.
