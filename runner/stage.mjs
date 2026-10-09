@@ -1,4 +1,5 @@
-import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {qualityGate} from '../lib/quality.mjs';
+import {mkdtemp,writeFile,rm,readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFile} from 'node:child_process';
@@ -52,6 +53,10 @@ try{
   }
   if(browserScenarios.length)evidence.tests.push(...await runBrowserTests(browserScenarios,target,JSON.parse(e.SF_BROWSER_STATE)));
   if(!evidence.tests.every(t=>t.passed)){knownFailure=true;throw new Error('Acceptance tests failed.');}
+  // Only a reviewed runner adapter may produce this file. Never take it from model output or the feature branch.
+  evidence.quality=e.DELIVERY_QUALITY_FILE?JSON.parse(await readFile(e.DELIVERY_QUALITY_FILE,'utf8')):{artifactHash:artifacts.hash,checks:{}};
+  const quality=qualityGate(evidence.quality,artifacts.hash);
+  if(!quality.passed)throw new Error('Quality adapters have not supplied all required evidence.');
   evidence.status='passed';evidence.reason='Salesforce validation, deployment and all reviewed scenarios passed.';
 }catch(error){
   evidence.status=knownFailure&&!writePending?'failed':'unknown';
