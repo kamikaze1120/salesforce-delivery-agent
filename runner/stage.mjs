@@ -1,5 +1,6 @@
+import {collectQuality} from './quality-adapters.mjs';
 import {qualityGate} from '../lib/quality.mjs';
-import {mkdtemp,writeFile,rm,readFile} from 'node:fs/promises';
+import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFile} from 'node:child_process';
@@ -20,7 +21,7 @@ async function api(action,extra={}){
 const context=await api('context');
 const {target,artifacts,testSuite,manualEvidence}=context;
 assert(hash(artifacts.files)===artifacts.hash,'Package integrity failed.');
-const dir=await mkdtemp(join(tmpdir(),'delivery-'));let mcp,writePending=false,knownFailure=false;
+const dir=await mkdtemp(join(tmpdir(),'delivery-'));let mcp,writePending=false,knownFailure=false,qualityBlocked=false;
 const evidence={artifactHash:artifacts.hash,orgId:target.orgId,status:'unknown',tests:[]};
 try{
   assert(e.SF_CLIENT_ID&&e.SF_USERNAME&&e.SF_JWT_PRIVATE_KEY,'Configure Salesforce JWT credentials for this environment.');
@@ -53,14 +54,13 @@ try{
   }
   if(browserScenarios.length)evidence.tests.push(...await runBrowserTests(browserScenarios,target,JSON.parse(e.SF_BROWSER_STATE)));
   if(!evidence.tests.every(t=>t.passed)){knownFailure=true;throw new Error('Acceptance tests failed.');}
-  // Only a reviewed runner adapter may produce this file. Never take it from model output or the feature branch.
-  evidence.quality=e.DELIVERY_QUALITY_FILE?JSON.parse(await readFile(e.DELIVERY_QUALITY_FILE,'utf8')):{artifactHash:artifacts.hash,checks:{}};
+  evidence.quality=collectQuality({artifacts,validation:evidence.validation,cases:context.requirementCases,testSuite,tests:evidence.tests});
   const quality=qualityGate(evidence.quality,artifacts.hash);
-  if(!quality.passed)throw new Error('Quality adapters have not supplied all required evidence.');
+  if(!quality.passed){qualityBlocked=true;throw new Error('Quality gate blocked: '+quality.checks.filter(c=>c.status==='blocked').map(c=>c.category).join(', '));}
   evidence.status='passed';evidence.reason='Salesforce validation, deployment and all reviewed scenarios passed.';
 }catch(error){
-  evidence.status=knownFailure&&!writePending?'failed':'unknown';
-  evidence.reason=knownFailure?error.message:'Configuration, authentication, tooling or an ambiguous operation blocked the stage. Inspect the environment and reconcile before retrying.';
+  evidence.status=qualityBlocked?'blocked':knownFailure&&!writePending?'failed':'unknown';
+  evidence.reason=knownFailure||qualityBlocked?error.message:'Configuration, authentication, tooling or an ambiguous operation blocked the stage. Inspect the environment and reconcile before retrying.';
 }finally{mcp?.close();await rm(dir,{recursive:true,force:true});}
 const report=await api('report',{evidence});
 console.log(JSON.stringify({stage:base.stage,status:evidence.status,pipelineId:base.pipelineId}));
