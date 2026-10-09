@@ -124,3 +124,9 @@ A successful non-production repair creates a new artifact and Git commit, preser
 | Usage and distribution terms | [MIT license](LICENSE) |
 
 The MIT license covers this project’s code. Salesforce, GitHub, Vercel, Supabase, model providers and Playwright have their own terms and licenses. No provider subscription or service charge is included.
+
+### License-aware planning
+
+Salesforce authorization now collects an evidence report: org edition (including Developer Edition), the connected user's license when available, user/feature/package license inventories, API limits and effective object CRUD flags. Refresh it under **Workspace setup → Salesforce → Refresh license & capability report**. BRD analysis obtains a new snapshot and asks blocking questions about unverified licensed features, with alternatives to investigate.
+
+A denied probe is **unknown**, not “unlicensed.” Inventories are capped at 200 rows and disclose truncation. License fields are discovered before querying; unavailable counts are never invented. Inventory does not establish assignment to every user. CRUD access does not establish metadata deployment permission. Exact-package validation and destination-specific testing remain mandatory. These reports cannot verify commercial contracts or promise zero hallucinations; the current requirement assessment is model-assisted, not a complete deterministic entitlement rules engine.
