@@ -140,3 +140,7 @@ The authoritative flow and implementation matrix are in [Delivery flow](docs/DEL
 ### Specialized agents and target stack
 
 [Agent responsibilities and stack decisions](docs/AGENTS-AND-STACK.md) separates the existing implementation from the target React/Next.js, FastAPI and LangGraph architecture. [Agent contracts](config/agent-contracts.json) define responsibilities and tool boundaries. Requirement analysis now creates structured test cases alongside stories, covering every acceptance criterion; executable test generation must preserve their expected outcomes.
+
+### Quality adapter progress
+
+The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. Security, performance, destination-license, baseline-regression and changed-Flow checks remain blocked pending verified adapters. No complete end-to-end Salesforce pipeline is claimed.
