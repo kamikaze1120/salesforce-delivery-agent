@@ -136,3 +136,7 @@ A denied probe is **unknown**, not “unlicensed.” Inventories are capped at 2
 The authoritative flow and implementation matrix are in [Delivery flow](docs/DELIVERY-FLOW.md). Jira story creation and GitHub Actions CI/CD are core integrations. Copado is not used. New deliveries require a resolved, approved Salesforce architecture before code generation. After UAT, the app generates a traceable release report; a reviewer records business approval before the production runner can claim its package. Approve the report in the app **before** releasing the protected production job in GitHub.
 
 **Current rollout blocker:** the expanded quality gate deliberately blocks promotion until the trusted runner supplies coverage, security, performance, license, regression, business and Flow applicability/results evidence. The full production quality adapters are not yet shipped or live-verified. Do not enable this pipeline for production simply because web-app unit tests pass. See the implementation matrix for remaining work.
+
+### Specialized agents and target stack
+
+[Agent responsibilities and stack decisions](docs/AGENTS-AND-STACK.md) separates the existing implementation from the target React/Next.js, FastAPI and LangGraph architecture. [Agent contracts](config/agent-contracts.json) define responsibilities and tool boundaries. Requirement analysis now creates structured test cases alongside stories, covering every acceptance criterion; executable test generation must preserve their expected outcomes.
