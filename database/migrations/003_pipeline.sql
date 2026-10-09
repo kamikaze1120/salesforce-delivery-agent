@@ -6,7 +6,7 @@ begin
   perform 1 from workspaces where id=p_workspace and connection_version=p_version for update;
   if not found then return false; end if;
   if exists(select 1 from jobs where workspace_id=p_workspace and
-    (busy or data->'pipeline'->>'status' in ('queued','running') or stage in ('validating','deploying') or data->>'reconciliationRequired'='true')) then return false; end if;
+    (busy or data->'pipeline'->>'status' in ('queued','running','awaiting_business_approval') or stage in ('validating','deploying') or data->>'reconciliationRequired'='true')) then return false; end if;
   insert into connections(workspace_id,type,encrypted_config,verified) values(p_workspace,p_type,p_config,p_verified)
   on conflict(workspace_id,type) do update set encrypted_config=excluded.encrypted_config,verified=excluded.verified,revision=gen_random_uuid(),updated_at=now();
   update workspaces set connection_version=connection_version+1 where id=p_workspace;
