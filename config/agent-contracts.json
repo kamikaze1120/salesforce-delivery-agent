@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "status": "target-contracts-not-independent-running-agents",
+  "orchestrator": {"owns": ["state transitions", "account bindings", "artifact hashes", "repair budgets", "approvals", "audit events"], "modelMayApprove": false},
+  "agents": [
+    {"id":"brd_reader","inputs":["original BRD","clarifications"],"outputs":["epics","stories","acceptance criteria","structured requirement tests","risks"],"writeTools":[]},
+    {"id":"license_analyst","inputs":["requirements","org evidence","versioned official feature rules"],"outputs":["supported/blocked/unknown assessments","evidence references","verified alternatives"],"writeTools":[]},
+    {"id":"salesforce_architect","inputs":["approved requirements","metadata snapshot","license assessments"],"outputs":["component choices","tradeoffs","unresolved questions"],"writeTools":[]},
+    {"id":"solution_designer","inputs":["approved architecture"],"outputs":["relationships","flow diagrams","mockups","sharing design","deployment and recovery plan"],"writeTools":[]},
+    {"id":"code_generator","inputs":["approved design","original requirements","metadata snapshot"],"outputs":["allowlisted metadata","Apex tests","change manifest"],"writeTools":[]},
+    {"id":"salesforce_mcp","inputs":["verified org identity","immutable package","tool policy"],"outputs":["metadata evidence","validation and deployment IDs","Apex results"],"writeTools":["policy-authorized development deployment"]},
+    {"id":"testing","inputs":["approved tests","test identities","deployed artifact"],"outputs":["Apex/Flow/UI/regression evidence"],"writeTools":["isolated non-production test data"]},
+    {"id":"business_testing","inputs":["frozen business cases","observed application behavior"],"outputs":["case-level expected and actual results"],"writeTools":["isolated non-production test data"]},
+    {"id":"deployment","inputs":["quality evidence","environment policy","human approvals"],"outputs":["promotion evidence","release report","post-deploy results"],"writeTools":["policy-authorized environment promotion"]}
+  ],
+  "prohibitions":["No agent self-approves production","No agent edits acceptance criteria to pass a test","No browser deployment","No invented entitlement rule","No automatic retry of an ambiguous write","No scratch org creation without configured Dev Hub and approved quota policy"]
+}
