@@ -50,17 +50,19 @@ The central layer persists original requirements, decisions, hashes, Jira mappin
 
 `lib/quality.mjs` requires artifact-bound evidence for coverage, security, performance, license, regression, business and Flow tests. Each category needs a result, source and reason. Missing, failed or unknown evidence blocks promotion. `not_applicable` must be justified by the trusted adapter; it is not an LLM override. The adapter must independently enforce numeric thresholds and applicability. Current schema validation does not prove a tool's output is truthful; its trust boundary is the pinned runner.
 
-`runner/stage.mjs` accepts a JSON evidence file via `DELIVERY_QUALITY_FILE`. This is an integration seam, not a shipped quality-analysis implementation. The current workflow does not configure a producer for that file, so the expanded gate intentionally stops. Install reviewed adapters in the trusted runner, never in model-generated feature code. Adapters must execute before reporting stage success, collect exact artifact/org/test identity, and preserve machine-readable evidence. Never point this at a manually fabricated pass file.
+`runner/quality-adapters.mjs` now derives changed-class Apex coverage from the validation response and maps frozen acceptance cases to observed scenario results. The default changed-class coverage policy is 75% per implementation class, a project policy rather than an assertion of Salesforce's org-wide calculation. Missing, ambiguous, malformed or zero-location counts block. Missing or duplicate scenario results block business evidence. This mapping verifies execution traceability, not the semantic adequacy of generated assertions.
+
+The runner no longer accepts `DELIVERY_QUALITY_FILE`; an external JSON file cannot override built-in checks. Security, performance, destination-license and baseline-regression adapters remain blocked. Flow changes also block until a Flow execution adapter is supplied. A package without Flow changes records narrow non-applicability for changed-Flow testing only; regression must still cover existing Flow side effects. A missing quality adapter stops the pipeline with `blocked`, without requesting a code repair or falsely labelling the deployment outcome ambiguous.
 
 Required adapter work:
 
 | Category | Required evidence | Current implementation |
 | --- | --- | --- |
-| Apex | Actual class/test results and applicable coverage | Named Apex tests and deployment RunLocalTests exist; coverage adapter pending |
+| Apex | Actual class/test results and applicable coverage | Named Apex tests and deployment RunLocalTests exist; changed-class coverage adapter implemented; live verification pending |
 | Flow | Flow-specific scenarios and observable assertions | Dedicated Flow test adapter pending; Draft Flow files alone are not behavioral proof |
 | UI | Playwright assertions using dedicated test users | Declarative browser runner exists; selectors and sessions need live verification |
 | Regression | Approved baseline and affected-feature results | Dedicated classification/baseline adapter pending |
-| Business | Every acceptance criterion linked to observed outcomes | Requirement links exist; complete criterion-level enforcement pending |
+| Business | Every acceptance criterion linked to observed outcomes | Frozen case-to-scenario evidence enforced; assertion adequacy still needs review |
 | Security | Static analysis, sharing/CRUD/FLS and access tests | Metadata allowlist exists; full security analysis adapter pending |
 | Performance | Reviewed thresholds and measured workloads | Performance adapter and org-specific thresholds pending |
 | License | Destination-specific edition, assignments, capacities and feature requirements | Development discovery exists; destination requirement-level evaluator pending |

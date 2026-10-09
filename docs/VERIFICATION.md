@@ -24,3 +24,5 @@ Before enabling production, use synthetic data to verify: correct and wrong targ
 ## Revised architecture checks
 
 Local tests cover fixed four-stage ordering, stale/missing business approval, Jira/report traceability, and missing quality evidence. They do not prove the unimplemented quality adapters, profile deployment, Flow behavior, performance, production licenses or live integrations. The expanded pipeline is intentionally not production-ready. See DELIVERY-FLOW.md for the exact implementation matrix.
+
+Coverage adapter tests reject missing, duplicate, invalid and insufficient Salesforce coverage counts. Business adapters reject dropped, duplicate, failed or rewritten acceptance scenarios. Current local suite: 56 passing tests. These use fixtures and do not replace live-org validation.
