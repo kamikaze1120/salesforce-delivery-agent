@@ -34,10 +34,11 @@ Copado is no longer required. Old Copado connection records are retained for com
 Use Node.js 22, download or clone this repository, and run:
 
 ```sh
+npm ci --ignore-scripts
 npm run dev
 ```
 
-Open `http://localhost:3000` and choose **Open sample workspace**. No credentials or runtime npm installation are needed for the web app. The sample is a fixture, not a live LLM or deployment.
+Open `http://localhost:3000` and choose **Open sample workspace**. No credentials are needed for the sample. Install the locked dependencies first; the server uses a structural XML parser for Salesforce results and metadata policy checks. The sample is a fixture, not a live LLM or deployment.
 
 ```sh
 npm test
@@ -144,3 +145,7 @@ The authoritative flow and implementation matrix are in [Delivery flow](docs/DEL
 ### Quality adapter progress
 
 The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. Security, performance, destination-license, baseline-regression and changed-Flow checks remain blocked pending verified adapters. No complete end-to-end Salesforce pipeline is claimed.
+
+## Implementation backlog
+
+The [audit backlog](docs/BACKLOG.md) tracks all 35 work items. [Work status](docs/WORK-STATUS.md) records verified checkpoints and live-verification limits. Passing web-app checks does not establish Salesforce production readiness.
