@@ -28,7 +28,8 @@ export function businessCheck(cases,suite,results){
  });
  return check(rows.some(r=>r.status==='blocked')?'blocked':rows.every(r=>r.status==='passed')?'passed':'failed',source,'All frozen acceptance cases must map to an observed passing scenario. Semantic adequacy of assertions still requires test review.',{cases:rows});
 }
-export function collectQuality({artifacts,validation,cases,testSuite,tests}){
+export function collectQuality({artifacts,validation,cases,testSuite,tests,security}){
  const pending=name=>check('blocked','No verified '+name+' adapter','A reviewed adapter and applicable policy are required; this is not a pass.');
- return {artifactHash:artifacts.hash,checks:{coverage:coverageCheck(artifacts,validation),business:businessCheck(cases,testSuite,tests),security:pending('security'),performance:pending('performance'),license:pending('destination license'),regression:pending('baseline regression'),flow:artifacts.files.some(f=>f.path.startsWith('flows/'))?pending('Flow execution'):check('not_applicable','Immutable package manifest','No Flow metadata is changed. Flow side effects of other changes remain part of business and regression tests.')}};
+ const securityEvidence=security&&security.artifactHash===artifacts.hash?security:pending('security');
+ return {artifactHash:artifacts.hash,checks:{coverage:coverageCheck(artifacts,validation),business:businessCheck(cases,testSuite,tests),security:securityEvidence,performance:pending('performance'),license:pending('destination license'),regression:pending('baseline regression'),flow:artifacts.files.some(f=>f.path.startsWith('flows/'))?pending('Flow execution'):check('not_applicable','Immutable package manifest','No Flow metadata is changed. Flow side effects of other changes remain part of business and regression tests.')}};
 }
