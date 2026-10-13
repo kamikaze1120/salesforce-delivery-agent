@@ -144,8 +144,17 @@ The authoritative flow and implementation matrix are in [Delivery flow](docs/DEL
 
 ### Quality adapter progress
 
-The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. Security, performance, destination-license, baseline-regression and changed-Flow checks remain blocked pending verified adapters. No complete end-to-end Salesforce pipeline is claimed.
+The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. An Apex-only security preflight is implemented with live verification still pending; broader metadata security remains blocked. Performance, destination-license, baseline-regression and changed-Flow checks remain blocked pending verified adapters. No complete end-to-end Salesforce pipeline is claimed.
 
 ## Implementation backlog
 
 The [audit backlog](docs/BACKLOG.md) tracks all 35 work items. [Work status](docs/WORK-STATUS.md) records verified checkpoints and live-verification limits. Passing web-app checks does not establish Salesforce production readiness.
+
+
+### Security preflight setup (B05, limited pilot scope)
+
+Before enabling a Salesforce pipeline, set `CODE_ANALYZER_VERSION` in each GitHub environment to an exact reviewed **5.x.y** release of `@salesforce/plugin-code-analyzer`, alongside the existing CLI and Playwright version variables. The runner requires Java 11+ and installs the scanner before environment credentials are used. Do not use `latest`.
+
+Security checks run **before any Salesforce validation or deployment**. The initial policy scans Apex-only packages using all PMD rules tagged Security, rejects suppression markers, and fails on every reported security severity. Unknown, incomplete or inconsistent evidence blocks the stage. Generated scanner configuration is never executed.
+
+Packages containing objects, permission sets, Flows, LWC or other metadata remain blocked until their reviewed security policies are implemented. A clean static scan does not prove CRUD/FLS, sharing or runtime authorization. Other required quality gates also remain blocked. See [security policy details](docs/SECURITY-GATE.md) and [backlog](docs/BACKLOG.md).
