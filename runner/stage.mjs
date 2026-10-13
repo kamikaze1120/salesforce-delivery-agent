@@ -1,4 +1,5 @@
 import {collectQuality} from './quality-adapters.mjs';
+import {runSecurity} from './security.mjs';
 import {qualityGate} from '../lib/quality.mjs';
 import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -24,6 +25,12 @@ assert(hash(artifacts.files)===artifacts.hash,'Package integrity failed.');
 const dir=await mkdtemp(join(tmpdir(),'delivery-'));let mcp,writePending=false,knownFailure=false,qualityBlocked=false;
 const evidence={artifactHash:artifacts.hash,orgId:target.orgId,status:'unknown',tests:[]};
 try{
+  evidence.security=await runSecurity(artifacts);
+  if(evidence.security.status!=='passed'){
+    qualityBlocked=true;
+    evidence.quality=collectQuality({artifacts,cases:context.requirementCases,testSuite,tests:[],security:evidence.security});
+    throw new Error('Security preflight blocked: '+evidence.security.reason);
+  }
   assert(e.SF_CLIENT_ID&&e.SF_USERNAME&&e.SF_JWT_PRIVATE_KEY,'Configure Salesforce JWT credentials for this environment.');
   const browserScenarios=testSuite.scenarios.filter(s=>s.kind==='browser');
   assert(!browserScenarios.length||e.SF_BROWSER_STATE,'Provide a dedicated test-user browser session for browser tests.');
@@ -54,7 +61,7 @@ try{
   }
   if(browserScenarios.length)evidence.tests.push(...await runBrowserTests(browserScenarios,target,JSON.parse(e.SF_BROWSER_STATE)));
   if(!evidence.tests.every(t=>t.passed)){knownFailure=true;throw new Error('Acceptance tests failed.');}
-  evidence.quality=collectQuality({artifacts,validation:evidence.validation,cases:context.requirementCases,testSuite,tests:evidence.tests});
+  evidence.quality=collectQuality({artifacts,validation:evidence.validation,cases:context.requirementCases,testSuite,tests:evidence.tests,security:evidence.security});
   const quality=qualityGate(evidence.quality,artifacts.hash);
   if(!quality.passed){qualityBlocked=true;throw new Error('Quality gate blocked: '+quality.checks.filter(c=>c.status==='blocked').map(c=>c.category).join(', '));}
   evidence.status='passed';evidence.reason='Salesforce validation, deployment and all reviewed scenarios passed.';
