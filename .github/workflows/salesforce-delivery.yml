@@ -36,9 +36,11 @@ jobs:
         env:
           SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
           PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
       - name: Verify, validate, deploy and test through Salesforce MCP
         run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
         env:
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
           DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
           DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
           DELIVERY_JOB: ${{ inputs.delivery_id }}
@@ -62,9 +64,11 @@ jobs:
         env:
           SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
           PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
       - name: Verify, validate, deploy and test through Salesforce MCP
         run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
         env:
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
           DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
           DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
           DELIVERY_JOB: ${{ inputs.delivery_id }}
@@ -88,9 +92,11 @@ jobs:
         env:
           SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
           PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
       - name: Verify, validate, deploy and test through Salesforce MCP
         run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
         env:
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
           DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
           DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
           DELIVERY_JOB: ${{ inputs.delivery_id }}
@@ -114,9 +120,11 @@ jobs:
         env:
           SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
           PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
       - name: Verify, validate, deploy and test through Salesforce MCP
         run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
         env:
+          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
           DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
           DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
           DELIVERY_JOB: ${{ inputs.delivery_id }}
