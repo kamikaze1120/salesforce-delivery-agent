@@ -30,3 +30,17 @@ Daily usage remaining is not visible. This file is a durable checkpoint, not a s
 ## Publishing status
 
 The initial command-line push had no GitHub authentication. The tested changes are now being published through the authorized GitHub browser session on `fix/audit-critical-safety`, including this backlog and status report. The branch uses several browser commits instead of the local checkpoint commit. GitHub check results and Vercel preview status are recorded on the associated pull request; local test success alone is not a deployment claim. Main and Salesforce production have not been changed by this correction checkpoint.
+
+
+## Checkpoint 2: security preflight — 2026-10-13 (B05 in progress)
+
+- Added an isolated, artifact-bound Code Analyzer v5 PMD Security adapter for Apex-only packages. All reported security findings fail; suppression markers, missing engine evidence, bad counts, failures and unsupported metadata block.
+- Security preflight now runs before Salesforce authentication, validation or deployment. Scanner subprocesses receive no Salesforce/JWT/GitHub credentials. Source excerpts and scanner messages are excluded from evidence.
+- The runner installs an exact reviewed `CODE_ANALYZER_VERSION` into a separate tool home. Every stage requires this variable; Java 11+ is required.
+- Seven new fixture-based regression groups; **68 local tests passed**, syntax build passed. Live scanner and GitHub checks are tracked separately; fixture success is not proof of tool interoperability.
+- B05 remains in progress: permission/Flow/LWC/object policies, runtime authorization tests and the live Salesforce pilot are not implemented or verified. Performance, destination-license and baseline-regression categories remain blocked.
+- No Salesforce deployment or production change was performed.
+
+Live-tool attempt: Salesforce CLI 2.153.5 installed locally and Java 17 was available. Installing Code Analyzer 5.16.0 through the CLI failed twice with a registry lookup error. A real scan was not executed; no scanner interoperability or Salesforce readiness claim is made.
+
+Publishing checkpoint — 2026-10-14: the security adapter, runner wiring, pinned-tool installation, workflow variables, seven regression groups, README and policy documentation were committed through the GitHub editor to `fix/audit-critical-safety` (PR #3). B05 remains in progress. Final CI results belong to the current PR head; older successful checks do not certify these changes. Main and Salesforce production remain unchanged.
