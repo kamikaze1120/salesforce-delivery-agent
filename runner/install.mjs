@@ -1,15 +1,8 @@
 import {execFileSync} from 'node:child_process';
-import {mkdirSync,writeFileSync} from 'node:fs';
-import {join,resolve,delimiter} from 'node:path';
+import {installAnalyzer} from './install-analyzer.mjs';
 execFileSync('npm',['ci','--ignore-scripts'],{stdio:'inherit'});
 for(const key of ['SALESFORCE_CLI_VERSION','PLAYWRIGHT_VERSION','CODE_ANALYZER_VERSION'])if(!/^\d+\.\d+\.\d+$/.test(process.env[key]||''))throw new Error(`Set ${key} to an exact reviewed release version.`);
 if(!process.env.CODE_ANALYZER_VERSION.startsWith('5.')||!process.env.RUNNER_TEMP)throw new Error('Code Analyzer v5 and RUNNER_TEMP are required.');
 execFileSync('npm',['install','--no-save','--package-lock=false','--ignore-scripts',`@salesforce/cli@${process.env.SALESFORCE_CLI_VERSION}`,`playwright@${process.env.PLAYWRIGHT_VERSION}`],{stdio:'inherit'});
 execFileSync('node_modules/.bin/playwright',['install','--with-deps','chromium'],{stdio:'inherit'});
-const analyzerHome=join(process.env.RUNNER_TEMP,'delivery-analyzer-home');
-mkdirSync(analyzerHome,{recursive:true,mode:0o700});
-const analyzerEnv={PATH:resolve('node_modules/.bin')+delimiter+process.env.PATH,HOME:analyzerHome,SF_DISABLE_TELEMETRY:'true',SF_AUTOUPDATE_DISABLE:'true'};
-if(process.env.JAVA_HOME)analyzerEnv.JAVA_HOME=process.env.JAVA_HOME;
-execFileSync('java',['-version'],{env:analyzerEnv,stdio:'inherit'});
-execFileSync(resolve('node_modules/.bin/sf'),['plugins','install',`@salesforce/plugin-code-analyzer@${process.env.CODE_ANALYZER_VERSION}`],{env:analyzerEnv,stdio:'inherit',timeout:300000});
-writeFileSync(join(analyzerHome,'delivery-analyzer-pin.json'),JSON.stringify({version:process.env.CODE_ANALYZER_VERSION}),{mode:0o600});
+installAnalyzer();
