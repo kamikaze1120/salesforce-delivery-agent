@@ -8,7 +8,7 @@ Baseline: independent audit of main `a064749`, 2026-10-12. Status is implementat
 | B02 | P0 | Deployment XML parsing | Implemented; local tests pass | Parse overall result independently of component outcomes; inconsistent success is rejected. |
 | B03 | P0 | Permission XML policy | Implemented; local tests pass | Namespace-equivalent permissions receive identical structural checks; forbidden access is rejected. |
 | B04 | P0 | Critical regression tests | Implemented; local tests pass | Reproduce B01–B03 and verify their corrected behavior. |
-| B05 | P0 | Security quality adapter | Backlog | Reviewed static analysis and permission policy produce artifact-bound evidence before promotion. |
+| B05 | P0 | Security quality adapter | In progress: Apex static preflight implemented; live verification pending | Reviewed static analysis and permission policy produce artifact-bound evidence before promotion. |
 | B06 | P0 | Performance quality adapter | Backlog | Representative bulk, limit and UI scenarios meet explicit approved thresholds. |
 | B07 | P0 | Destination license gate | Backlog | Every target provides applicable feature, permission, limit and dependency evidence; unknown blocks. |
 | B08 | P0 | Baseline regression adapter | Backlog | Approved existing-behavior tests run and retain results for each applicable stage. |
