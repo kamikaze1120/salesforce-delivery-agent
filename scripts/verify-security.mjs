@@ -7,7 +7,7 @@ import {runSecurity} from '../runner/security.mjs';
 installAnalyzer();
 for(const [name,content,expected] of [
  ['CleanFixture','public with sharing class CleanFixture { public static Integer answer() { return 42; } }','passed'],
- ['UnsafeFixture','public with sharing class UnsafeFixture { public static List<SObject> search(String input) { return Database.query(input); } }','failed']
+ ['UnsafeFixture',"public with sharing class UnsafeFixture { public static List<SObject> search(String input) { return Database.query('SELECT Id FROM Account' + input); } }",'failed']
 ]){
  const files=[{path:`classes/${name}.cls`,content}];
  const evidence=await runSecurity({files,hash:hash(files)});
