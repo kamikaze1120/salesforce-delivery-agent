@@ -144,7 +144,7 @@ The authoritative flow and implementation matrix are in [Delivery flow](docs/DEL
 
 ### Quality adapter progress
 
-The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. An Apex-only security preflight is implemented with live verification still pending; broader metadata security remains blocked. Performance, destination-license, baseline-regression and changed-Flow checks remain blocked pending verified adapters. No complete end-to-end Salesforce pipeline is claimed.
+The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. An Apex-only security preflight has a passing real-scanner CI fixture check; Salesforce runtime verification is still pending and broader metadata security remains blocked. Performance, destination-license, baseline-regression and changed-Flow checks remain blocked pending verified adapters. No complete end-to-end Salesforce pipeline is claimed.
 
 ## Implementation backlog
 
@@ -158,3 +158,9 @@ Before enabling a Salesforce pipeline, set `CODE_ANALYZER_VERSION` in each GitHu
 Security checks run **before any Salesforce validation or deployment**. The initial policy scans Apex-only packages using all PMD rules tagged Security, rejects suppression markers, and fails on every reported security severity. Unknown, incomplete or inconsistent evidence blocks the stage. Generated scanner configuration is never executed.
 
 Packages containing objects, permission sets, Flows, LWC or other metadata remain blocked until their reviewed security policies are implemented. A clean static scan does not prove CRUD/FLS, sharing or runtime authorization. Other required quality gates also remain blocked. See [security policy details](docs/SECURITY-GATE.md) and [backlog](docs/BACKLOG.md).
+
+### Interrupted runs and pause behavior
+
+The runner saves each validation/deployment intent before submission, its Salesforce operation ID before polling, and the terminal outcome before continuing. Lost or ambiguous responses block replay and automatic repair. A passing stage report must match those saved operation IDs. Pause checks run before validation, deployment, each Apex scenario and each browser step; outcome reporting and read-only polling of an already submitted deployment remain available while paused. Pause cannot undo or cancel an operation already accepted by Salesforce, and there is a small race between permission checks and external submission. Do not treat it as emergency cancellation. See [runner recovery](docs/RUNNER-RECOVERY.md).
+
+A separate credential-free `Security scanner integration` workflow exercises the pinned real scanner against clean and intentionally unsafe synthetic Apex. Its result is distinct from unit tests and web preview deployment. It needs no Salesforce credentials and performs no Salesforce writes.
