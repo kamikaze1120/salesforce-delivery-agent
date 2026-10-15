@@ -44,3 +44,16 @@ The initial command-line push had no GitHub authentication. The tested changes a
 Live-tool attempt: Salesforce CLI 2.153.5 installed locally and Java 17 was available. Installing Code Analyzer 5.16.0 through the CLI failed twice with a registry lookup error. A real scan was not executed; no scanner interoperability or Salesforce readiness claim is made.
 
 Publishing checkpoint — 2026-10-14: the security adapter, runner wiring, pinned-tool installation, workflow variables, seven regression groups, README and policy documentation were committed through the GitHub editor to `fix/audit-critical-safety` (PR #3). B05 remains in progress. Final CI results belong to the current PR head; older successful checks do not certify these changes. Main and Salesforce production remain unchanged.
+
+
+## Checkpoint 3 — 2026-10-14
+
+- B05: added a credential-free real-scanner CI job, using a shared isolated installer and positive/negative synthetic Apex fixtures. A real scanner result must be observed separately; mocked unit tests do not prove installation or rule execution. Broader metadata/security policies remain pending.
+- B09: operation intents, Salesforce IDs and completion outcomes now persist in the stage journal through authenticated, locked API calls. Submission is never retried; unknown outcomes block recovery and new pipeline dispatch. Passing reports must match durable IDs. Local interruption and invariant tests added; live fault injection remains pending.
+- B11: pause is checked at operation and test action boundaries; authenticated outcome recording remains possible while paused. Existing Salesforce operations continue read-only polling to record the actual outcome. In-flight cancellation and a UI for reconciliation remain pending.
+- B06–B08 stay blocked pending approved performance policies, destination entitlement rules, and a representative regression baseline. These cannot safely be replaced with invented pass evidence.
+- No Salesforce org was modified and no production promotion was started for this checkpoint.
+
+### Verification follow-up — 2026-10-15
+
+All 75 local tests and JavaScript syntax checks passed. GitHub's real-scanner job succeeded at commit `50940ab` (run `38617194532`, job `116035202934`), using CLI 2.153.5 and Code Analyzer 5.16.0. The job asserts both a clean result and detection of PMD ApexSOQLInjection in the documented concatenated-query fixture. The original direct-input fixture was not detected and caused CI to fail; it was replaced with the documented rule example. This demonstrates limited rule execution, not complete vulnerability detection. Salesforce org execution and runtime authorization remain unverified.
