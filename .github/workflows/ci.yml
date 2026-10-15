@@ -13,5 +13,6 @@ jobs:
         with:
           persist-credentials: false
       - run: node --version
+      - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run build

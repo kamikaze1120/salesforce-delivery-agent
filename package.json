@@ -13,5 +13,8 @@
   },
   "engines": {
     "node": "22.x"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.11.2"
   }
 }

@@ -1,4 +1,5 @@
 import {collectQuality} from './quality-adapters.mjs';
+import {runSecurity} from './security.mjs';
 import {qualityGate} from '../lib/quality.mjs';
 import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -23,7 +24,31 @@ const {target,artifacts,testSuite,manualEvidence}=context;
 assert(hash(artifacts.files)===artifacts.hash,'Package integrity failed.');
 const dir=await mkdtemp(join(tmpdir(),'delivery-'));let mcp,writePending=false,knownFailure=false,qualityBlocked=false;
 const evidence={artifactHash:artifacts.hash,orgId:target.orgId,status:'unknown',tests:[]};
+async function boundary(){
+  const control=await api('control');
+  if(control.allowed!==true||control.artifactHash!==artifacts.hash){qualityBlocked=true;throw new Error('Delivery paused or stopped at an action boundary.');}
+}
+async function perform(kind,tool,waitFor){
+  await boundary();
+  // Record intent before submission, and ID before polling. Never retry submissions.
+  await api('operation',{operation:{kind,phase:'intent'}});
+  writePending=true;
+  const submitted=await mcp.call(tool);
+  evidence[kind]={id:submitted.id,done:false,success:false};
+  await api('operation',{operation:{kind,phase:'submitted',id:submitted.id}});
+  evidence[kind]=await waitFor(submitted.id);
+  await api('operation',{operation:{kind,phase:'completed',id:submitted.id,success:evidence[kind].success}});
+  writePending=false;
+}
+
 try{
+  evidence.security=await runSecurity(artifacts);
+  if(evidence.security.status!=='passed'){
+    qualityBlocked=true;
+    evidence.quality=collectQuality({artifacts,cases:context.requirementCases,testSuite,tests:[],security:evidence.security});
+    throw new Error('Security preflight blocked: '+evidence.security.reason);
+  }
+  await boundary();
   assert(e.SF_CLIENT_ID&&e.SF_USERNAME&&e.SF_JWT_PRIVATE_KEY,'Configure Salesforce JWT credentials for this environment.');
   const browserScenarios=testSuite.scenarios.filter(s=>s.kind==='browser');
   assert(!browserScenarios.length||e.SF_BROWSER_STATE,'Provide a dedicated test-user browser session for browser tests.');
@@ -42,24 +67,23 @@ try{
   mcp=new SalesforceMcp({...cleanEnv,DELIVERY_TARGET_FILE:join(dir,'target.json'),DELIVERY_ARTIFACT_FILE:join(dir,'artifacts.json')});
   await mcp.initialize();await mcp.call('inspect_org');
   async function waitFor(id){for(let n=0;n<240;n++){const result=await mcp.call('deployment_status',{id});if(result.done)return {...result,id};await new Promise(r=>setTimeout(r,15000));}throw new Error('Salesforce result timeout. Reconciliation required.');}
-  writePending=true;
-  const validation=await mcp.call('validate_metadata');evidence.validation=await waitFor(validation.id);writePending=false;
+  await perform('validation','validate_metadata',waitFor);
   if(!evidence.validation.success){knownFailure=true;throw new Error('Salesforce check-only validation failed.');}
-  writePending=true;
-  const deployment=await mcp.call('deploy_metadata');evidence.deployment=await waitFor(deployment.id);writePending=false;
+  await perform('deployment','deploy_metadata',waitFor);
   if(!evidence.deployment.success){knownFailure=true;throw new Error('Salesforce deployment reported failure and rollback.');}
   for(const scenario of testSuite.scenarios.filter(s=>s.kind==='apex')){
+    await boundary();
     const result=await mcp.call('run_apex_tests',{classes:scenario.apexClasses});
-    evidence.tests.push({id:scenario.id,kind:'apex',passed:result.passed,summary:result.summary});
+    evidence.tests.push({id:scenario.id,kind:'apex',passed:result.passed,summary:result.summary,tests:result.tests});
   }
-  if(browserScenarios.length)evidence.tests.push(...await runBrowserTests(browserScenarios,target,JSON.parse(e.SF_BROWSER_STATE)));
+  if(browserScenarios.length)evidence.tests.push(...await runBrowserTests(browserScenarios,target,JSON.parse(e.SF_BROWSER_STATE),{beforeStep:boundary}));
   if(!evidence.tests.every(t=>t.passed)){knownFailure=true;throw new Error('Acceptance tests failed.');}
-  evidence.quality=collectQuality({artifacts,validation:evidence.validation,cases:context.requirementCases,testSuite,tests:evidence.tests});
+  evidence.quality=collectQuality({artifacts,validation:evidence.validation,cases:context.requirementCases,testSuite,tests:evidence.tests,security:evidence.security});
   const quality=qualityGate(evidence.quality,artifacts.hash);
   if(!quality.passed){qualityBlocked=true;throw new Error('Quality gate blocked: '+quality.checks.filter(c=>c.status==='blocked').map(c=>c.category).join(', '));}
   evidence.status='passed';evidence.reason='Salesforce validation, deployment and all reviewed scenarios passed.';
 }catch(error){
-  evidence.status=qualityBlocked?'blocked':knownFailure&&!writePending?'failed':'unknown';
+  evidence.status=writePending?'unknown':qualityBlocked?'blocked':knownFailure?'failed':'unknown';
   evidence.reason=knownFailure||qualityBlocked?error.message:'Configuration, authentication, tooling or an ambiguous operation blocked the stage. Inspect the environment and reconcile before retrying.';
 }finally{mcp?.close();await rm(dir,{recursive:true,force:true});}
 const report=await api('report',{evidence});
