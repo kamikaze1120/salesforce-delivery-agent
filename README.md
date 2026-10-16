@@ -68,6 +68,26 @@ The separate GitHub runner installs explicitly pinned Salesforce CLI and Playwri
 
 Generate an encryption key locally with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"`. Store it in your secret manager and Vercel, not Git or a ticket. Use `.env.local` for local credentials. Never share production credentials with untrusted previews.
 
+## Branches and releases
+
+`main` is the single integration branch for this application. The previous version branches were already merged; the audit safety changes were merged in PR #3. Completed branches are removed after their work is preserved in `main`.
+
+For each new change, use one short-lived branch and pull request, run the required checks, merge, then delete the branch. This provides a reviewable diff and Vercel preview without keeping permanent version branches. Keep main protected against force pushes and deletion; do not bypass required checks.
+
+Merging application changes into `main` triggers the connected Vercel production build. Check that deployment's commit and Ready status before treating the release as live. This deploys the **web application** only. Salesforce metadata promotion uses the separate delivery pipeline, target-org checks and business approval gates.
+
+## Current implementation checkpoint
+
+| Area | Verified behavior | Remaining work |
+|---|---|---|
+| Application safety | 75 local tests passed at the audit checkpoint; runner routing and structural XML checks corrected | Live account integration rehearsal |
+| Apex security | Real Code Analyzer CI accepted a clean fixture and detected the unsafe injection fixture | Broader metadata policies and runtime authorization tests |
+| Interrupted runs | Durable intents, operation IDs, immutable outcomes and replay prevention | B10 authenticated reconciliation and reviewer interface |
+| Pause | Checks before deployment submissions and test actions | Cancellation of operations already accepted by Salesforce |
+| Promotion | Required evidence gates block unsupported or unknown results | Performance, destination-license, baseline-regression and Flow adapters; four-org rehearsal |
+
+Use [the backlog](docs/BACKLOG.md) for all 35 items and [work status](docs/WORK-STATUS.md) for evidence. A successful Vercel build does not mean Salesforce promotion is ready.
+
 ## Connect your accounts
 
 All settings are per workspace; there are no hardcoded customer accounts.
