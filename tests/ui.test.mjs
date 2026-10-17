@@ -34,3 +34,20 @@ test('synthetic identities exercise clarification, human review, pause, and role
   vm.runInContext("state.ws.role='developer'",context);
   assert.throws(()=>vm.runInContext("demoAction('generate',{})",context),/live connections/);
 });
+
+test('operation journal exposes saved evidence safely and blocks unresolved pipeline starts',async()=>{
+ const context=vm.createContext({document:{querySelector:()=>({innerHTML:'',textContent:'',className:''}),addEventListener(){}},fetch:async()=>({ok:true,json:async()=>({configured:false})}),location:{origin:'http://localhost:3000'},URLSearchParams,FormData,structuredClone,setTimeout,clearTimeout,console});
+ vm.runInContext(await readFile('public/app.js','utf8'),context);
+ const data={paused:false,reconciliationRequired:false,approvals:{code:{}},testApproval:{},pipeline:{status:'stopped',repairs:0,artifactHash:'release',policy:{maxRepairs:1,stages:[{name:'dev',environment:'dev',orgId:'00Dtarget'}]},stages:[{name:'dev',status:'unknown',operations:[{kind:'deployment',phase:'submitted',id:'0Af123',runId:'456',artifactHash:'<img src=x onerror=evil()>',startedAt:'2026-10-16T12:00:00Z'}]}]}};
+ context.fixture={data};vm.runInContext("state.ws={role:'owner'}",context);
+ let html=vm.runInContext('pipelineView(fixture)',context);
+ assert.match(html,/00Dtarget/);assert.match(html,/0Af123/);assert.match(html,/456/);
+ assert.match(html,/outcome unresolved/);assert.match(html,/does not query Salesforce/);
+ assert.match(html,/&lt;img src=x onerror=evil\(\)&gt;/);assert.doesNotMatch(html,/<img src=x/);
+ assert.match(html,/<button[^>]*data-act="startPipeline"[^>]*disabled/);
+ data.pipeline.stages[0].operations[0].phase='intent';delete data.pipeline.stages[0].operations[0].id;
+ html=vm.runInContext('pipelineView(fixture)',context);assert.match(html,/No operation ID was saved/);
+ data.pipeline.stages[0].operations[0].phase='completed';data.pipeline.stages[0].operations[0].success=false;
+ html=vm.runInContext('pipelineView(fixture)',context);assert.match(html,/Completed with failure/);
+ assert.equal(vm.runInContext('pipelineHasUnresolved(fixture.data)',context),false);
+});

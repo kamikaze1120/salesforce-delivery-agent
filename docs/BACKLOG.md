@@ -13,7 +13,7 @@ Baseline: independent audit of main `a064749`, 2026-10-12. Status is implementat
 | B07 | P0 | Destination license gate | Backlog | Every target provides applicable feature, permission, limit and dependency evidence; unknown blocks. |
 | B08 | P0 | Baseline regression adapter | Backlog | Approved existing-behavior tests run and retain results for each applicable stage. |
 | B09 | P1 | Durable Salesforce operation IDs | Implemented; interruption regression tests pass; live fault injection pending | IDs persist immediately after submission; interrupted writes are never blindly retried. |
-| B10 | P1 | Recovery and reconciliation | Backlog | Worker and reviewer flow resolve actual Salesforce/GitHub outcomes after interruption. |
+| B10 | P1 | Recovery and reconciliation | In progress | CI/CD shows saved operation IDs, run/artifact identity and timestamps; unresolved starts are disabled. Live authenticated reconciliation worker and controlled recovery transition remain pending. |
 | B11 | P1 | Pause and cancellation | In progress: action-boundary pause and paused outcome reporting implemented; in-flight cancellation pending | Pause stops subsequent writes; authenticated outcome reporting remains available. |
 | B12 | P1 | Business approval continuation | Backlog | Exact UAT release resumes safely after business approval regardless of approval timing. |
 | B13 | P1 | Org-wide deployment locks | Backlog | Concurrent deliveries cannot mutate the same target through this platform. |
