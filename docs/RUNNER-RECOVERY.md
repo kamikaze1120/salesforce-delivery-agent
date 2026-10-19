@@ -25,3 +25,36 @@ The CI/CD screen displays each stage’s saved operation journal: operation kind
 B10 now includes reviewer visibility of the journal. The authenticated live status reconciliation worker and supported recovery transition remain outstanding. The journal display cannot resolve an unknown outcome or authorize promotion. An `intent` without an ID requires investigating the Salesforce deployment history and runner records before any future recovery. Journaling cannot eliminate the gap between a remote submission and receipt of its ID.
 
 Local tests exercise interruption after intent and ID persistence, mismatched IDs, replay prevention, pause handling, run binding and immutable completion. A disposable-org fault-injection rehearsal is still required. Org-wide locks, production recovery, business-approval continuation and full promotion rehearsal remain separate backlog items.
+
+
+## Read-only MCP reconciliation foundation
+
+The project-owned MCP server now supports `DELIVERY_MCP_MODE=reconciliation`. This mode advertises only `inspect_org` and `deployment_status`. Both the client and server reject deployment, validation and Apex execution. The server validates tool arguments before making an org query, verifies org ID/type/URL for permitted calls, and only accepts the exact saved operation IDs from a constrained manifest. No deployable artifact is loaded in this mode. An unknown or empty mode fails closed; existing delivery jobs that omit the mode retain their normal tool set.
+
+The mode requires `DELIVERY_TARGET_FILE` and `DELIVERY_RECONCILIATION_FILE`, plus an already authenticated `delivery-target` CLI alias. The version-1 manifest contract is:
+
+```json
+{
+  "version": 1,
+  "pipelineId": "12345678-1234-1234-1234-123456789abc",
+  "stage": "dev",
+  "orgId": "00D000000000001AAA",
+  "targetKind": "developer",
+  "targetUrl": "https://example.my.salesforce.com",
+  "artifactHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "runId": "123",
+  "operations": [{
+    "kind": "validation",
+    "phase": "submitted",
+    "id": "0Af000000000001AAA",
+    "artifactHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "runId": "123"
+  }]
+}
+```
+
+These are synthetic example values, not usable org credentials. Up to two unique submitted operations (validation/deployment) may be included. Intent-only, completed, duplicated or mismatched records are rejected. An intent with no ID remains blocked for investigation.
+
+**This manifest is not authentication or authorization.** A future trusted worker must receive it from the persisted journal through an authenticated API, with the original target/run/artifact bindings verified server-side. The current change does not add a dispatch endpoint, workflow, reconciliation result recorder or recovery transition; it does not clear pause/reconciliation flags or authorize promotion. Do not hand-edit a manifest to resolve application state. B10 remains in progress.
+
+Verification includes policy rejection tests and a real MCP subprocess against an offline simulated Salesforce transport. The subprocess checks supported reads, wrong-org rejection and blocked writes without Salesforce credentials. Live org compatibility and recovery rehearsal remain unverified.

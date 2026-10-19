@@ -304,7 +304,7 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 **User story:** As a operator, I want read-only reconciliation of interrupted operations so recovery uses actual Salesforce status.
 
-**Current evidence / gap:** In progress. Original audit outcome: CI/CD shows saved operation IDs, run/artifact identity and timestamps; unresolved starts are disabled. Live authenticated reconciliation worker and controlled recovery transition remain pending.
+**Current evidence / gap:** In progress. A restricted MCP reconciliation mode now exposes only org inspection and exact saved-ID status reads; offline subprocess tests cover its boundary. Authenticated worker dispatch, server-side result recording, recovery transitions and live rehearsal remain outstanding. Original audit outcome: CI/CD shows saved operation IDs, run/artifact identity and timestamps; unresolved starts are disabled. Live authenticated reconciliation worker and controlled recovery transition remain pending.
 
 **Implementation tasks:** Add an authenticated reconciliation worker bound to the original org, operation, artifact and run; query saved IDs without deployment tools; implement audited recovery transitions. The journal UI already exists.
 
@@ -962,7 +962,7 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 - Through `ec5e04d`: 76 local tests and syntax checks passed; PR #5 had three passing checks. These are historical checkpoint results, not fresh results from this documentation edit.
 - B05 has a real-scanner CI demonstration for clean Apex and a known SOQL-injection fixture; it does not establish complete metadata or runtime security coverage.
 - B09 has durable journal and interruption regression coverage; live fault injection is outstanding.
-- B10 now displays saved operation evidence and blocks unresolved starts. The display is not a live Salesforce query; authenticated reconciliation and controlled recovery remain outstanding.
+- B10 now has a restricted read-only MCP mode with offline subprocess tests, displays saved operation evidence and blocks unresolved starts. The display is not a live Salesforce query; authenticated reconciliation and controlled recovery remain outstanding.
 - B11 has action-boundary pause and outcome reporting; it does not guarantee cancellation of an already accepted Salesforce operation.
 - No live end-to-end Salesforce delivery, full promotion rehearsal, or production readiness is claimed by this board.
 

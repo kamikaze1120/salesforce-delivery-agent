@@ -1,5 +1,6 @@
 // Project-owned MCP server: fixed Salesforce tools, no arbitrary shell or SOQL.
 import readline from 'node:readline';
+import {mcpMode,mcpPolicy} from './mcp-policy.mjs';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {readFile} from 'node:fs/promises';
@@ -7,8 +8,12 @@ import {assert,origin,zip,xml,xmlValue,hash} from '../lib/core.mjs';
 import {sf,metadata,deploymentStatus} from '../lib/integrations.mjs';
 const exec=promisify(execFile);
 const target=JSON.parse(await readFile(process.env.DELIVERY_TARGET_FILE,'utf8'));
-const artifacts=JSON.parse(await readFile(process.env.DELIVERY_ARTIFACT_FILE,'utf8'));
-assert(hash(artifacts.files)===artifacts.hash,'Artifact integrity check failed.');
+const mode=mcpMode(process.env.DELIVERY_MCP_MODE);
+const manifest=mode==='reconciliation'?JSON.parse(await readFile(process.env.DELIVERY_RECONCILIATION_FILE,'utf8')):undefined;
+const policy=mcpPolicy(mode,target,manifest);
+// Recovery never loads a deployable artifact. Unknown modes fail before authentication.
+const artifacts=mode==='delivery'?JSON.parse(await readFile(process.env.DELIVERY_ARTIFACT_FILE,'utf8')):undefined;
+if(artifacts)assert(hash(artifacts.files)===artifacts.hash,'Artifact integrity check failed.');
 const auth=JSON.parse((await exec('sf',['org','display','--target-org','delivery-target','--json'],{maxBuffer:2e6})).stdout).result;
 const c={instanceUrl:origin(auth.instanceUrl,'Salesforce'),accessToken:auth.accessToken};
 assert(c.accessToken,'Salesforce authentication is missing.');
@@ -18,7 +23,7 @@ const tools=[
   {name:'deploy_metadata',description:'Deploy only the immutable package to the configured, verified org.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
   {name:'deployment_status',description:'Read a submitted metadata deployment result.',inputSchema:{type:'object',properties:{id:{type:'string'}},required:['id'],additionalProperties:false}},
   {name:'run_apex_tests',description:'Run explicitly named Apex tests in the configured org.',inputSchema:{type:'object',properties:{classes:{type:'array',items:{type:'string'}}},required:['classes'],additionalProperties:false}}
-];
+].filter(tool=>policy.tools().includes(tool.name));
 async function identity(){
   const result=await sf(c,'/query?q='+encodeURIComponent('SELECT Id, Name, IsSandbox, OrganizationType FROM Organization LIMIT 1'));
   const org=result.records?.[0];assert(org?.Id?.slice(0,15)===target.orgId.slice(0,15),'Org ID mismatch.');
@@ -26,7 +31,7 @@ async function identity(){
   assert(valid,'Org type mismatch.');assert(c.instanceUrl===target.url,'Org instance URL mismatch.');return org;
 }
 async function call(name,args){
-  assert(tools.some(t=>t.name===name),'Tool is not allowed.');await identity();
+  policy.authorize(name,args);await identity();
   if(name==='inspect_org')return identity();
   if(name==='deployment_status')return deploymentStatus(c,args.id);
   if(name==='run_apex_tests'){
