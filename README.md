@@ -184,3 +184,8 @@ Packages containing objects, permission sets, Flows, LWC or other metadata remai
 The runner saves each validation/deployment intent before submission, its Salesforce operation ID before polling, and the terminal outcome before continuing. Lost or ambiguous responses block replay and automatic repair. A passing stage report must match those saved operation IDs. Pause checks run before validation, deployment, each Apex scenario and each browser step; outcome reporting and read-only polling of an already submitted deployment remain available while paused. Pause cannot undo or cancel an operation already accepted by Salesforce, and there is a small race between permission checks and external submission. Do not treat it as emergency cancellation. See [runner recovery](docs/RUNNER-RECOVERY.md).
 
 A separate credential-free `Security scanner integration` workflow exercises the pinned real scanner against clean and intentionally unsafe synthetic Apex. Its result is distinct from unit tests and web preview deployment. It needs no Salesforce credentials and performs no Salesforce writes.
+
+
+### Interrupted operation recovery
+
+The CI/CD journal shows saved Salesforce operation evidence and blocks unresolved restarts. A restricted MCP reconciliation mode now allows org inspection and status reads for exact saved IDs without exposing write tools. This is a tested foundation; authenticated recovery dispatch and state transitions remain pending. See [runner recovery](docs/RUNNER-RECOVERY.md) for the contract and limitations, and [B10](docs/BACKLOG.md#b10) for the remaining acceptance criteria.

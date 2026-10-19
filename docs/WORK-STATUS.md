@@ -65,3 +65,12 @@ All 75 local tests and JavaScript syntax checks passed. GitHub's real-scanner jo
 - Snapshot: 25 backlog, 3 in progress, 5 awaiting remaining verification and 2 blocked on live setup. No story is declared fully verified. Implemented fixes retain their existing evidence descriptions.
 - Included the merged B10 journal visibility checkpoint (`ec5e04d`): 76 local tests and three passing PR checks were recorded for that earlier code change, not rerun or claimed as new execution here. Live reconciliation remains outstanding.
 - Validated all 35 unique story IDs, index entries and required story fields; README points to the expanded catalog. This change does not modify application behavior or execute Salesforce operations.
+
+
+## Checkpoint 5 — B10 read-only MCP foundation, 2026-10-19
+
+- Added an explicit reconciliation mode that exposes only org inspection and exact journal-ID status reads. Unknown modes, write tools, extra arguments and mismatched manifest bindings fail closed. Recovery mode does not load deployment artifacts.
+- The client rejects a reconciliation server that advertises extra tools and blocks write calls before transport. The server independently enforces policy and retains target org identity checks.
+- Five focused tests cover immutable ID allowlists, manifest mismatches, delivery compatibility, client discovery and the actual MCP subprocess using an offline Salesforce transport. No live Salesforce credentials or calls are involved.
+- B10 remains in progress: the manifest is not authorization. Authenticated worker dispatch, result recording, controlled recovery and live verification are still required. No pause/reconciliation flag is cleared and no promotion is enabled by this foundation.
+- Validation: 81 local tests passed; JavaScript syntax and whitespace checks passed. Local runtime was Node 24.19.0 (package declares Node 22.x); required remote checks must pass separately.
