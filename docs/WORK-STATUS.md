@@ -57,3 +57,11 @@ Publishing checkpoint — 2026-10-14: the security adapter, runner wiring, pinne
 ### Verification follow-up — 2026-10-15
 
 All 75 local tests and JavaScript syntax checks passed. GitHub's real-scanner job succeeded at commit `50940ab` (run `38617194532`, job `116035202934`), using CLI 2.153.5 and Code Analyzer 5.16.0. The job asserts both a clean result and detection of PMD ApexSOQLInjection in the documented concatenated-query fixture. The original direct-input fixture was not detected and caused CI to fail; it was replaced with the documented rule example. This demonstrates limited rule execution, not complete vulnerability detection. Salesforce org execution and runtime authorization remain unverified.
+
+
+## Checkpoint 4 — backlog story catalog, 2026-10-19
+
+- Expanded all 35 existing audit IDs into Jira-style stories across six epics, with a repository-maintained Kanban summary, dependencies, acceptance checklists and evidence requirements. No Jira issues or GitHub Projects board were created by this documentation change.
+- Snapshot: 25 backlog, 3 in progress, 5 awaiting remaining verification and 2 blocked on live setup. No story is declared fully verified. Implemented fixes retain their existing evidence descriptions.
+- Included the merged B10 journal visibility checkpoint (`ec5e04d`): 76 local tests and three passing PR checks were recorded for that earlier code change, not rerun or claimed as new execution here. Live reconciliation remains outstanding.
+- Validated all 35 unique story IDs, index entries and required story fields; README points to the expanded catalog. This change does not modify application behavior or execute Salesforce operations.
