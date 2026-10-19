@@ -168,7 +168,7 @@ The runner derives changed-Apex-class coverage and acceptance-case execution cov
 
 ## Implementation backlog
 
-The [audit backlog](docs/BACKLOG.md) tracks all 35 work items. [Work status](docs/WORK-STATUS.md) records verified checkpoints and live-verification limits. Passing web-app checks does not establish Salesforce production readiness.
+The [backlog board and story catalog](docs/BACKLOG.md) tracks all 35 audit items across six epics. Each Jira-style story includes priority, status, implementation tasks, acceptance criteria, dependencies, required evidence and expected results. The Kanban summary separates backlog, in-progress work, verification and live-setup blockers. [Work status](docs/WORK-STATUS.md) records verified checkpoints and live-verification limits. Passing web-app checks does not establish Salesforce production readiness.
 
 
 ### Security preflight setup (B05, limited pilot scope)
