@@ -65,4 +65,7 @@ test('reconciliation controls require a reviewer, pause and a saved ID',async()=
  context.stage.operations[0].phase='submitted';vm.runInContext("state.ws.role='developer'",context);assert.match(html(),/<button[^>]*disabled/);
  vm.runInContext("state.ws.role='reviewer'",context);context.job.data.pipeline.reconciliation={stage:'dev',id:'<script>',status:'running'};
  assert.match(html(),/<button[^>]*disabled/);assert.match(html(),/&lt;script&gt;/);assert.doesNotMatch(html(),/<script>/);
+ assert.match(html(),/Retire interrupted status check/);
+ context.job.data.pipeline.reconciliation={stage:'dev',id:'request',status:'retired',retirement:{at:'2026-10-20',note:'<script>'}};
+ assert.doesNotMatch(html(),/<button[^>]*data-act="requestReconciliation"[^>]*disabled/);assert.match(html(),/&lt;script&gt;/);assert.doesNotMatch(html(),/<script>/);
 });

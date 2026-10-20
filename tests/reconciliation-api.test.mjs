@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {randomBytes,generateKeyPairSync,sign} from 'node:crypto';
 import {runnerRequest} from '../lib/runner-api.mjs';
 import {seal} from '../lib/core.mjs';
-import {requestReconciliation} from '../lib/reconciliation-api.mjs';
+import {requestReconciliation,retireReconciliationRequest} from '../lib/reconciliation-api.mjs';
 process.env.APP_ORIGIN='https://app.example';process.env.SUPABASE_ANON_KEY='test';process.env.SUPABASE_URL='https://test.supabase.co';process.env.SUPABASE_SERVICE_ROLE_KEY='test';process.env.ENCRYPTION_KEY=randomBytes(32).toString('base64');
 const wid='00000000-0000-4000-8000-000000000001',pid='00000000-0000-4000-8000-000000000002',sha='a'.repeat(40),artifactHash='b'.repeat(64);
 function fixture(){
@@ -24,6 +24,7 @@ async function harness(options,callback){
   if(u.endsWith('/branches/main'))return Response.json({protected:true});
   if(u.endsWith('/branches/main/protection'))return Response.json({allow_force_pushes:{enabled:false},allow_deletions:{enabled:false},enforce_admins:{enabled:true},required_status_checks:{contexts:['check']}});
   if(u.includes('/environments/'))return Response.json({protection_rules:[{type:'required_reviewers',reviewers:[{id:1}],prevent_self_review:true}],deployment_branch_policy:{protected_branches:true}});
+  if(u.endsWith('/actions/runs/456'))return Response.json({id:456,status:options.recoveryActive?'in_progress':'completed',head_sha:sha,display_title:`Reconciliation ${job.data.pipeline.reconciliation.id}`});
   if(u.endsWith('/actions/runs/123'))return Response.json({status:options.active?'in_progress':'completed',head_sha:sha,display_title:`Delivery ${pid}`});
   if(u.endsWith('/dispatches')){events.push('dispatch');assert.equal(job.data.pipeline.reconciliation.status,'queued');assert.equal(body.inputs.reconciliation_id,job.data.pipeline.reconciliation.id);if(options.lost)throw new Error('lost response');return new Response(null,{status:204});}
   if(u.includes('/actions/workflows/'))return Response.json({state:'active'});
@@ -64,5 +65,17 @@ test('authenticated recovery callbacks claim once and persist observations witho
   assert.equal(result.terminal,true);assert.equal(get().data.pipeline.stages[0].operations[0].success,false);
   assert.equal(get().data.reconciliationRequired,true);assert.equal(get().data.paused,true);assert.equal(get().data.pipeline.status,'stopped');
   await assert.rejects(()=>runnerRequest(req,{...base,action:'context'}));
+ });
+});
+
+
+test('retirement API verifies the saved runner and records the reviewer decision without dispatch',async()=>{
+ for(const active of [true,false])await harness({recoveryActive:active},async(run,get,events)=>{
+  await run();get().data.pipeline.reconciliation.runId='456';get().data.pipeline.reconciliation.status='running';
+  const retire=()=>retireReconciliationRequest({id:wid,connection_version:0},get(),{id:'reviewer',email:'test@example.test'},get().data.pipeline.reconciliation.id,'The status-check worker stopped without a report.');
+  if(active){await assert.rejects(retire,/exact/);assert.equal(get().data.pipeline.reconciliation.status,'running');}
+  else {await retire();assert.equal(get().data.pipeline.reconciliation.status,'retired');assert.equal(get().data.pipeline.reconciliation.retirement.userId,'reviewer');}
+  assert.equal(get().data.pipeline.stages[0].operations[0].phase,'submitted');assert.equal(get().data.paused,true);
+  assert.equal(events.filter(x=>x==='dispatch').length,1);
  });
 });
