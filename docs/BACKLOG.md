@@ -1,14 +1,14 @@
 # Delivery platform backlog — story board
 
-Updated: **2026-10-20 (America/Chicago)**. Scope: all **35 audit backlog items**, preserving B01–B35. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
+Updated: **2026-10-20 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
 
 This is a repository-maintained Kanban summary and Jira-style story catalog, not a connected Jira or GitHub Projects board. Story IDs are stable repository IDs, not Jira issue keys. Each card can be copied into an issue. Assignees, sprint commitments and estimates are **unassigned / not estimated**; dependencies below are proposed delivery sequencing, not proof that prerequisite work is complete.
 
 ## Board
 
-| Backlog — 22 | In progress — 2 | Verification — 9 | Blocked: live setup — 2 | Done — 0 |
+| Backlog — 23 | In progress — 2 | Verification — 9 | Blocked: live setup — 2 | Done — 0 |
 |---|---|---|---|---|
-| B12–B31, B34–B35 | B10, B11 | B01–B09 | B32, B33 | No story declared fully verified |
+| B12–B31, B34–B36 | B10, B11 | B01–B09 | B32, B33 | No story declared fully verified |
 
 **Status policy:** Backlog = implementation remains; In progress = partial implementation exists; Verification = implementation/local regression evidence exists but remaining acceptance evidence must be checked; Blocked = external setup prevents end-to-end execution; Done = all story criteria and linked evidence accepted. The verification column does not erase completed fixes. P0 = critical correctness/promotion blockers; P1 = reliable delivery and operational readiness; P2 = platform alignment and ongoing documentation. Missing quality evidence always blocks the relevant gate.
 
@@ -51,6 +51,7 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B33](#b33) | P1 | Full promotion rehearsal | Blocked — live setup | E5 Release readiness |
 | [B34](#b34) | P2 | Agent/stack implementation alignment | Backlog | E6 Platform and documentation |
 | [B35](#b35) | P2 | Documentation/onboarding | Backlog | E6 Platform and documentation |
+| [B36](#b36) | P1 | Runner tooling dependency security | Backlog | E1 Quality and security |
 
 ## Working agreements and definition of done
 
@@ -957,6 +958,31 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 **Expected result:** README, supported scope, setup, architecture and recovery instructions match verified behavior.
 
+<a id="b36"></a>
+
+### B36 — Runner tooling dependency security
+
+**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E1 Quality and security
+
+**User story:** As a platform operator, I want reviewed runner dependencies so the deployment toolchain has a documented vulnerability posture.
+
+**Current evidence / gap:** PR #10 scanner job 118829976880 reported 64 dependency vulnerabilities after installing pinned `@salesforce/cli@2.153.5`: 16 moderate, 47 high, 1 critical. The initial application-only `npm ci` reported zero. These are dependency-audit findings, not evidence of exploitation or a Salesforce code finding. Package/advisory reachability and safe version upgrades have not been triaged.
+
+**Implementation tasks:** Capture advisory details for the pinned CLI and plugin trees; determine affected execution paths; choose compatible patched pins or documented mitigations; run real scanner and non-production CLI compatibility checks. Do not run an unreviewed `npm audit fix --force` in deployment jobs.
+
+**Acceptance criteria:**
+
+- [ ] Each relevant high/critical advisory has documented disposition and owner.
+- [ ] Approved pins or mitigations are reflected in workflow/setup configuration.
+- [ ] Scanner and CLI compatibility checks pass after changes.
+- [ ] Isolation and credential boundaries remain enforced.
+
+**Dependencies / inputs:** B05, B19, B31; upstream vendor fixes and advisory details.
+
+**Verification evidence required:** Dependency audit report, reviewed remediation decision and compatibility results.
+
+**Expected result:** Toolchain dependency risks are resolved or explicitly reviewed before rollout.
+
 ## Evidence checkpoint
 
 - Through `ec5e04d`: 76 local tests and syntax checks passed; PR #5 had three passing checks. These are historical checkpoint results, not fresh results from this documentation edit.
@@ -970,4 +996,4 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 The audit stories support the requested BRD → requirements/Jira → design/mockup approval → Salesforce architecture → MCP → Dev → tests/repair → quality gate → QA → UAT → business approval → production flow. B32 validates the upstream BRD/Jira/mockup path; B33 validates promotion. B18/B07 cover license analysis and destination enforcement; B19 covers MCP; B26 covers bounded autonomous repair. B34 keeps the target multi-agent stack distinct from the implemented system. Copado is not the target deployment mechanism.
 
-Additional gaps found during implementation should receive a new stable ID (starting B36), a clear story and acceptance evidence rather than silently expanding a completed story. This catalog covers the existing 35-item audit; it is not a guarantee that no further gaps will be found.
+Additional gaps found during implementation should receive a new stable ID (starting B37), a clear story and acceptance evidence rather than silently expanding a completed story. This catalog covers the original 35-item audit plus the newly observed tooling issue; it is not a guarantee that no further gaps will be found.

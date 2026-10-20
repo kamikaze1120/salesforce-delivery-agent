@@ -29,7 +29,8 @@ export function evaluateSecurity(artifacts,observation){
  const scope=securityScope(artifacts);if(scope.status)return scope;
  const o=observation,r=o?.report;
  if(o?.artifactHash!==artifacts.hash||o?.policy!==securityPolicy||o?.exitCode!==0||o?.selector!=='pmd:Security'||o?.suppressionsDisabled!==true||JSON.stringify(o?.targets)!==JSON.stringify(scope.targets))return result('blocked','Missing, incomplete or stale scanner execution evidence.');
- if(!version(o.pluginVersion)||(!version(r?.versions?.['code-analyzer'])||r.versions['code-analyzer']!==o.pluginVersion)||!version(r?.versions?.pmd)||!Array.isArray(r?.violations)||r.violations.length>10000)return result('blocked','Malformed scanner output or missing engine versions.');
+ // Plugin, analyzer core and PMD adapter use independent release versions.
+ if(!version(o.pluginVersion)||!version(r?.versions?.['code-analyzer'])||!version(r?.versions?.pmd)||!Array.isArray(r?.violations)||r.violations.length>10000)return result('blocked','Malformed scanner output or missing engine versions.');
  const counts=r.violationCounts;
  if(!counts||counts.total!==r.violations.length||![1,2,3,4,5].every(n=>Number.isSafeInteger(counts['sev'+n])&&counts['sev'+n]>=0&&counts['sev'+n]===r.violations.filter(v=>v.severity===n).length)||[1,2,3,4,5].reduce((n,s)=>n+counts['sev'+s],0)!==counts.total)return result('blocked','Scanner violation counts are inconsistent.');
  if(r.violations.some(v=>v.engine!=='pmd'||typeof v.rule!=='string'||!v.rule||!Number.isInteger(v.severity)||v.severity<1||v.severity>5||!Array.isArray(v.tags)||!v.tags.includes('Security')||!Array.isArray(v.locations)||!v.locations.length||!Number.isInteger(v.primaryLocationIndex)||v.primaryLocationIndex<0||v.primaryLocationIndex>=v.locations.length))return result('blocked','Unsupported or malformed scanner findings.');
