@@ -51,3 +51,18 @@ test('operation journal exposes saved evidence safely and blocks unresolved pipe
  html=vm.runInContext('pipelineView(fixture)',context);assert.match(html,/Completed with failure/);
  assert.equal(vm.runInContext('pipelineHasUnresolved(fixture.data)',context),false);
 });
+
+
+test('reconciliation controls require a reviewer, pause and a saved ID',async()=>{
+ const context=vm.createContext({document:{querySelector:()=>({innerHTML:''}),addEventListener(){}},fetch:async()=>({ok:true,json:async()=>({configured:false})}),location:{origin:'http://localhost'},URLSearchParams,FormData,structuredClone,setTimeout,clearTimeout,console});
+ vm.runInContext(await readFile('public/app.js','utf8'),context);
+ context.job={busy:false,data:{paused:true,pipeline:{}}};context.target={name:'dev'};context.stage={operations:[{phase:'submitted',id:'0Af123'}]};
+ vm.runInContext("state.ws={role:'reviewer'}",context);
+ const html=()=>vm.runInContext('recoveryControls(job,target,stage)',context);
+ assert.doesNotMatch(html(),/<button[^>]*disabled/);assert.match(html(),/does not resume deployment/);
+ context.job.data.paused=false;assert.match(html(),/<button[^>]*disabled/);
+ context.job.data.paused=true;context.stage.operations[0].phase='intent';assert.match(html(),/<button[^>]*disabled/);
+ context.stage.operations[0].phase='submitted';vm.runInContext("state.ws.role='developer'",context);assert.match(html(),/<button[^>]*disabled/);
+ vm.runInContext("state.ws.role='reviewer'",context);context.job.data.pipeline.reconciliation={stage:'dev',id:'<script>',status:'running'};
+ assert.match(html(),/<button[^>]*disabled/);assert.match(html(),/&lt;script&gt;/);assert.doesNotMatch(html(),/<script>/);
+});

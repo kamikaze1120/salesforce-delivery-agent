@@ -1,0 +1,54 @@
+name: Salesforce read-only reconciliation
+run-name: Reconciliation ${{ inputs.reconciliation_id }}
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        required: true
+        type: string
+      delivery_id:
+        required: true
+        type: string
+      pipeline_id:
+        required: true
+        type: string
+      reconciliation_id:
+        required: true
+        type: string
+      stage:
+        required: true
+        type: choice
+        options: [dev, qa, uat, production]
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: delivery-${{ inputs.workspace_id }}-${{ inputs.delivery_id }}
+  cancel-in-progress: false
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ fromJSON(vars.DELIVERY_ENVIRONMENTS)[inputs.stage] }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install pinned CLI without environment credentials
+        run: |
+          npm ci --ignore-scripts
+          node runner/install-reconciliation.mjs
+        env:
+          SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
+      - name: Observe saved Salesforce operation IDs through read-only MCP
+        run: PATH="$PWD/node_modules/.bin:$PATH" node runner/reconcile.mjs
+        env:
+          DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
+          DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
+          DELIVERY_JOB: ${{ inputs.delivery_id }}
+          DELIVERY_PIPELINE: ${{ inputs.pipeline_id }}
+          DELIVERY_RECONCILIATION: ${{ inputs.reconciliation_id }}
+          DELIVERY_STAGE: ${{ inputs.stage }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
