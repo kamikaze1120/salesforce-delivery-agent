@@ -85,3 +85,12 @@ All 75 local tests and JavaScript syntax checks passed. GitHub's real-scanner jo
 - B10 remains in progress: controlled recovery decisions, stale lease/request handling and live Salesforce rehearsal are outstanding. No live Salesforce workflow was dispatched in this checkpoint.
 
 Publishing verification — 2026-10-20: all 93 local tests passed; JavaScript syntax and whitespace checks passed, and the new workflow YAML parsed successfully. Tests use simulated transport and synthetic signed OIDC identities; no live recovery dispatch or Salesforce call was performed. Local Node was 24.19.0; the package declares 22.x. Remote checks are tracked on the publishing PR.
+
+
+## Checkpoint 7 — interrupted reconciliation request retirement, 2026-10-20
+
+- Owners/reviewers can retire an interrupted read request with an audited reason. Claimed requests require server-confirmed completion of the exact GitHub run, trusted commit and request title; unclaimed requests must reach their 24-hour callback expiry.
+- Retired callbacks are rejected. A new read request receives a fresh ID and snapshot; prior requests remain in history. Operation journals, paused state and unresolved recovery requirements are preserved.
+- Added retirement controls, escaped reviewer-note rendering and regression coverage for active/wrong runs, expiry boundaries, stale callbacks, replacement history and developer-role rejection.
+- Validation: 97 local tests passed; JavaScript syntax and whitespace checks passed. Local Node was 24.19.0 (package declares 22.x). Remote checks are tracked on the publishing PR.
+- B10 remains in progress: stale locks, controlled recovery decisions and live Salesforce rehearsal remain outstanding. No Salesforce operation or production promotion was performed.

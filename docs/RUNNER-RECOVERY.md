@@ -66,15 +66,24 @@ Verification includes policy rejection tests and a real MCP subprocess against a
 2. Configure the same `DELIVERY_ENVIRONMENTS`, `DELIVERY_APP_ORIGIN`, pinned `SALESFORCE_CLI_VERSION` and stage-specific JWT credentials used by delivery. UAT/production environment reviewer rules remain in force. The recovery job does not receive browser-session credentials or install browser/scanner tools.
 3. Pause the delivery. As an owner or reviewer, open CI/CD and select **Check saved Salesforce status** for a stage with submitted IDs. The API confirms that the original GitHub delivery run is completed, verifies branch/environment protections, and snapshots the persisted journal. An active runner or an intent without an ID blocks dispatch.
 4. The request ID and snapshot are saved under the job lock before GitHub dispatch. A lost dispatch response remains `dispatch_unknown`; it is not automatically sent again. Inspect the existing run/request instead of using GitHub Re-run jobs.
-5. The workflow uses GitHub OIDC to claim the request. Repository, protected ref, pinned workflow SHA, reconciliation workflow filename, environment, request-specific run title and first run attempt must match. One GitHub run may claim a request. Recovery callbacks expire 24 hours after the request was created; delayed or interrupted runs stay blocked for investigation.
+5. The workflow uses GitHub OIDC to claim the request. Repository, protected ref, pinned workflow SHA, reconciliation workflow filename, environment, request-specific run title and first run attempt must match. One GitHub run may claim a request. Recovery callbacks expire 24 hours after the request was created; delayed or interrupted runs cannot report after expiry. Reviewers may retire an interrupted request under the rules below.
 6. The worker checks each saved ID once through the restricted MCP mode. It records an explicit terminal or in-progress observation. An in-progress result remains unresolved; after that worker finishes, a reviewer may request another read. All observations retain the original release identity.
 
-`pipeline.reconciliation` stores the current request and its redacted outcome; previous observed requests are retained in `pipeline.reconciliationHistory`. Terminal results update only the corresponding operation journal records. They never mark a stage passed, replace acceptance evidence, clear pause/reconciliation flags, repair artifacts, or authorize another deployment. A generic **Record reconciliation** note cannot unlock a pipeline that has a reconciliation request.
+`pipeline.reconciliation` stores the current request and its redacted outcome; previous observed or retired requests are retained in `pipeline.reconciliationHistory`. Terminal results update only the corresponding operation journal records. They never mark a stage passed, replace acceptance evidence, clear pause/reconciliation flags, repair artifacts, or authorize another deployment. A generic **Record reconciliation** note cannot unlock a pipeline that has a reconciliation request.
+
+### Retiring an interrupted status check
+
+An owner or reviewer can select **Retire interrupted status check** while the delivery is paused and its lock is free. Enter an investigation reason (20–2,000 characters). This retires only the read request; it does not resolve an operation, restart a deployment or clear the pause.
+
+- If the request has a claimed GitHub run ID, the server fetches that exact run and requires it to be completed with the original trusted commit and request-specific title. Stop an active workflow before retrying retirement.
+- If no run ID was claimed, the request must be at least 24 hours old. Its callback authorization has then expired; an uncertain dispatch is never automatically retried.
+- Retirement records the reviewer, reason, time and verification basis. Old context claims and result callbacks are rejected. A subsequent status-check request gets a fresh ID and journal snapshot, while the retired request remains in history.
+- Deployment operation IDs, outcomes, stage state and approval requirements are preserved. A retired request cannot unlock generic recovery or authorize promotion. Existing connection-version and job-lock checks still apply.
 
 ### Remaining B10 limitations
 
 - Controlled reviewer recovery transitions, including decisions about missing tests and safe continuation, are not implemented.
 - A busy job with an expired lease is not automatically taken over. Requests rejected because of a stale lock remain blocked for administrator investigation; never clear a lock or outcome flag manually to replay a write.
-- A request whose worker never claims it, expires, or stops before reporting remains blocked. There is no automatic redispatch of an uncertain request.
+- Interrupted requests require explicit reviewer retirement before a new read can be requested. Active claimed workers and unclaimed requests younger than 24 hours remain blocked. There is no automatic redispatch of an uncertain request.
 - Missing IDs, target/configuration changes and contradictory Salesforce outcomes stay unresolved.
 - GitHub dispatch and callback behavior are covered with simulated transport and signed synthetic OIDC tokens. No live Salesforce recovery run or production promotion has been verified.

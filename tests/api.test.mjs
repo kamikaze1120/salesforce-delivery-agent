@@ -112,7 +112,9 @@ test('developers cannot dispatch reviewer-only reconciliation',async()=>{
  };
  try{
   const headers={origin:process.env.APP_ORIGIN,cookie:'sfda_session='+seal({access_token:'test',expires:Date.now()+600000},'session')};
-  const response=await request('requestReconciliation',{workspaceId:wid,jobId:wid,stage:'dev'},headers);
-  assert.equal(response.status,403);
+  for(const op of ['requestReconciliation','retireReconciliation']){
+   const response=await request(op,{workspaceId:wid,jobId:wid,stage:'dev',requestId:wid,note:'Investigated the missing callback.'},headers);
+   assert.equal(response.status,403);
+  }
  }finally{global.fetch=old;}
 });

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,sign} from 'node:crypto';
 import {hash} from '../lib/core.mjs';
-import {createReconciliation,claimReconciliation,recordReconciliation,reconciliationContext} from '../lib/reconciliation.mjs';
+import {createReconciliation,claimReconciliation,recordReconciliation,reconciliationContext,retireReconciliation} from '../lib/reconciliation.mjs';
 import {verifyRunnerToken,nextStage} from '../lib/pipeline.mjs';
 import {canRecover} from '../lib/workflow.mjs';
 const id='0Af000000000001AAA',pid='12345678-1234-1234-1234-123456789abc',artifactHash='a'.repeat(64),trustedCommit='b'.repeat(40);
@@ -60,4 +60,34 @@ test('signed OIDC recovery identity cannot be exchanged with a delivery workflow
   await assert.rejects(()=>verifyRunnerToken(token(claims),{owner:'owner',repo:'repo'},d.pipeline,'dev'));
   for(const change of [{workflow_ref:'owner/repo/.github/workflows/salesforce-delivery.yml@refs/heads/main'},{sub:'repo:owner/repo:environment:production'},{run_attempt:'2'},{workflow_sha:'c'.repeat(40)}])await assert.rejects(()=>verifyRunnerToken(token({...claims,...change}),{owner:'owner',repo:'repo'},d.pipeline,'dev',r.id));
  }finally{global.fetch=old;}
+});
+
+
+test('retiring a stopped recovery runner preserves unresolved writes and fences late callbacks',()=>{
+ const d=claimed(),r=d.pipeline.reconciliation,original=hash(d.pipeline.stages);
+ retireReconciliation(d,r.id,{id:'reviewer'},'Runner stopped before reporting an observation.',{id:456,status:'completed',head_sha:trustedCommit,display_title:`Reconciliation ${r.id}`});
+ assert.equal(r.status,'retired');assert.equal(hash(d.pipeline.stages),original);assert.equal(d.paused,true);assert.equal(d.reconciliationRequired,true);
+ assert.equal(r.retirement.basis,'confirmed_runner_stopped');assert.equal(r.retirement.userId,'reviewer');
+ assert.throws(()=>claimReconciliation(d,r.id,'456'),/inactive/);
+ assert.throws(()=>recordReconciliation(d,r.id,'456',observation(d)),/not authorized/);
+ const next=createReconciliation(d,'dev',{id:'reviewer'});assert.notEqual(next.id,r.id);assert.equal(d.pipeline.reconciliationHistory[0].status,'retired');
+ assert.throws(()=>claimReconciliation(d,r.id,'456'),/inactive/);
+});
+test('only expired unclaimed read requests can be retired without a known runner',()=>{
+ const now=Date.parse('2026-10-20T12:00:00Z');
+ const d=state(),r=createReconciliation(d,'dev',{id:'reviewer'},new Date(now-86400000).toISOString());r.status='dispatch_unknown';
+ assert.throws(()=>retireReconciliation(d,r.id,{id:'reviewer'},'Investigated the missing callback and dispatch.',null,now-1),/24 hours/);
+ retireReconciliation(d,r.id,{id:'reviewer'},'Investigated the missing callback and dispatch.',null,now);
+ assert.equal(r.retirement.basis,'unclaimed_request_expired');assert.equal(d.pipeline.stages[0].operations[0].phase,'submitted');
+});
+test('retirement rejects active, wrong, unknown or altered evidence without modifying the request',()=>{
+ for(const change of [w=>w.id=789,w=>w.status='in_progress',w=>w.head_sha='wrong',w=>w.display_title='wrong']){
+  const d=claimed(),r=d.pipeline.reconciliation,w={id:456,status:'completed',head_sha:trustedCommit,display_title:`Reconciliation ${r.id}`};change(w);const before=hash(d);
+  assert.throws(()=>retireReconciliation(d,r.id,{id:'reviewer'},'Investigate the stopped status check worker.',w),/exact/);assert.equal(hash(d),before);
+ }
+ const d=claimed(),r=d.pipeline.reconciliation;
+ assert.throws(()=>retireReconciliation(d,r.id,{id:'reviewer'},'short',{}),/characters/);
+ assert.throws(()=>retireReconciliation(d,'old',{id:'reviewer'},'Investigate the stopped status check worker.',{}),/current/);
+ recordReconciliation(d,r.id,'456',observation(d));
+ assert.throws(()=>retireReconciliation(d,r.id,{id:'reviewer'},'Investigate the stopped status check worker.',{}),/unobserved/);
 });
