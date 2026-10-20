@@ -10,7 +10,7 @@ const target={name:'dev',orgId:'00D000000000001AAA',kind:'developer',url:'https:
 test('real MCP transport reads baseline hashes, destination inventory and run-bound numeric metrics without leaking logs',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'mcp-quality-'));let client;
  try{
-  const login={result:{instanceUrl:target.url,accessToken:'synthetic',userId:'005000000000001AAA'}};
+  const login={result:{instanceUrl:target.url,accessToken:'synthetic',username:'quality@example.test'}};
   const testReport={status:0,result:{summary:{outcome:'Passed',testRunId:'707000000000001AAA'},tests:[{Id:'07M000000000001AAA'}]}};
   await writeFile(join(dir,'sf'),`#!/bin/sh\nif [ "$1" = "apex" ]; then\nprintf '%s\\n' '${JSON.stringify(testReport)}'\nelse\nprintf '%s\\n' '${JSON.stringify(login)}'\nfi\n`,{mode:0o700});
   await writeFile(join(dir,'target.json'),JSON.stringify(target));const files=[{path:'classes/ExistingTests.cls',content:'@IsTest class ExistingTests {}'}];
@@ -28,7 +28,7 @@ test('real MCP transport reads baseline hashes, destination inventory and run-bo
     if(u.endsWith('/limits'))return Response.json({DailyApiRequests:{Remaining:100}});
     if(u.endsWith('/sobjects'))return Response.json({sobjects:[{name:'Account',queryable:true}]});
     if(u.endsWith('/describe'))return Response.json({fields:[{name:'Name'},{name:'Status'},{name:'TotalLicenses'},{name:'UsedLicenses'}]});
-    if(u.includes('FROM User WHERE'))return Response.json({records:[{Profile:{UserLicense:{Name:'Salesforce'}}}]});
+    if(u.includes('FROM User WHERE'))return Response.json({done:true,records:[{Id:'005000000000001AAA',Profile:{UserLicense:{Name:'Salesforce'}}}]});
     return Response.json({done:true,records:[]});
    };
   `);

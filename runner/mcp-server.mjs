@@ -38,8 +38,14 @@ async function call(name,args){
   policy.authorize(name,args);await identity();
   if(name==='inspect_org')return identity();
   if(name==='inspect_capabilities'){
-    const org=await identity();
-    return {...await scanCapabilities(path=>sf(c,path),{id:target.orgId,organizationType:org.OrganizationType,environment:target.kind},auth.userId),stage:target.name};
+    const org=await identity();let userId=auth.userId;
+    // CLI versions do not consistently include userId in org display output.
+    // Resolve only the authenticated username, never a model-supplied identity.
+    if(!/^005[A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?$/.test(userId||'')&&/^[A-Za-z0-9._%+@-]{1,200}$/.test(auth.username||''))try{
+      const user=await sf(c,'/query?q='+encodeURIComponent(`SELECT Id FROM User WHERE Username = '${auth.username}' LIMIT 1`));
+      if(user.done===true&&user.records?.length===1)userId=user.records[0].Id;
+    }catch{/* User-scoped probes remain unknown if identity cannot be read. */}
+    return {...await scanCapabilities(path=>sf(c,path),{id:target.orgId,organizationType:org.OrganizationType,environment:target.kind},userId),stage:target.name};
   }
   if(name==='inspect_apex_source'){
     const query=`SELECT Name, Body FROM ApexClass WHERE NamespacePrefix = null AND Name IN (${args.classes.map(n=>"'"+n+"'").join(',')})`;
