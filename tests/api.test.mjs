@@ -98,3 +98,21 @@ test('synthetic owner and outsider sessions stay isolated at the workspace bound
     assert.equal(writes.length,1);assert.equal(writes[0].created_by,'owner');
   }finally{global.fetch=old;}
 });
+
+
+test('developers cannot dispatch reviewer-only reconciliation',async()=>{
+ const old=global.fetch;
+ global.fetch=async(url,opts={})=>{
+  const u=String(url);
+  if(u.includes('/auth/v1/user'))return Response.json({id:'developer',email:'test@example.test'});
+  if(u.includes('/members?'))return Response.json([{role:'developer'}]);
+  if(u.includes('/workspaces?'))return Response.json([{id:wid,connection_version:0}]);
+  if(u.includes('/jobs?'))return Response.json([{id:wid,workspace_id:wid,data:{}}]);
+  throw new Error('Must not dispatch or claim a lock');
+ };
+ try{
+  const headers={origin:process.env.APP_ORIGIN,cookie:'sfda_session='+seal({access_token:'test',expires:Date.now()+600000},'session')};
+  const response=await request('requestReconciliation',{workspaceId:wid,jobId:wid,stage:'dev'},headers);
+  assert.equal(response.status,403);
+ }finally{global.fetch=old;}
+});

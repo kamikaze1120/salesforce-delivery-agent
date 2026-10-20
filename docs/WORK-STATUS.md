@@ -74,3 +74,14 @@ All 75 local tests and JavaScript syntax checks passed. GitHub's real-scanner jo
 - Five focused tests cover immutable ID allowlists, manifest mismatches, delivery compatibility, client discovery and the actual MCP subprocess using an offline Salesforce transport. No live Salesforce credentials or calls are involved.
 - B10 remains in progress: the manifest is not authorization. Authenticated worker dispatch, result recording, controlled recovery and live verification are still required. No pause/reconciliation flag is cleared and no promotion is enabled by this foundation.
 - Validation: 81 local tests passed; JavaScript syntax and whitespace checks passed. Local runtime was Node 24.19.0 (package declares Node 22.x); required remote checks must pass separately.
+
+
+## Checkpoint 6 — authenticated read-only reconciliation, 2026-10-19
+
+- Added reviewer-only status-check dispatch, durable request snapshots before dispatch, original-run completion checks and request-bound GitHub OIDC callbacks. Recovery identity cannot be used as delivery identity.
+- Added a protected-environment GitHub workflow and a one-observation-per-ID worker using the restricted MCP mode. No deployment, tests, repair or promotion are invoked by this worker.
+- Server recording validates the complete observation batch before mutating journals, rejects conflicting/duplicate/stale outcomes and keeps the pipeline stopped and paused. Generic reconciliation notes cannot unlock these requests.
+- CI/CD now offers **Check saved Salesforce status** and displays request state/results. README and recovery instructions describe setup, 24-hour expiry, lost dispatch responses and stale-lock limitations.
+- B10 remains in progress: controlled recovery decisions, stale lease/request handling and live Salesforce rehearsal are outstanding. No live Salesforce workflow was dispatched in this checkpoint.
+
+Publishing verification — 2026-10-20: all 93 local tests passed; JavaScript syntax and whitespace checks passed, and the new workflow YAML parsed successfully. Tests use simulated transport and synthetic signed OIDC identities; no live recovery dispatch or Salesforce call was performed. Local Node was 24.19.0; the package declares 22.x. Remote checks are tracked on the publishing PR.
