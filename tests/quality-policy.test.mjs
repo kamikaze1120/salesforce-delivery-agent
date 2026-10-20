@@ -15,7 +15,7 @@ const observations=p=>[...p.security,...p.performance,...p.regression].map(c=>({
 const inventory=()=>({orgId:target.orgId,stage:'dev',checkedAt:new Date().toISOString(),edition:'Developer Edition',evidence:{}});
 test('reviewed quality policy binds plan, targets, workload and all access dimensions',()=>{
  const p=fixture();assert.deepEqual(qualityPolicy(p,planHash,[target]),p);
- for(const change of [p=>p.planHash='wrong',p=>p.targets.dev='other',p=>p.security.pop(),p=>p.performance[0].budgets.cpuMs=-1,p=>p.performance[0].budgets.records=0,p=>p.regression=[],p=>p.regression[0].sourceHash='old',p=>p.regression.push(p.regression[0]),p=>p.license[0].source='https://evil.example/']){
+ for(const change of [p=>p.planHash='wrong',p=>p.targets.dev='other',p=>p.security.pop(),p=>p.performance[0].budgets.cpuMs=-1,p=>p.performance[0].budgets.records=0,p=>p.performance[0].budgets={records:200},p=>p.regression=[],p=>p.regression[0].sourceHash='old',p=>p.regression.push(p.regression[0]),p=>p.license[0].source='https://evil.example/']){
   const x=fixture();change(x);assert.throws(()=>qualityPolicy(x,planHash,[target]));
  }
 });
