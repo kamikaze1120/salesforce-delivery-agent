@@ -1,3 +1,4 @@
+import {hash} from '../lib/core.mjs';
 // Deterministic adapters consume observed runner evidence, never model pass claims.
 const check=(status,source,reason,details={})=>({status,source,reason,...details});
 export function coverageCheck(artifacts,validation,minimum=75){
@@ -28,8 +29,10 @@ export function businessCheck(cases,suite,results){
  });
  return check(rows.some(r=>r.status==='blocked')?'blocked':rows.every(r=>r.status==='passed')?'passed':'failed',source,'All frozen acceptance cases must map to an observed passing scenario. Semantic adequacy of assertions still requires test review.',{cases:rows});
 }
-export function collectQuality({artifacts,validation,cases,testSuite,tests,security}){
+export function collectQuality({artifacts,validation,cases,testSuite,tests,security,qualityPolicy,target,suites,license}){
  const pending=name=>check('blocked','No verified '+name+' adapter','A reviewed adapter and applicable policy are required; this is not a pass.');
- const securityEvidence=security&&security.artifactHash===artifacts.hash?security:pending('security');
- return {artifactHash:artifacts.hash,checks:{coverage:coverageCheck(artifacts,validation),business:businessCheck(cases,testSuite,tests),security:securityEvidence,performance:pending('performance'),license:pending('destination license'),regression:pending('baseline regression'),flow:artifacts.files.some(f=>f.path.startsWith('flows/'))?pending('Flow execution'):check('not_applicable','Immutable package manifest','No Flow metadata is changed. Flow side effects of other changes remain part of business and regression tests.')}};
+ const bound=item=>item&&item.artifactHash===artifacts.hash&&item.policyHash===hash(qualityPolicy)&&item.orgId===target?.orgId&&item.stage===target?.name;
+ const staticSecurity=security&&security.artifactHash===artifacts.hash?security:pending('security');
+ const securityEvidence=qualityPolicy?bound(suites?.security)?{...suites.security,status:staticSecurity.status==='passed'?suites.security.status:staticSecurity.status,static:staticSecurity}:pending('runtime security'):staticSecurity;
+ return {artifactHash:artifacts.hash,...(qualityPolicy?{policyHash:hash(qualityPolicy),orgId:target.orgId,stage:target.name}:{}),checks:{coverage:coverageCheck(artifacts,validation),business:businessCheck(cases,testSuite,tests),security:securityEvidence,performance:bound(suites?.performance)?suites.performance:pending('performance'),license:bound(license)?license:pending('destination license'),regression:bound(suites?.regression)?suites.regression:pending('baseline regression'),flow:artifacts.files.some(f=>f.path.startsWith('flows/'))?pending('Flow execution'):check('not_applicable','Immutable package manifest','No Flow metadata is changed. Flow side effects of other changes remain part of business and regression tests.')}};
 }

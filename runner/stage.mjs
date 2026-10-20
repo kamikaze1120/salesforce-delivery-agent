@@ -1,4 +1,7 @@
 import {collectQuality} from './quality-adapters.mjs';
+import {qualityPolicy} from '../lib/quality-policy.mjs';
+import {runQualitySuites,verifyQualitySources} from './quality-suites.mjs';
+import {evaluateLicense} from './license.mjs';
 import {runSecurity} from './security.mjs';
 import {qualityGate} from '../lib/quality.mjs';
 import {mkdtemp,writeFile,rm} from 'node:fs/promises';
@@ -21,6 +24,7 @@ async function api(action,extra={}){
 }
 const context=await api('context');
 const {target,artifacts,testSuite,manualEvidence}=context;
+const reviewedQuality=qualityPolicy(context.qualityPolicy,context.qualityPolicy?.planHash,context.policy.stages);
 assert(hash(artifacts.files)===artifacts.hash,'Package integrity failed.');
 const dir=await mkdtemp(join(tmpdir(),'delivery-'));let mcp,writePending=false,knownFailure=false,qualityBlocked=false;
 const evidence={artifactHash:artifacts.hash,orgId:target.orgId,status:'unknown',tests:[]};
@@ -30,6 +34,11 @@ async function boundary(){
 }
 async function perform(kind,tool,waitFor){
   await boundary();
+  if(!await verifyQualitySources(reviewedQuality,artifacts,target,mcp)){qualityBlocked=true;throw new Error('Reviewed quality baseline changed or is unavailable.');}
+  const inventory=await mcp.call('inspect_capabilities');
+  evidence.license=evaluateLicense(reviewedQuality,artifacts,target,inventory);
+  const preflight=await api('qualityPreflight',{inventory});
+  if(evidence.license.status!=='passed'||preflight.license.status!=='passed'){qualityBlocked=true;throw new Error('Destination license preflight blocked. Inspect required capabilities and capacity.');}
   // Record intent before submission, and ID before polling. Never retry submissions.
   await api('operation',{operation:{kind,phase:'intent'}});
   writePending=true;
@@ -78,7 +87,9 @@ try{
   }
   if(browserScenarios.length)evidence.tests.push(...await runBrowserTests(browserScenarios,target,JSON.parse(e.SF_BROWSER_STATE),{beforeStep:boundary}));
   if(!evidence.tests.every(t=>t.passed)){knownFailure=true;throw new Error('Acceptance tests failed.');}
-  evidence.quality=collectQuality({artifacts,validation:evidence.validation,cases:context.requirementCases,testSuite,tests:evidence.tests,security:evidence.security});
+  evidence.suites=await runQualitySuites(reviewedQuality,artifacts,target,mcp,boundary,{browserState:e.SF_BROWSER_STATE?JSON.parse(e.SF_BROWSER_STATE):undefined});
+  evidence.license=evaluateLicense(reviewedQuality,artifacts,target,await mcp.call('inspect_capabilities'));
+  evidence.quality=collectQuality({qualityPolicy:reviewedQuality,target,suites:evidence.suites,license:evidence.license,artifacts,validation:evidence.validation,cases:context.requirementCases,testSuite,tests:evidence.tests,security:evidence.security});
   const quality=qualityGate(evidence.quality,artifacts.hash);
   if(!quality.passed){qualityBlocked=true;throw new Error('Quality gate blocked: '+quality.checks.filter(c=>c.status==='blocked').map(c=>c.category).join(', '));}
   evidence.status='passed';evidence.reason='Salesforce validation, deployment and all reviewed scenarios passed.';

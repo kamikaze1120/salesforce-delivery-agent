@@ -1,6 +1,6 @@
 import {assert,origin,uuid} from '../lib/core.mjs';
 
-export const deliveryTools=['inspect_org','validate_metadata','deploy_metadata','deployment_status','run_apex_tests'];
+export const deliveryTools=['inspect_org','validate_metadata','deploy_metadata','deployment_status','run_apex_tests','inspect_capabilities','inspect_apex_source'];
 export const reconciliationTools=['inspect_org','deployment_status'];
 const deploymentId=id=>typeof id==='string'&&/^0Af[A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?$/.test(id);
 export function mcpMode(value){
@@ -42,7 +42,7 @@ export function mcpPolicy(modeValue,target,manifest){
    if(name==='deployment_status'){
     assert(Object.keys(args).length===1&&deploymentId(args.id),'A valid Salesforce deployment ID is required.');
     if(mode==='reconciliation')assert(ids.has(args.id),'Operation ID is outside the reconciliation journal.');
-   }else if(name==='run_apex_tests'){
+   }else if(['run_apex_tests','inspect_apex_source'].includes(name)){
     assert(Object.keys(args).length===1&&Array.isArray(args.classes)&&args.classes.length>0&&args.classes.length<=50&&args.classes.every(n=>typeof n==='string'&&/^[A-Za-z][A-Za-z0-9_]*$/.test(n)),'Invalid Apex classes.');
    }else assert(Object.keys(args).length===0,'Unexpected tool arguments.');
   }

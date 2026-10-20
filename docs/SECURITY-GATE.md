@@ -1,6 +1,6 @@
-# Security preflight: Apex static policy v1
+# Security gate: Apex and metadata policy v2
 
-Status: B05 in progress. This is a deliberately limited static-analysis gate, not a security certification or production-readiness claim.
+Status: B05 implementation ready for verification within the supported scope below. Static and runtime evidence are both mandatory; this is not a security certification or production-readiness claim.
 
 ## Execution and trust
 
@@ -14,7 +14,7 @@ The fixed selector is `pmd:Security`, with Code Analyzer suppressions disabled. 
 
 | Outcome | Meaning |
 |---|---|
-| Passed | Apex-only scope, successful scanner process, engine versions present, coherent counts, zero reported security findings. |
+| Passed | Supported scope, successful scanner process for Apex, engine versions present, coherent counts, zero findings and structural metadata checks passed. Runtime cases must pass separately. |
 | Failed | At least one reported security finding, including Low and Info. No waivers. |
 | Blocked | Missing installation/version, process failure/timeout, malformed/stale evidence, invalid source, suppressions, or unsupported metadata. |
 
@@ -24,10 +24,12 @@ At this stage, all non-passing security preflights stop with a blocked pipeline 
 
 ## Deliberate limits and remaining verification
 
-- Only Apex classes, their companion metadata and the server-generated package manifest are accepted by this policy. Objects, permission sets, profiles, Flows, triggers and LWC need additional reviewed policies and remain blocked.
+- Supported: Apex classes/companions, package manifest, private custom objects with simple fields, and constrained permission sets. Objects must retain private sharing; formulas/relationships and unknown XML fields block. Permission sets cannot enable system permissions or broad object access. Profiles, Flows, triggers, LWC and more complex metadata remain blocked pending expanded B16/B17 coverage.
+- A metadata-only package runs structural checks without pretending to have run PMD. Runtime security cases remain mandatory.
+- Every destination requires reviewed Apex allow/deny cases for CRUD, FLS and sharing, with source-hash verification and exact observed method outcomes. See [quality policies](QUALITY-POLICIES.md) for setup and the limitations of System.runAs.
 - PMD static findings do not establish runtime CRUD/FLS, sharing, persona access, dependency safety, effective org permissions or absence of vulnerabilities.
 - The reviewed plugin version must be exercised on known-good, known-bad and malformed Apex in the deployment runner before pilot activation. Local fixture tests alone do not establish scanner interoperability.
-- Performance, license, regression and Flow quality gates retain their existing fail-closed behavior. No end-to-end Salesforce success is implied.
+- Performance, license and regression have reviewed-policy adapters; missing measurements/configuration still block. The changed-Flow gate remains blocked pending B17. No end-to-end Salesforce success is implied.
 
 ## Official references
 

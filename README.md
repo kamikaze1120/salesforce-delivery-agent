@@ -84,7 +84,7 @@ Merging application changes into `main` triggers the connected Vercel production
 | Apex security | Real Code Analyzer CI accepted a clean fixture and detected the unsafe injection fixture | Broader metadata policies and runtime authorization tests |
 | Interrupted runs | Durable intents, operation IDs, immutable outcomes and replay prevention | B10 authenticated reconciliation and reviewer interface |
 | Pause | Checks before deployment submissions and test actions | Cancellation of operations already accepted by Salesforce |
-| Promotion | Required evidence gates block unsupported or unknown results | Performance, destination-license, baseline-regression and Flow adapters; four-org rehearsal |
+| Promotion | Required evidence gates block unsupported or unknown results | Reviewed per-plan quality policies, Flow adapter and four-org rehearsal |
 
 Use [the backlog](docs/BACKLOG.md) for all 35 items and [work status](docs/WORK-STATUS.md) for evidence. A successful Vercel build does not mean Salesforce promotion is ready.
 
@@ -156,7 +156,7 @@ A denied probe is **unknown**, not “unlicensed.” Inventories are capped at 2
 
 The authoritative flow and implementation matrix are in [Delivery flow](docs/DELIVERY-FLOW.md). Jira story creation and GitHub Actions CI/CD are core integrations. Copado is not used. New deliveries require a resolved, approved Salesforce architecture before code generation. After UAT, the app generates a traceable release report; a reviewer records business approval before the production runner can claim its package. Approve the report in the app **before** releasing the protected production job in GitHub.
 
-**Current rollout blocker:** the expanded quality gate deliberately blocks promotion until the trusted runner supplies coverage, security, performance, license, regression, business and Flow applicability/results evidence. The full production quality adapters are not yet shipped or live-verified. Do not enable this pipeline for production simply because web-app unit tests pass. See the implementation matrix for remaining work.
+**Current rollout blocker:** the expanded quality gate deliberately blocks promotion until the trusted runner supplies coverage, security, performance, license, regression, business and Flow applicability/results evidence. B05–B08 adapters now execute reviewed policies for their documented supported scope; Flow execution and live verification remain outstanding. Do not enable this pipeline for production simply because web-app unit tests pass. See the implementation matrix for remaining work.
 
 ### Specialized agents and target stack
 
@@ -164,7 +164,7 @@ The authoritative flow and implementation matrix are in [Delivery flow](docs/DEL
 
 ### Quality adapter progress
 
-The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. An Apex-only security preflight has a passing real-scanner CI fixture check; Salesforce runtime verification is still pending and broader metadata security remains blocked. Performance, destination-license, baseline-regression and changed-Flow checks remain blocked pending verified adapters. No complete end-to-end Salesforce pipeline is claimed.
+The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. Security combines isolated Apex scanning, constrained metadata policy and reviewed runtime access cases. Performance evaluates measured Apex/bulk and browser budgets. Destination-license checks run before each metadata operation; baseline regression uses independently reviewed tests with pinned sources. All require a per-plan policy from the trusted runner commit. Changed-Flow checks remain blocked pending B17. See [quality policy setup](docs/QUALITY-POLICIES.md). No complete end-to-end Salesforce pipeline is claimed.
 
 ## Implementation backlog
 
@@ -175,9 +175,9 @@ The [backlog board and story catalog](docs/BACKLOG.md) tracks all 35 audit items
 
 Before enabling a Salesforce pipeline, set `CODE_ANALYZER_VERSION` in each GitHub environment to an exact reviewed **5.x.y** release of `@salesforce/plugin-code-analyzer`, alongside the existing CLI and Playwright version variables. The runner requires Java 11+ and installs the scanner before environment credentials are used. Do not use `latest`.
 
-Security checks run **before any Salesforce validation or deployment**. The initial policy scans Apex-only packages using all PMD rules tagged Security, rejects suppression markers, and fails on every reported security severity. Unknown, incomplete or inconsistent evidence blocks the stage. Generated scanner configuration is never executed.
+Security checks run **before any Salesforce validation or deployment**. The policy scans all Apex source using PMD rules tagged Security, rejects suppression markers, and fails on every reported security severity. Unknown, incomplete or inconsistent evidence blocks the stage. Generated scanner configuration is never executed.
 
-Packages containing objects, permission sets, Flows, LWC or other metadata remain blocked until their reviewed security policies are implemented. A clean static scan does not prove CRUD/FLS, sharing or runtime authorization. Other required quality gates also remain blocked. See [security policy details](docs/SECURITY-GATE.md) and [backlog](docs/BACKLOG.md).
+Restricted private custom objects with simple fields and constrained permission sets now have structural security policies. Flows, LWC, profiles, triggers and more complex metadata remain blocked pending expanded coverage. A clean static scan alone cannot pass the security gate: reviewed allow/deny CRUD/FLS/sharing cases must also execute. Configure all gates using [reviewed quality policies](docs/QUALITY-POLICIES.md). See [security policy details](docs/SECURITY-GATE.md) and [backlog](docs/BACKLOG.md).
 
 ### Interrupted runs and pause behavior
 

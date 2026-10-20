@@ -6,6 +6,7 @@ export async function runBrowserTests(scenarios,target,state,{beforeStep=async()
   try{
     for(const scenario of scenarios){
       if(target.name==='production')assert(scenario.steps.every(s=>['goto','assertVisible','assertText'].includes(s.action)),'Production browser tests must be read-only.');
+      const started=performance.now();
       const context=await browser.newContext({storageState:state});
       // A compromised generated URL or page cannot send data to arbitrary hosts.
       const login=new URL(target.url),lightning=login.hostname.replace(/\.my\.salesforce\.com$/,'.lightning.force.com');
@@ -24,7 +25,7 @@ export async function runBrowserTests(scenarios,target,state,{beforeStep=async()
           else throw new Error('Unsupported browser step.');
         }
       }catch(error){if(error?.controlFailure)throw error;passed=false;}
-      results.push({id:scenario.id,passed,kind:'browser',reason:passed?'Assertions passed.':'Browser assertion, locator, authentication or allowed-origin check failed.'});
+      results.push({id:scenario.id,passed,elapsedMs:performance.now()-started,kind:'browser',reason:passed?'Assertions passed.':'Browser assertion, locator, authentication or allowed-origin check failed.'});
       await context.close();
     }
   }finally{await browser.close();}

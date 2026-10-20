@@ -52,7 +52,7 @@ The central layer persists original requirements, decisions, hashes, Jira mappin
 
 `runner/quality-adapters.mjs` now derives changed-class Apex coverage from the validation response and maps frozen acceptance cases to observed scenario results. The default changed-class coverage policy is 75% per implementation class, a project policy rather than an assertion of Salesforce's org-wide calculation. Missing, ambiguous, malformed or zero-location counts block. Missing or duplicate scenario results block business evidence. This mapping verifies execution traceability, not the semantic adequacy of generated assertions.
 
-The runner no longer accepts `DELIVERY_QUALITY_FILE`; an external JSON file cannot override built-in checks. Security, performance, destination-license and baseline-regression adapters remain blocked. Flow changes also block until a Flow execution adapter is supplied. A package without Flow changes records narrow non-applicability for changed-Flow testing only; regression must still cover existing Flow side effects. A missing quality adapter stops the pipeline with `blocked`, without requesting a code repair or falsely labelling the deployment outcome ambiguous.
+The runner no longer accepts `DELIVERY_QUALITY_FILE`; an external JSON file cannot override built-in checks. Security, performance, destination-license and baseline-regression now execute [reviewed per-plan policies](QUALITY-POLICIES.md) retrieved at the pinned runner commit. Their evidence also binds the policy, stage and destination; these four categories cannot use a not-applicable override. Metadata intents require fresh server-persisted destination license preflight. Flow changes also block until a Flow execution adapter is supplied. A package without Flow changes records narrow non-applicability for changed-Flow testing only; regression must still cover existing Flow side effects. A missing quality adapter stops the pipeline with `blocked`, without requesting a code repair or falsely labelling the deployment outcome ambiguous.
 
 Required adapter work:
 
@@ -61,11 +61,11 @@ Required adapter work:
 | Apex | Actual class/test results and applicable coverage | Named Apex tests and deployment RunLocalTests exist; changed-class coverage adapter implemented; live verification pending |
 | Flow | Flow-specific scenarios and observable assertions | Dedicated Flow test adapter pending; Draft Flow files alone are not behavioral proof |
 | UI | Playwright assertions using dedicated test users | Declarative browser runner exists; selectors and sessions need live verification |
-| Regression | Approved baseline and affected-feature results | Dedicated classification/baseline adapter pending |
+| Regression | Approved baseline and affected-feature results | Pinned independent Apex/browser baseline adapter implemented; live execution pending |
 | Business | Every acceptance criterion linked to observed outcomes | Frozen case-to-scenario evidence enforced; assertion adequacy still needs review |
-| Security | Static analysis, sharing/CRUD/FLS and access tests | Metadata allowlist exists; full security analysis adapter pending |
-| Performance | Reviewed thresholds and measured workloads | Performance adapter and org-specific thresholds pending |
-| License | Destination-specific edition, assignments, capacities and feature requirements | Development discovery exists; destination requirement-level evaluator pending |
+| Security | Static analysis, sharing/CRUD/FLS and access tests | Isolated PMD, constrained metadata checks and pinned CRUD/FLS/sharing allow/deny cases; expanded metadata/personas remain B16/B22 |
+| Performance | Reviewed thresholds and measured workloads | Measured Apex runtime/CPU/query/DML/volume and browser-duration adapters implemented; reviewed org workloads and live execution required |
+| License | Destination-specific edition, assignments, capacities and feature requirements | Source-backed destination rules and runner-user assignment/capacity preflight implemented; broader planning engine remains B18 |
 
 ## Business approval and report
 
