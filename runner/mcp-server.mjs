@@ -1,11 +1,13 @@
 // Project-owned MCP server: fixed Salesforce tools, no arbitrary shell or SOQL.
 import readline from 'node:readline';
+import {scanCapabilities} from '../lib/capabilities.mjs';
+import {parseQualityMetrics} from './quality-suites.mjs';
 import {mcpMode,mcpPolicy} from './mcp-policy.mjs';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {readFile} from 'node:fs/promises';
 import {assert,origin,zip,xml,xmlValue,hash} from '../lib/core.mjs';
-import {sf,metadata,deploymentStatus} from '../lib/integrations.mjs';
+import {sf,metadata,deploymentStatus,remote,apiVersion} from '../lib/integrations.mjs';
 const exec=promisify(execFile);
 const target=JSON.parse(await readFile(process.env.DELIVERY_TARGET_FILE,'utf8'));
 const mode=mcpMode(process.env.DELIVERY_MCP_MODE);
@@ -19,6 +21,8 @@ const c={instanceUrl:origin(auth.instanceUrl,'Salesforce'),accessToken:auth.acce
 assert(c.accessToken,'Salesforce authentication is missing.');
 const tools=[
   {name:'inspect_org',description:'Verify the configured org identity and edition.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
+  {name:'inspect_capabilities',description:'Read destination license, limit and API-user capability inventory.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
+  {name:'inspect_apex_source',description:'Read source hashes of explicitly named local Apex classes.',inputSchema:{type:'object',properties:{classes:{type:'array',items:{type:'string'}}},required:['classes'],additionalProperties:false}},
   {name:'validate_metadata',description:'Validate the immutable package with RunLocalTests and rollbackOnError.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
   {name:'deploy_metadata',description:'Deploy only the immutable package to the configured, verified org.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
   {name:'deployment_status',description:'Read a submitted metadata deployment result.',inputSchema:{type:'object',properties:{id:{type:'string'}},required:['id'],additionalProperties:false}},
@@ -33,11 +37,42 @@ async function identity(){
 async function call(name,args){
   policy.authorize(name,args);await identity();
   if(name==='inspect_org')return identity();
+  if(name==='inspect_capabilities'){
+    const org=await identity();let userId=auth.userId;
+    // CLI versions do not consistently include userId in org display output.
+    // Resolve only the authenticated username, never a model-supplied identity.
+    if(!/^005[A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?$/.test(userId||'')&&/^[A-Za-z0-9._%+@-]{1,200}$/.test(auth.username||''))try{
+      const user=await sf(c,'/query?q='+encodeURIComponent(`SELECT Id FROM User WHERE Username = '${auth.username}' LIMIT 1`));
+      if(user.done===true&&user.records?.length===1)userId=user.records[0].Id;
+    }catch{/* User-scoped probes remain unknown if identity cannot be read. */}
+    return {...await scanCapabilities(path=>sf(c,path),{id:target.orgId,organizationType:org.OrganizationType,environment:target.kind},userId),stage:target.name};
+  }
+  if(name==='inspect_apex_source'){
+    const query=`SELECT Name, Body FROM ApexClass WHERE NamespacePrefix = null AND Name IN (${args.classes.map(n=>"'"+n+"'").join(',')})`;
+    const read=await sf(c,'/tooling/query?q='+encodeURIComponent(query));
+    assert(read.done===true&&Array.isArray(read.records)&&read.records.every(r=>typeof r.Body==='string'),'Apex baseline source unavailable.');
+    return {sources:read.records.map(r=>({className:r.Name,hash:hash(r.Body)}))};
+  }
   if(name==='deployment_status')return deploymentStatus(c,args.id);
   if(name==='run_apex_tests'){
     assert(Array.isArray(args.classes)&&args.classes.length>0&&args.classes.length<=50&&args.classes.every(n=>/^[A-Za-z][A-Za-z0-9_]*$/.test(n)),'Invalid Apex classes.');
     const result=await exec('sf',['apex','run','test','--target-org','delivery-target',...args.classes.flatMap(n=>['--class-names',n]),'--wait','60','--result-format','json','--json'],{timeout:3700000,maxBuffer:5e6}).catch(e=>({stdout:e.stdout||'{}'}));
-    const report=JSON.parse(result.stdout);return {passed:report.status===0&&report.result?.summary?.outcome==='Passed',summary:report.result?.summary,tests:report.result?.tests};
+    const report=JSON.parse(result.stdout),tests=[],runId=report.result?.summary?.testRunId;
+    if(!/^707[A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?$/.test(runId||''))return {passed:false,tests:[]};
+    for(const row of report.result?.tests||[]){
+      // Resolve method results/log ownership through Salesforce, not supplied telemetry IDs.
+      if(!/^[A-Za-z0-9]{15}(?:[A-Za-z0-9]{3})?$/.test(row.Id||''))continue;
+      const observed=await sf(c,'/tooling/query?q='+encodeURIComponent(`SELECT Id, ApexLogId, ApexClass.Name, ApexClass.NamespacePrefix, MethodName, Outcome, RunTime FROM ApexTestResult WHERE Id = '${row.Id}' AND AsyncApexJobId = '${runId}'`));
+      if(observed.done!==true||observed.records?.length!==1)continue;
+      const t=observed.records[0];if(!args.classes.includes(t.ApexClass?.Name)||t.ApexClass?.NamespacePrefix)continue;
+      let qualityMetrics=null;
+      if(/^07L[A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?$/.test(t.ApexLogId||''))try{
+        const log=await remote(`${c.instanceUrl}/services/data/v${apiVersion()}/tooling/sobjects/ApexLog/${t.ApexLogId}/Body`,{headers:{Authorization:`Bearer ${c.accessToken}`}},'Salesforce test log',true);
+        qualityMetrics=parseQualityMetrics(log,t.MethodName);
+      }catch{/* Missing telemetry blocks any required performance metric. */}
+      tests.push({testRunId:runId,resultId:t.Id,ApexClass:{Name:t.ApexClass.Name,NamespacePrefix:t.ApexClass.NamespacePrefix||null},MethodName:t.MethodName,Outcome:t.Outcome,RunTime:t.RunTime,qualityMetrics});
+    }
+    return {passed:report.status===0&&report.result?.summary?.outcome==='Passed'&&tests.length>0&&tests.every(t=>t.Outcome==='Pass'),tests};
   }
   const checkOnly=name==='validate_metadata';
   const payload=`<met:ZipFile>${zip(artifacts.files).toString('base64')}</met:ZipFile><met:DeployOptions><met:checkOnly>${checkOnly}</met:checkOnly><met:ignoreWarnings>false</met:ignoreWarnings><met:rollbackOnError>true</met:rollbackOnError><met:singlePackage>true</met:singlePackage><met:testLevel>RunLocalTests</met:testLevel></met:DeployOptions>`;

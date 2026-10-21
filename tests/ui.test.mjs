@@ -69,3 +69,10 @@ test('reconciliation controls require a reviewer, pause and a saved ID',async()=
  context.job.data.pipeline.reconciliation={stage:'dev',id:'request',status:'retired',retirement:{at:'2026-10-20',note:'<script>'}};
  assert.doesNotMatch(html(),/<button[^>]*data-act="requestReconciliation"[^>]*disabled/);assert.match(html(),/&lt;script&gt;/);assert.doesNotMatch(html(),/<script>/);
 });
+
+test('quality evidence view exposes blockers and measurements without executing report text',async()=>{
+ const context=vm.createContext({document:{querySelector:()=>({innerHTML:''}),addEventListener(){}},fetch:async()=>({ok:true,json:async()=>({configured:false})}),location:{origin:'http://localhost:3000'},URLSearchParams,FormData,structuredClone,setTimeout,clearTimeout,console});
+ vm.runInContext(await readFile('public/app.js','utf8'),context);
+ context.stage={licensePreflight:{status:'blocked',reason:'Missing feature'},quality:{checks:{performance:{status:'failed',reason:'<img src=x onerror=evil()>',cases:[{actual:150,threshold:100}]}}}};
+ const html=vm.runInContext('qualityEvidenceView(stage)',context);assert.match(html,/performance: failed/);assert.match(html,/150/);assert.match(html,/Missing feature/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img/);
+});

@@ -1,4 +1,4 @@
-# Work status — 2026-10-12
+# Work status — latest checkpoint 2026-10-20
 
 ## Checkpoint 1: critical audit corrections
 
@@ -94,3 +94,19 @@ Publishing verification — 2026-10-20: all 93 local tests passed; JavaScript sy
 - Added retirement controls, escaped reviewer-note rendering and regression coverage for active/wrong runs, expiry boundaries, stale callbacks, replacement history and developer-role rejection.
 - Validation: 97 local tests passed; JavaScript syntax and whitespace checks passed. Local Node was 24.19.0 (package declares 22.x). Remote checks are tracked on the publishing PR.
 - B10 remains in progress: stale locks, controlled recovery decisions and live Salesforce rehearsal remain outstanding. No Salesforce operation or production promotion was performed.
+
+
+## Checkpoint 8 — B05–B08 reviewed quality adapters, 2026-10-20
+
+- B05: expanded static policy to constrained private objects and permission sets; runtime security requires exact pinned Apex methods covering allow/deny CRUD, FLS and sharing. Unsupported metadata remains blocked and is documented under B16/B17/B22 dependencies.
+- B06: added approved workload/budget policies and measured Apex runtime, instrumented CPU/query/DML/record-volume, plus browser elapsed-time checks. Missing, duplicated, malformed or mismatched measurements block.
+- B07: added destination-specific sourced edition, license capacity, runner-user assignment/license, object access and limit rules. The signed runner must persist a fresh passing preflight before each metadata intent; old/foreign/partial evidence cannot authorize a write.
+- B08: added independent reviewed Apex/browser baselines, exact-method outcomes, pre-deployment and before/after-test source checks, and source-hash protection against generated/repair changes.
+- Policy snapshots are retrieved from `quality/policies/<planHash>.json` at the reviewed runner commit, bound to all target orgs, and retained with release evidence. No AI pass files or category waivers are accepted. Added an intentionally incomplete setup template generator and detailed setup documentation.
+- CI/CD now displays category results and actual measurements; UAT reports include the policy review/hash. Recovery MCP mode retains exactly its two read-only tools.
+- Local validation: 112 tests passed, including signed preflight API tests, a real MCP subprocess using offline Salesforce/CLI transport, schema rejection, numeric telemetry, browser duration, source drift, metadata security and UI escaping tests. Syntax/whitespace checks passed. Node 24.19.0 was used locally; remote checks are recorded on the publishing PR.
+- B05–B08 move to **Verification**, not Done. Required live evidence and project-specific approved workloads/license requirements/baselines are still outstanding. Expanded metadata/security support, dedicated Flow testing, package-version dependency resolution and full persona/session support remain in B15–B18/B21–B22.
+- Board: 23 backlog, 2 in progress (B10/B11), 9 verification (B01–B09), 2 live-setup blocked (B32/B33), 0 declared fully verified. No Salesforce org changes or production promotion were performed.
+
+- Remote scanner correction: plugin 5.16.0 reports analyzer core 0.53.0 and PMD adapter 0.46.0. These are independent version namespaces; a mistaken equality check was removed and the actual observed combination added to regression coverage. Installation pins and version-presence checks remain enforced.
+- Newly discovered B36: real CLI installation reported 64 dependency vulnerabilities (16 moderate, 47 high, 1 critical); application-only install reported zero. Toolchain advisory triage and reviewed pin remediation remain outstanding. This is recorded separately from generated Salesforce security findings.

@@ -11,6 +11,7 @@ const report=()=>({versions:{'code-analyzer':'5.0.0',pmd:'7.0.0'},violationCount
 const observation=a=>({artifactHash:a.hash,policy:securityPolicy,exitCode:0,selector:'pmd:Security',suppressionsDisabled:true,targets:['classes/Safe.cls'],pluginVersion:'5.0.0',report:report()});
 test('Apex security evidence binds exact source, tool, policy and complete target list',()=>{
  const a=pkg(),o=observation(a);assert.equal(evaluateSecurity(a,o).status,'passed');
+ const realVersions={...observation(a),pluginVersion:'5.16.0',report:{...report(),versions:{'code-analyzer':'0.53.0',pmd:'0.46.0'}}};assert.equal(evaluateSecurity(a,realVersions).status,'passed');
  for(const changes of [{artifactHash:'stale'},{exitCode:1},{policy:'weaker'},{selector:'Recommended'},{suppressionsDisabled:false},{targets:[]},{pluginVersion:'latest'}])assert.equal(evaluateSecurity(a,{...o,...changes}).status,'blocked');
  a.files[0].content+=' // modified';assert.equal(evaluateSecurity(a,o).status,'blocked');
 });
