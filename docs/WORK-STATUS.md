@@ -124,3 +124,9 @@ Implemented production continuation (B12), Git ownership/removal checks (B30), a
 PR #11 publishes checkpoint 9. Added global org locks (migration 004) across pipeline and direct sandbox writes, with no expiry takeover and verified-terminal release. Reviewer recovery now accepts observed terminal results from a stopped exact runner, preserves pause and forces a new pipeline for missing tests. 127 application tests plus credential-free SQL checks and syntax checks passed locally. No live migration or Salesforce call was performed.
 
 Board: 12 backlog, 8 in progress, 14 verification, 2 live-blocked, 0 Done. Remaining implementation is not complete. No new skill created.
+
+## Checkpoint 11 — browser resource policy
+
+B21 now has reviewed exact HTTPS Salesforce resource origins, blocked-request evidence, and disabled service workers. Network failures cannot appear as passing business scenarios. Live Lightning compatibility remains outstanding. Board: 11 backlog, 9 in progress, 14 verification, 2 live-blocked.
+
+Verification: 129 local tests, JavaScript syntax checks and whitespace checks passed. No live browser/Salesforce test or database migration was executed. Official MCP constraints and local DX MCP retirement are documented in DELIVERY-CONTROLS.md.

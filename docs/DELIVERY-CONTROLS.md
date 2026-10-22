@@ -47,3 +47,17 @@ A global Salesforce org-ID lock covers all workspaces, pipeline stages and direc
 For a saved operation ID: pause, request the restricted read-only status workflow, then use **Accept terminal recovery**. The server verifies the original GitHub runner is stopped, every observed operation is terminal and the exact artifact/journal still matches. Acceptance records the reviewer and rationale, removes stale production approval, keeps the delivery paused and marks the stage blocked. It does not invent missing tests or continue a previously claimed stage. Resume and start a new reviewed pipeline when appropriate. **Retry verified lock release** can repeat a failed database unlock without replaying Salesforce writes.
 
 An intent without a saved Salesforce ID, a lost pre-claim checkpoint, or a nonterminal remote operation remains blocked for investigation. No force-unlock route is provided. SQL checks run against a credential-free PostgreSQL-compatible test engine in CI; real cross-process/live verification remains outstanding.
+
+## Reviewed browser resource origins (B21)
+
+Each pipeline stage can specify `browserOrigins`, an optional array of at most ten exact HTTPS Salesforce resource origins, for example `https://static.sfdcstatic.com`. The target org and its Lightning origin remain included by default. No wildcards, credentials, paths, query strings or non-default ports are accepted. These values are part of the pinned pipeline policy and must be reviewed before a new run. Do not widen the policy automatically in response to generated content.
+
+Service workers are disabled. Blocked requests mark the scenario blocked even if its visible assertions passed. Evidence retains a policy hash and bounded origin hashes/counts, without raw URLs or credential-bearing queries. A live org must still establish the required resource list; this is not a claim that all Lightning pages currently load.
+
+## Official MCP integration plan — verified October 22, 2026
+
+Salesforce has [announced local DX MCP end of life for November 2, 2026](https://github.com/forcedotcom/mcp/issues/46). Do not introduce that package as the long-term deployment dependency. The current project-owned bridge remains explicitly labeled; B19 is not implemented merely by using the MCP protocol.
+
+[Hosted metadata grounding](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/metadata-grounding.html) is a read-only beta requiring Data 360, API access and Salesforce Catalog provisioning. Its indexed metadata may lag the org and cannot replace a fresh deployment drift check. It does not deploy metadata. Discovery must inspect available schemas and call describe, search, then query using returned identifiers.
+
+[Hosted authentication](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/client-connection-overview.html) requires an External Client App and OAuth authorization code with PKCE; an existing Connected App is insufficient. Future onboarding must detect these prerequisites and expose unsupported/unknown capabilities rather than infer support from edition alone. Credential handling, runtime discovery and integration acceptance tests remain B19 work.

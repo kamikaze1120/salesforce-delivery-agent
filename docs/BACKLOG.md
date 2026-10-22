@@ -6,9 +6,9 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 
 ## Board
 
-| Backlog — 12 | In progress — 8 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
+| Backlog — 11 | In progress — 9 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
 |---|---|---|---|---|
-| B14–B19, B21–B24, B28–B29 | B11, B20, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
+| B14–B19, B22–B24, B28–B29 | B11, B20–B21, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
 
 **Status policy:** Backlog = implementation remains; In progress = partial implementation exists; Verification = implementation/local regression evidence exists but remaining acceptance evidence must be checked; Blocked = external setup prevents end-to-end execution; Done = all story criteria and linked evidence accepted. The verification column does not erase completed fixes. P0 = critical correctness/promotion blockers; P1 = reliable delivery and operational readiness; P2 = platform alignment and ongoing documentation. Missing quality evidence always blocks the relevant gate.
 
@@ -36,7 +36,7 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B18](#b18) | P1 | License analysis engine | Backlog | E3 Salesforce architecture and capabilities |
 | [B19](#b19) | P1 | Official Salesforce MCP adapter | Backlog | E3 Salesforce architecture and capabilities |
 | [B20](#b20) | P1 | Assertion-level traceability | In progress | E4 Testing and repair |
-| [B21](#b21) | P1 | Browser compatibility | Backlog | E4 Testing and repair |
+| [B21](#b21) | P1 | Browser compatibility | In progress | E4 Testing and repair |
 | [B22](#b22) | P1 | Personas and sessions | Backlog | E4 Testing and repair |
 | [B23](#b23) | P1 | Test data and cleanup | Backlog | E4 Testing and repair |
 | [B24](#b24) | P1 | Production smoke suite | Backlog | E4 Testing and repair |
@@ -579,11 +579,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B21 — Browser compatibility
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E4 Testing and repair
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E4 Testing and repair
 
 **User story:** As a test engineer, I want compatible Salesforce browser access so required UI resources load without broad network access.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Observed required Salesforce resources load through a reviewed narrow allowlist.
+**Current evidence / gap:** Exact reviewed Salesforce resource origins are now configurable in the immutable pipeline policy; wildcard origins, credentials and unrelated domains are rejected. Blocked requests produce redacted evidence and block the scenario. Service workers are disabled so network interception cannot be bypassed by their requests. Actual Lightning resource compatibility remains unverified.
 
 **Implementation tasks:** Observe supported Salesforce UI resource needs; maintain a narrow reviewed host policy and redirect handling; diagnose blocked resources without permitting arbitrary destinations.
 

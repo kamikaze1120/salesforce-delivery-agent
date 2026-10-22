@@ -1,3 +1,4 @@
+import {browserNetworkPolicy} from '../lib/browser-policy.mjs';
 import {executeBrowserSteps} from './browser-evidence.mjs';
 import {assert} from '../lib/core.mjs';
 export async function runBrowserTests(scenarios,target,state,{beforeStep=async()=>{}}={}){
@@ -8,14 +9,14 @@ export async function runBrowserTests(scenarios,target,state,{beforeStep=async()
     for(const scenario of scenarios){
       if(target.name==='production')assert(scenario.steps.every(s=>['goto','assertVisible','assertText'].includes(s.action)),'Production browser tests must be read-only.');
       const started=performance.now();
-      const context=await browser.newContext({storageState:state});
+      const context=await browser.newContext({storageState:state,serviceWorkers:'block'});
       // A compromised generated URL or page cannot send data to arbitrary hosts.
-      const login=new URL(target.url),lightning=login.hostname.replace(/\.my\.salesforce\.com$/,'.lightning.force.com');
-      const allowed=new Set([login.hostname,lightning]);
-      await context.route('**/*',route=>{const u=new URL(route.request().url());return u.protocol==='https:'&&allowed.has(u.hostname)?route.continue():route.abort();});
+      const network=browserNetworkPolicy(target),lightning=network.lightning;
+      await context.route('**/*',route=>network.allows(route.request().url())?route.continue():route.abort());
       const page=await context.newPage();
       const observed=await executeBrowserSteps(page,scenario.steps,{beforeStep,navigate:path=>page.goto(`https://${lightning}${path}`,{waitUntil:'domcontentloaded'})});
-      results.push({id:scenario.id,passed:observed.status==='passed',status:observed.status,steps:observed.steps,elapsedMs:performance.now()-started,kind:'browser',reason:observed.status==='passed'?'Assertions passed.':'Inspect redacted step diagnostics; missing execution is blocked.'});
+      const networkEvidence=network.evidence(),status=networkEvidence.status==='blocked'?'blocked':observed.status;
+      results.push({id:scenario.id,passed:status==='passed',status,network:networkEvidence,steps:observed.steps,elapsedMs:performance.now()-started,kind:'browser',reason:status==='passed'?'Assertions passed.':'Inspect redacted step diagnostics; missing execution is blocked.'});
       await context.close();
     }
   }finally{await browser.close();}
