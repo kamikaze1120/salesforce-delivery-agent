@@ -130,3 +130,7 @@ Board: 12 backlog, 8 in progress, 14 verification, 2 live-blocked, 0 Done. Remai
 B21 now has reviewed exact HTTPS Salesforce resource origins, blocked-request evidence, and disabled service workers. Network failures cannot appear as passing business scenarios. Live Lightning compatibility remains outstanding. Board: 11 backlog, 9 in progress, 14 verification, 2 live-blocked.
 
 Verification: 129 local tests, JavaScript syntax checks and whitespace checks passed. No live browser/Salesforce test or database migration was executed. Official MCP constraints and local DX MCP retirement are documented in DELIVERY-CONTROLS.md.
+
+## Checkpoint 12 — production identity and repair evidence
+
+Signed RSA/OIDC tests confirm the production continuation accepts only its exact workflow, protected environment, pinned commit and continuation run title. Old delivery workers, other continuations, re-runs and expired identities are rejected. Repair now also requires terminal deployment results matching durable operation IDs and exactly one result for every approved scenario with all mapped assertions present. 131 local application tests, syntax and whitespace checks passed. No new skill was created. Live checks remain excluded.

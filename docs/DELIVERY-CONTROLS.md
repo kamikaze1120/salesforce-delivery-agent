@@ -16,7 +16,7 @@ Browser results include every step's hash, index, duration and passed/failed/blo
 
 ## Repair decisions (B26)
 
-Only confirmed non-production Apex test failures with matching frozen release identities, completed validation/deployment and an available persisted repair budget qualify. Missing method evidence, browser infrastructure failures, deployment/setup failures, changed requirements, uncertain writes, pauses and production failures do not authorize generation. The response records the classification and next action. Static analysis and performance findings are not yet automatically repaired. The original BRD and frozen test files remain outside repair authority.
+Only confirmed non-production Apex test failures with matching frozen release identities, terminal validation/deployment matching the durable operation journal and an available persisted repair budget qualify. Every approved scenario must have exactly one result with its mapped assertions present. Missing method evidence, browser infrastructure failures, deployment/setup failures, changed requirements, uncertain writes, pauses and production failures do not authorize generation. The response records the classification and next action. Static analysis and performance findings are not yet automatically repaired. The original BRD and frozen test files remain outside repair authority.
 
 ## Source ownership (B30)
 
