@@ -106,31 +106,3 @@ jobs:
           SF_USERNAME: ${{ secrets.SF_USERNAME }}
           SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
           SF_BROWSER_STATE: ${{ secrets.SF_BROWSER_STATE }}
-  stage_3:
-    needs: stage_2
-    runs-on: ubuntu-latest
-    timeout-minutes: 180
-    environment: ${{ fromJSON(vars.DELIVERY_ENVIRONMENTS)[fromJSON(inputs.stage_order)[3]] }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - name: Install reviewed tooling (no environment credentials)
-        run: node runner/install.mjs
-        env:
-          SALESFORCE_CLI_VERSION: ${{ vars.SALESFORCE_CLI_VERSION }}
-          PLAYWRIGHT_VERSION: ${{ vars.PLAYWRIGHT_VERSION }}
-          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
-      - name: Verify, validate, deploy and test through Salesforce MCP
-        run: PATH="$PWD/node_modules/.bin:$PATH" node runner/stage.mjs
-        env:
-          CODE_ANALYZER_VERSION: ${{ vars.CODE_ANALYZER_VERSION }}
-          DELIVERY_APP_ORIGIN: ${{ vars.DELIVERY_APP_ORIGIN }}
-          DELIVERY_WORKSPACE: ${{ inputs.workspace_id }}
-          DELIVERY_JOB: ${{ inputs.delivery_id }}
-          DELIVERY_PIPELINE: ${{ inputs.pipeline_id }}
-          DELIVERY_STAGE: ${{ fromJSON(inputs.stage_order)[3] }}
-          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
-          SF_USERNAME: ${{ secrets.SF_USERNAME }}
-          SF_JWT_PRIVATE_KEY: ${{ secrets.SF_JWT_PRIVATE_KEY }}
-          SF_BROWSER_STATE: ${{ secrets.SF_BROWSER_STATE }}

@@ -5,9 +5,9 @@ import {artifactsSchema,jiraDefaults} from '../lib/core.mjs';
 const wid='00000000-0000-4000-8000-000000000001';
 const artifacts=artifactsSchema({files:[{path:'classes/Request.cls',content:'public with sharing class Request {}'},{path:'classes/Request.cls-meta.xml',content:'<ApexClass></ApexClass>'}]});
 test('Git commits create a new isolated branch without updating the base ref',async()=>{
-  const old=global.fetch,calls=[];const replies=[{object:{sha:'base'}},{tree:{sha:'base-tree'}},{sha:'tree'},{sha:'new-commit'},{ref:'refs/heads/sfda/'+wid}];
+  const old=global.fetch,calls=[];const replies=[{object:{sha:'base'}},{tree:{sha:'base-tree'}},{truncated:false,tree:[]},{sha:'tree'},{sha:'new-commit'},{ref:'refs/heads/sfda/'+wid}];
   global.fetch=async(url,opts={})=>{calls.push({url:String(url),method:opts.method||'GET',body:opts.body?JSON.parse(opts.body):null});return new Response(JSON.stringify(replies.shift()));};
-  try{const result=await commitArtifacts({owner:'team',repo:'repo',url:'https://github.com/team/repo',branch:'main',sourcePath:'force-app/main/default',token:'test'},artifacts,wid,'Request');assert.equal(result.branch,'sfda/'+wid);assert.equal(calls.filter(c=>c.method==='PATCH').length,0);assert.equal(calls.at(-1).body.ref,'refs/heads/sfda/'+wid);assert.match(calls[2].body.tree[0].path,/force-app\/main\/default\/classes/);}finally{global.fetch=old;}
+  try{const result=await commitArtifacts({owner:'team',repo:'repo',url:'https://github.com/team/repo',branch:'main',sourcePath:'force-app/main/default',token:'test'},artifacts,wid,'Request');assert.equal(result.branch,'sfda/'+wid);assert.equal(calls.filter(c=>c.method==='PATCH').length,0);assert.equal(calls.at(-1).body.ref,'refs/heads/sfda/'+wid);assert.match(calls[3].body.tree[0].path,/force-app\/main\/default\/classes/);}finally{global.fetch=old;}
 });
 test('sandbox validation sends check-only, rollback, and local test options',async()=>{
   const old=global.fetch;let soap='';global.fetch=async(url,opts={})=>{if(String(url).includes('/query?'))return new Response(JSON.stringify({records:[{Id:'00D000000000001',Name:'Dev',IsSandbox:true}]}));soap=opts.body;return new Response('<deployResponse><result><id>0Af000000000001</id></result></deployResponse>');};
@@ -23,9 +23,9 @@ test('Jira retries recover a marked issue without creating another one',async()=
 });
 test('reviewed revisions advance only the recorded delivery branch with force disabled',async()=>{
   const old=global.fetch,calls=[],branch='sfda/'+wid;
-  const replies=[{object:{sha:'previous'}},{tree:{sha:'base-tree'}},{sha:'tree'},{sha:'next'},{}];
+  const replies=[{object:{sha:'previous'}},{tree:{sha:'base-tree'}},{truncated:false,tree:[]},{sha:'tree'},{sha:'next'},{}];
   global.fetch=async(url,opts={})=>{calls.push({url:String(url),method:opts.method,body:opts.body?JSON.parse(opts.body):null});return new Response(JSON.stringify(replies.shift()));};
-  try{await commitArtifacts({owner:'team',repo:'repo',url:'https://github.com/team/repo',branch:'main',sourcePath:'force-app/main/default',token:'test'},artifacts,wid,'Revision',{branch,commit:'previous'});assert.equal(calls.at(-1).method,'PATCH');assert.equal(calls.at(-1).body.force,false);assert.match(calls.at(-1).url,/sfda%2F/);}finally{global.fetch=old;}
+  try{await commitArtifacts({owner:'team',repo:'repo',url:'https://github.com/team/repo',branch:'main',sourcePath:'force-app/main/default',token:'test'},artifacts,wid,'Revision',{branch,commit:'previous',ownership:{version:1,root:'force-app/main/default',files:[]}});assert.equal(calls.at(-1).method,'PATCH');assert.equal(calls.at(-1).body.force,false);assert.match(calls.at(-1).url,/sfda%2F/);}finally{global.fetch=old;}
 });
 
 const jiraConfig={url:'https://team.atlassian.net',projectKey:'CRM',issueTypeId:'10001',email:'owner@example.test',token:'synthetic'};

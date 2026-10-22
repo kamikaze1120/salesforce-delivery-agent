@@ -1,10 +1,10 @@
 # Architecture — v0.4
 
-The dependency-free Node API and static UI run on Vercel. Supabase Auth identifies users. The server enforces workspace membership; server-only Supabase tables have RLS enabled with no browser read policies. Connection credentials are encrypted with AES-256-GCM and workspace/type associated data.
+The Node API and static UI run on Vercel. Supabase Auth identifies users. The server enforces workspace membership; server-only Supabase tables have RLS enabled with no browser read policies. Connection credentials are encrypted with AES-256-GCM and workspace/type associated data.
 
 BRD input is immutable within a delivery. A model proposes exact-source requirements, questions and Jira stories. Blocking questions prevent plan approval. The model then proposes structured mockup screens; the UI renders escaped text and fixed controls instead of running generated HTML. Approval binds the screen hash, plan hash and connection version.
 
-Code generation uses the approved plan and mockup plus the original BRD and inspected org context. Strict metadata path and XML checks build the package manifest server-side. Generated Flows stay Draft. Code review and test-expectation review precede CI/CD. Test plans use existing Apex test class names and declarative Playwright actions; manual or uncertain scenarios cannot be silently marked passed.
+Code generation uses the approved plan and mockup plus the original BRD and inspected org context. Strict metadata path and XML checks build the package manifest server-side. Generated Flows stay Draft. Code review and test-expectation review precede CI/CD. Test plans map requirements to exact Apex test methods and declarative Playwright actions; manual or uncertain scenarios cannot be silently marked passed.
 
 ## Release execution and identity
 
@@ -18,14 +18,18 @@ GitHub environment reviewers gate UAT/production before their secrets become acc
 
 ## Repair loop
 
-Known non-production validation or test failures can request a repair. The budget is persisted before calling the model. The model sees the original BRD, approved answers and design, implementation, frozen tests and actual failure. Server validation forbids added/deleted implementation paths or modifications to frozen Apex tests and permission sets. A no-op repair stops. A successful repair commits to the isolated delivery branch, changes the artifact hash and restarts all stages; old evidence is retained in history.
+Only deterministically classified non-production Apex method failures can request a repair; setup/deployment/ambiguous failures cannot. The budget is persisted before calling the model. The model sees the original BRD, approved answers and design, implementation, frozen tests and actual failure. Server validation forbids added/deleted implementation paths or modifications to frozen Apex tests and permission sets. A no-op repair stops. A successful repair commits to the isolated delivery branch, changes the artifact hash and restarts all stages; old evidence is retained in history.
 
 Requirements, test expectations, credentials, policies and production approvals are outside the repair authority. Unknown external write outcomes stop and require reconciliation. Production failures do not trigger automatic changes. A pause blocks new API stage claims and repair requests; an already submitted Salesforce operation may still complete. Stop the GitHub workflow and inspect the org if immediate operational intervention is needed.
 
 ## Limits
 
-This is not formal verification or a guarantee of correct business behavior. Existing full Salesforce source and Flow logic are not exhaustively retrieved. Semantic compliance, UI selectors, sufficient test coverage, org-specific limits, browser sessions and business acceptance need validation. Browser tests use the same approved suite at each stage and allow writes only outside production. Hosted Salesforce MCP is not yet an adapter. Test evidence is trusted only from the pinned authenticated runner; protect its repository and dependency supply chain.
+This is not formal verification or a guarantee of correct business behavior. Existing full Salesforce source and Flow logic are not exhaustively retrieved. Semantic compliance, UI selectors, sufficient test coverage, org-specific limits, browser sessions and business acceptance need validation. Browser tests currently use the same approved suite at each stage and allow writes only outside production. Hosted Salesforce MCP is not yet an adapter. Test evidence is trusted only from the pinned authenticated runner; protect its repository and dependency supply chain.
 
 ## Revised flow and status
 
 [DELIVERY-FLOW.md](DELIVERY-FLOW.md) is the authoritative specification and implementation matrix. It adds the explicit architecture approval, fixed Dev/QA/UAT/production order, post-UAT business report approval, and mandatory quality evidence. Quality-analysis adapters, profile generation and live end-to-end verification remain incomplete; missing evidence now blocks promotion rather than falling back to generic successful tests.
+
+## Current implementation decisions
+
+See [ADR 001](ARCHITECTURE-DECISION-001.md) for current versus target stack and responsibility contracts, and [delivery controls](DELIVERY-CONTROLS.md) for production continuation, source ownership, assertion evidence and setup preflight. The delivery workflow stops at UAT; business approval dispatches the separate protected production workflow.

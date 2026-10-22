@@ -1,3 +1,4 @@
+import {scenarioEvidence} from '../lib/test-evidence.mjs';
 import {hash} from '../lib/core.mjs';
 // Deterministic adapters consume observed runner evidence, never model pass claims.
 const check=(status,source,reason,details={})=>({status,source,reason,...details});
@@ -23,9 +24,9 @@ export function businessCheck(cases,suite,results){
  if(!cases?.length)return check('blocked',source,'No structured acceptance cases supplied.');
  const rows=cases.map(c=>{
   const scenarios=suite.scenarios.filter(s=>s.caseId===c.id&&s.expected===c.expected&&s.requirements.includes(c.requirementId));
-  const observed=scenarios.map(s=>({scenarioId:s.id,results:results.filter(r=>r.id===s.id)}));
-  const status=!observed.length||observed.some(o=>o.results.length!==1)?'blocked':observed.every(o=>o.results[0].passed===true)?'passed':'failed';
-  return {caseId:c.id,requirementId:c.requirementId,acceptanceIndex:c.acceptanceIndex,expected:c.expected,status,scenarios:observed.map(o=>({id:o.scenarioId,passed:o.results[0]?.passed??null}))};
+  const observed=scenarios.map(s=>{const matches=results.filter(r=>r.id===s.id);return {scenarioId:s.id,results:matches,detail:scenarioEvidence(s,matches.length===1?matches[0]:null)};});
+  const status=!observed.length||observed.some(o=>o.results.length!==1||['blocked','manual'].includes(o.detail.status))?'blocked':observed.every(o=>o.detail.status==='passed')?'passed':'failed';
+  return {caseId:c.id,requirementId:c.requirementId,acceptanceIndex:c.acceptanceIndex,expected:c.expected,status,scenarios:observed.map(o=>({id:o.scenarioId,passed:o.detail.status==='passed',evidence:o.detail}))};
  });
  return check(rows.some(r=>r.status==='blocked')?'blocked':rows.every(r=>r.status==='passed')?'passed':'failed',source,'All frozen acceptance cases must map to an observed passing scenario. Semantic adequacy of assertions still requires test review.',{cases:rows});
 }

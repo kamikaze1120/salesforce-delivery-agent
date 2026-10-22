@@ -1,14 +1,14 @@
 # Delivery platform backlog — story board
 
-Updated: **2026-10-20 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
+Updated: **2026-10-21 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
 
 This is a repository-maintained Kanban summary and Jira-style story catalog, not a connected Jira or GitHub Projects board. Story IDs are stable repository IDs, not Jira issue keys. Each card can be copied into an issue. Assignees, sprint commitments and estimates are **unassigned / not estimated**; dependencies below are proposed delivery sequencing, not proof that prerequisite work is complete.
 
 ## Board
 
-| Backlog — 23 | In progress — 2 | Verification — 9 | Blocked: live setup — 2 | Done — 0 |
+| Backlog — 13 | In progress — 9 | Verification — 12 | Blocked: live setup — 2 | Done — 0 |
 |---|---|---|---|---|
-| B12–B31, B34–B36 | B10, B11 | B01–B09 | B32, B33 | No story declared fully verified |
+| B13–B19, B21–B24, B28–B29 | B10–B11, B20, B25–B27, B31, B35–B36 | B01–B09, B12, B30, B34 | B32, B33 | No story declared fully verified |
 
 **Status policy:** Backlog = implementation remains; In progress = partial implementation exists; Verification = implementation/local regression evidence exists but remaining acceptance evidence must be checked; Blocked = external setup prevents end-to-end execution; Done = all story criteria and linked evidence accepted. The verification column does not erase completed fixes. P0 = critical correctness/promotion blockers; P1 = reliable delivery and operational readiness; P2 = platform alignment and ongoing documentation. Missing quality evidence always blocks the relevant gate.
 
@@ -27,7 +27,7 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B09](#b09) | P1 | Durable Salesforce operation IDs | Verification | E2 Durable delivery and recovery |
 | [B10](#b10) | P1 | Recovery and reconciliation | In progress | E2 Durable delivery and recovery |
 | [B11](#b11) | P1 | Pause and cancellation | In progress | E2 Durable delivery and recovery |
-| [B12](#b12) | P1 | Business approval continuation | Backlog | E2 Durable delivery and recovery |
+| [B12](#b12) | P1 | Business approval continuation | Verification | E2 Durable delivery and recovery |
 | [B13](#b13) | P1 | Org-wide deployment locks | Backlog | E2 Durable delivery and recovery |
 | [B14](#b14) | P1 | Existing metadata retrieval | Backlog | E3 Salesforce architecture and capabilities |
 | [B15](#b15) | P1 | Dependency and drift checks | Backlog | E3 Salesforce architecture and capabilities |
@@ -35,23 +35,23 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B17](#b17) | P1 | Flow testing and activation | Backlog | E3 Salesforce architecture and capabilities |
 | [B18](#b18) | P1 | License analysis engine | Backlog | E3 Salesforce architecture and capabilities |
 | [B19](#b19) | P1 | Official Salesforce MCP adapter | Backlog | E3 Salesforce architecture and capabilities |
-| [B20](#b20) | P1 | Assertion-level traceability | Backlog | E4 Testing and repair |
+| [B20](#b20) | P1 | Assertion-level traceability | In progress | E4 Testing and repair |
 | [B21](#b21) | P1 | Browser compatibility | Backlog | E4 Testing and repair |
 | [B22](#b22) | P1 | Personas and sessions | Backlog | E4 Testing and repair |
 | [B23](#b23) | P1 | Test data and cleanup | Backlog | E4 Testing and repair |
 | [B24](#b24) | P1 | Production smoke suite | Backlog | E4 Testing and repair |
-| [B25](#b25) | P1 | Detailed test evidence | Backlog | E4 Testing and repair |
-| [B26](#b26) | P1 | Repair classification | Backlog | E4 Testing and repair |
-| [B27](#b27) | P1 | Manual-test policy | Backlog | E4 Testing and repair |
+| [B25](#b25) | P1 | Detailed test evidence | In progress | E4 Testing and repair |
+| [B26](#b26) | P1 | Repair classification | In progress | E4 Testing and repair |
+| [B27](#b27) | P1 | Manual-test policy | In progress | E4 Testing and repair |
 | [B28](#b28) | P1 | Post-deployment recovery | Backlog | E5 Release readiness |
 | [B29](#b29) | P1 | Release activation/setup | Backlog | E5 Release readiness |
-| [B30](#b30) | P1 | Git/package consistency | Backlog | E5 Release readiness |
-| [B31](#b31) | P1 | Setup preflight | Backlog | E5 Release readiness |
+| [B30](#b30) | P1 | Git/package consistency | Verification | E5 Release readiness |
+| [B31](#b31) | P1 | Setup preflight | In progress | E5 Release readiness |
 | [B32](#b32) | P1 | Development pilot | Blocked — live setup | E5 Release readiness |
 | [B33](#b33) | P1 | Full promotion rehearsal | Blocked — live setup | E5 Release readiness |
-| [B34](#b34) | P2 | Agent/stack implementation alignment | Backlog | E6 Platform and documentation |
-| [B35](#b35) | P2 | Documentation/onboarding | Backlog | E6 Platform and documentation |
-| [B36](#b36) | P1 | Runner tooling dependency security | Backlog | E1 Quality and security |
+| [B34](#b34) | P2 | Agent/stack implementation alignment | Verification | E6 Platform and documentation |
+| [B35](#b35) | P2 | Documentation/onboarding | In progress | E6 Platform and documentation |
+| [B36](#b36) | P1 | Runner tooling dependency security | In progress | E1 Quality and security |
 
 ## Working agreements and definition of done
 
@@ -352,11 +352,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B12 — Business approval continuation
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E2 Durable delivery and recovery
+**Type:** Story · **Priority:** P1 · **Status:** Verification · **Epic:** E2 Durable delivery and recovery
 
 **User story:** As a business approver, I want safe continuation of the exact UAT release so approval timing does not strand or replace the release.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Exact UAT release resumes safely after business approval regardless of approval timing.
+**Current evidence / gap:** Production continuation is now independent of the original worker: exact report approval, durable dispatch correlation, new OIDC workflow identity and duplicate-dispatch blocking. Local negative tests pass; live rehearsal remains outstanding.
 
 **Implementation tasks:** Persist a resumable approval checkpoint independent of a short-lived runner; bind approval to artifact, requirements, tests and UAT evidence; dispatch continuation idempotently.
 
@@ -554,11 +554,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B20 — Assertion-level traceability
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E4 Testing and repair
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E4 Testing and repair
 
 **User story:** As a business analyst, I want assertion-level requirement traceability so green test counts demonstrate business acceptance.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Each acceptance criterion maps to meaningful executed assertions or test methods.
+**Current evidence / gap:** Exact Apex-method and browser-step evidence now gates business cases. Class-only and skipped/duplicate evidence block. Stable criterion identifiers and broader semantic coverage review remain.
 
 **Implementation tasks:** Give acceptance criteria stable IDs; map each to executed assertions/Apex methods and expected results; freeze reviewed expectations across repair attempts.
 
@@ -680,11 +680,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B25 — Detailed test evidence
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E4 Testing and repair
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E4 Testing and repair
 
 **User story:** As a business approver, I want detailed trustworthy evidence so release decisions are based on what actually ran.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Assertions, Apex methods and redacted browser diagnostics persist for review and repair.
+**Current evidence / gap:** Browser step hashes, durations and explicit outcomes plus Apex method/run IDs are retained. Full diagnostics retention, report counts and export policy remain.
 
 **Implementation tasks:** Persist per-assertion and per-Apex-method outcomes, durations, expected/actual summaries and redacted browser diagnostics; bind reports to stage, org, artifact, test and requirement versions.
 
@@ -706,11 +706,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B26 — Repair classification
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E4 Testing and repair
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E4 Testing and repair
 
 **User story:** As a delivery owner, I want bounded defect repair so automation fixes code without rewriting requirements or retrying uncertain writes.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Repairable defects are distinguished from missing configuration/evidence and ambiguous writes; frozen expectations remain protected.
+**Current evidence / gap:** Deterministic repair classification now permits only evidenced non-production Apex defects. Unknown writes, setup/browser ambiguity, changed expectations and exhausted budgets block. Broader safe defect classes remain.
 
 **Implementation tasks:** Classify code defects versus missing setup, policy failures, entitlement restrictions and ambiguous operations; reread frozen requirements and use capped repair attempts with evidence.
 
@@ -732,11 +732,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B27 — Manual-test policy
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E4 Testing and repair
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E4 Testing and repair
 
 **User story:** As a reviewer, I want consistent manual-test rules so human evidence is neither ignored nor treated as automation.
 
-**Current evidence / gap:** Backlog. Original audit outcome: UI and readiness consistently distinguish acceptable reviewed evidence from automation requirements.
+**Current evidence / gap:** UI and model instructions now consistently label manual notes supplemental; automation-required gates cannot accept them. Configurable exemption/expiry policy remains.
 
 **Implementation tasks:** Define which criteria permit manual evidence, who may attest, required proof, expiry and review; enforce the same policy in UI, readiness and promotion.
 
@@ -808,11 +808,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B30 — Git/package consistency
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E5 Release readiness
+**Type:** Story · **Priority:** P1 · **Status:** Verification · **Epic:** E5 Release readiness
 
 **User story:** As a repository maintainer, I want consistent delivery-owned packages so removed generated files do not linger or delete unrelated work.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Removed delivery-owned files are handled explicitly without removing unrelated work.
+**Current evidence / gap:** Owned source paths and blob hashes now drive explicit Git removals; collisions, drift, truncated inventory and legacy ownership gaps block before mutation. Salesforce destructive deletion remains separate.
 
 **Implementation tasks:** Track file ownership and approved artifact contents; compute additions/updates/removals; handle any Salesforce destructive change as a separately reviewed deployment action.
 
@@ -833,11 +833,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B31 — Setup preflight
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E5 Release readiness
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E5 Release readiness
 
 **User story:** As a workspace administrator, I want actionable setup preflight so missing prerequisites are discovered before a delivery starts.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Migrations, connections, tooling, environments and credentials are verified before execution.
+**Current evidence / gap:** Owner-only setup preflight reports database/connector/model/pipeline checks with redacted remediation and connection version. Runner credentials and target verification remain explicitly unknown.
 
 **Implementation tasks:** Check database migrations, workspace isolation, Jira project access, LLM availability, repository/checks, MCP/CLI tooling and Dev/QA/UAT/production identities and credentials.
 
@@ -911,11 +911,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B34 — Agent/stack implementation alignment
 
-**Type:** Story · **Priority:** P2 · **Status:** Backlog · **Epic:** E6 Platform and documentation
+**Type:** Story · **Priority:** P2 · **Status:** Verification · **Epic:** E6 Platform and documentation
 
 **User story:** As a platform architect, I want an honest component and agent architecture so implementation decisions match the delivery vision.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Approved architecture separates implemented orchestration from target frameworks and specialized agents.
+**Current evidence / gap:** ADR 001 documents the current runtime, responsibility contracts, trust boundaries and deferred framework migration. Owner architecture acceptance remains.
 
 **Implementation tasks:** Document current Node application and project-owned orchestration; define contracts for requirements, license, architecture, code, test and deployment responsibilities; decide framework changes with migration cost and acceptance criteria.
 
@@ -936,11 +936,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B35 — Documentation/onboarding
 
-**Type:** Story · **Priority:** P2 · **Status:** Backlog · **Epic:** E6 Platform and documentation
+**Type:** Story · **Priority:** P2 · **Status:** In progress · **Epic:** E6 Platform and documentation
 
 **User story:** As a new contributor, I want accurate onboarding and operational documentation so the system can be configured and supported without guesswork.
 
-**Current evidence / gap:** Backlog. Original audit outcome: README, supported scope, setup, architecture and recovery instructions match verified behavior.
+**Current evidence / gap:** README, architecture and new control/audit guides document this checkpoint; clean-environment onboarding and live setup validation remain.
 
 **Implementation tasks:** Maintain README, setup, supported-scope matrix, architecture, backlog, recovery and contribution guidance; audit license/code-of-conduct links and remove active Copado deployment instructions while labeling historical material.
 
@@ -962,11 +962,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B36 — Runner tooling dependency security
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E1 Quality and security
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E1 Quality and security
 
 **User story:** As a platform operator, I want reviewed runner dependencies so the deployment toolchain has a documented vulnerability posture.
 
-**Current evidence / gap:** PR #10 scanner job 118829976880 reported 64 dependency vulnerabilities after installing pinned `@salesforce/cli@2.153.5`: 16 moderate, 47 high, 1 critical. The initial application-only `npm ci` reported zero. These are dependency-audit findings, not evidence of exploitation or a Salesforce code finding. Package/advisory reachability and safe version upgrades have not been triaged.
+**Current evidence / gap:** Clean lockfile audit reproduced all 64 findings. High/critical package dispositions are recorded in TOOLCHAIN-AUDIT.md. Critical Handlebars advisories identified; no unsafe override or risk acceptance applied. Remediation and plugin-tree audit remain.
 
 **Implementation tasks:** Capture advisory details for the pinned CLI and plugin trees; determine affected execution paths; choose compatible patched pins or documented mitigations; run real scanner and non-production CLI compatibility checks. Do not run an unreviewed `npm audit fix --force` in deployment jobs.
 
@@ -997,3 +997,7 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 The audit stories support the requested BRD → requirements/Jira → design/mockup approval → Salesforce architecture → MCP → Dev → tests/repair → quality gate → QA → UAT → business approval → production flow. B32 validates the upstream BRD/Jira/mockup path; B33 validates promotion. B18/B07 cover license analysis and destination enforcement; B19 covers MCP; B26 covers bounded autonomous repair. B34 keeps the target multi-agent stack distinct from the implemented system. Copado is not the target deployment mechanism.
 
 Additional gaps found during implementation should receive a new stable ID (starting B37), a clear story and acceptance evidence rather than silently expanding a completed story. This catalog covers the original 35-item audit plus the newly observed tooling issue; it is not a guarantee that no further gaps will be found.
+
+## October 21 implementation checkpoint
+
+See [delivery controls](DELIVERY-CONTROLS.md) and [toolchain audit](TOOLCHAIN-AUDIT.md). 126 local tests and syntax checks passed before final documentation updates. No live Salesforce calls or production promotion were performed. The CLI credential command was corrected using official vendor documentation; Hosted/DX integration remains unimplemented.
