@@ -6,9 +6,9 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 
 ## Board
 
-| Backlog — 11 | In progress — 9 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
+| Backlog — 10 | In progress — 10 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
 |---|---|---|---|---|
-| B14–B19, B22–B24, B28–B29 | B11, B20–B21, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
+| B15–B19, B22–B24, B28–B29 | B11, B14, B20–B21, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
 
 **Status policy:** Backlog = implementation remains; In progress = partial implementation exists; Verification = implementation/local regression evidence exists but remaining acceptance evidence must be checked; Blocked = external setup prevents end-to-end execution; Done = all story criteria and linked evidence accepted. The verification column does not erase completed fixes. P0 = critical correctness/promotion blockers; P1 = reliable delivery and operational readiness; P2 = platform alignment and ongoing documentation. Missing quality evidence always blocks the relevant gate.
 
@@ -29,7 +29,7 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B11](#b11) | P1 | Pause and cancellation | In progress | E2 Durable delivery and recovery |
 | [B12](#b12) | P1 | Business approval continuation | Verification | E2 Durable delivery and recovery |
 | [B13](#b13) | P1 | Org-wide deployment locks | Verification | E2 Durable delivery and recovery |
-| [B14](#b14) | P1 | Existing metadata retrieval | Backlog | E3 Salesforce architecture and capabilities |
+| [B14](#b14) | P1 | Existing metadata retrieval | In progress | E3 Salesforce architecture and capabilities |
 | [B15](#b15) | P1 | Dependency and drift checks | Backlog | E3 Salesforce architecture and capabilities |
 | [B16](#b16) | P1 | Expanded metadata support | Backlog | E3 Salesforce architecture and capabilities |
 | [B17](#b17) | P1 | Flow testing and activation | Backlog | E3 Salesforce architecture and capabilities |
@@ -402,11 +402,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B14 — Existing metadata retrieval
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E3 Salesforce architecture and capabilities
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E3 Salesforce architecture and capabilities
 
 **User story:** As a Salesforce architect, I want an accurate existing-org baseline so generated changes fit the current solution.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Relevant source, Flows, permissions, sharing and dependencies are retrieved with explicit limits.
+**Current evidence / gap:** Bounded inventory now records omitted matches, truncated object/field/Apex lists, unknown access failures and observed schema hashes; prompts explicitly require clarification for affected gaps. Full source, Flow, permission, sharing and dependency retrieval remain outstanding.
 
 **Implementation tasks:** Retrieve relevant metadata and dependencies with explicit type, size and API limits; preserve source hashes and access failures; provide redacted structured context to design/generation.
 

@@ -134,3 +134,7 @@ Verification: 129 local tests, JavaScript syntax checks and whitespace checks pa
 ## Checkpoint 12 — production identity and repair evidence
 
 Signed RSA/OIDC tests confirm the production continuation accepts only its exact workflow, protected environment, pinned commit and continuation run title. Old delivery workers, other continuations, re-runs and expired identities are rejected. Repair now also requires terminal deployment results matching durable operation IDs and exactly one result for every approved scenario with all mapped assertions present. 131 local application tests, syntax and whitespace checks passed. No new skill was created. Live checks remain excluded.
+
+## Checkpoint 13 — metadata inventory and live setup
+
+PR #11 merged into main at a79438e after app checks, real scanner integration and Vercel preview passed. B14 partial implementation now exposes retrieval limits, omitted matches, unknown access and observed hashes. Added live sandbox connection guide and corrected stale org-lock README status. 134 local tests and syntax checks passed. Board: 10 backlog, 10 in progress, 14 verification, 2 live-blocked. No live Salesforce changes or database migrations were performed. No new skill was created.

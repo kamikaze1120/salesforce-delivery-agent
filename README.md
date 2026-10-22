@@ -9,7 +9,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Runtime](https://img.shields.io/badge/node-22-blue)
 
-[Quick start](#quick-start) · [Connect accounts](#connect-your-accounts) · [CI/CD setup](docs/PIPELINE.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md)
+[Quick start](#quick-start) · [Connect accounts](#connect-your-accounts) · [Live sandbox setup](docs/LIVE-SALESFORCE-SETUP.md) · [CI/CD setup](docs/PIPELINE.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md)
 
 </div>
 
@@ -198,6 +198,8 @@ Business approval now dispatches a separate protected production continuation. R
 - [Current versus target architecture](docs/ARCHITECTURE-DECISION-001.md)
 - [Unresolved runner dependency audit](docs/TOOLCHAIN-AUDIT.md)
 
-These changes do not establish live Salesforce readiness. The official Hosted/DX MCP adapter, org-wide locks and other open backlog items remain outstanding.
+These changes do not establish live Salesforce readiness. The official Hosted MCP adapter and other open backlog items remain outstanding. Org-wide locks are implemented and require migration 004 plus live verification.
 
 **Database upgrade required for org locks:** apply [migration 004](database/migrations/004_target_locks.sql) after migration 003. Without it, new Salesforce mutations block. The lock coordinates workspaces by org ID and never expires an uncertain write automatically. [Controlled recovery](docs/DELIVERY-CONTROLS.md) explains how reviewers accept terminal observations without granting a test pass.
+
+Metadata inventory reports object/schema/field limits, inaccessible probes, omitted matches and observed hashes. It remains partial: source bodies, Flow definitions, permissions, sharing and dependencies are not retrieved by this scan. See B14 in the backlog.
