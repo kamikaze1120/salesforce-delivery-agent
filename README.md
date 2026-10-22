@@ -199,3 +199,5 @@ Business approval now dispatches a separate protected production continuation. R
 - [Unresolved runner dependency audit](docs/TOOLCHAIN-AUDIT.md)
 
 These changes do not establish live Salesforce readiness. The official Hosted/DX MCP adapter, org-wide locks and other open backlog items remain outstanding.
+
+**Database upgrade required for org locks:** apply [migration 004](database/migrations/004_target_locks.sql) after migration 003. Without it, new Salesforce mutations block. The lock coordinates workspaces by org ID and never expires an uncertain write automatically. [Controlled recovery](docs/DELIVERY-CONTROLS.md) explains how reviewers accept terminal observations without granting a test pass.

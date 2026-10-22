@@ -117,3 +117,10 @@ Publishing verification — 2026-10-20: all 93 local tests passed; JavaScript sy
 Implemented production continuation (B12), Git ownership/removal checks (B30), and documented current architecture contracts (B34). Added assertion-level evidence, redacted browser diagnostics, constrained repair classification, consistent manual-test wording, owner setup preflight and CLI credential compatibility fixes (B19/B20/B25–B27/B31). The CLI dependency audit reproduces 64 findings; B36 remains unresolved with documented high/critical dispositions.
 
 126 local tests and syntax checks passed before documentation updates. Live pilot/rehearsal excluded per request. Remaining board: 13 backlog, 9 in progress, 12 verification, 2 live-blocked, 0 fully accepted Done. No new skill was created; the existing agent-building skill guided runtime boundaries. More implementation remains; this checkpoint does not claim the entire backlog is finished.
+
+
+## Checkpoint 10 — October 22, 2026
+
+PR #11 publishes checkpoint 9. Added global org locks (migration 004) across pipeline and direct sandbox writes, with no expiry takeover and verified-terminal release. Reviewer recovery now accepts observed terminal results from a stopped exact runner, preserves pause and forces a new pipeline for missing tests. 127 application tests plus credential-free SQL checks and syntax checks passed locally. No live migration or Salesforce call was performed.
+
+Board: 12 backlog, 8 in progress, 14 verification, 2 live-blocked, 0 Done. Remaining implementation is not complete. No new skill created.

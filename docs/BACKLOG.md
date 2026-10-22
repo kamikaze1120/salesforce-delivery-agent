@@ -1,14 +1,14 @@
 # Delivery platform backlog — story board
 
-Updated: **2026-10-21 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
+Updated: **2026-10-22 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
 
 This is a repository-maintained Kanban summary and Jira-style story catalog, not a connected Jira or GitHub Projects board. Story IDs are stable repository IDs, not Jira issue keys. Each card can be copied into an issue. Assignees, sprint commitments and estimates are **unassigned / not estimated**; dependencies below are proposed delivery sequencing, not proof that prerequisite work is complete.
 
 ## Board
 
-| Backlog — 13 | In progress — 9 | Verification — 12 | Blocked: live setup — 2 | Done — 0 |
+| Backlog — 12 | In progress — 8 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
 |---|---|---|---|---|
-| B13–B19, B21–B24, B28–B29 | B10–B11, B20, B25–B27, B31, B35–B36 | B01–B09, B12, B30, B34 | B32, B33 | No story declared fully verified |
+| B14–B19, B21–B24, B28–B29 | B11, B20, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
 
 **Status policy:** Backlog = implementation remains; In progress = partial implementation exists; Verification = implementation/local regression evidence exists but remaining acceptance evidence must be checked; Blocked = external setup prevents end-to-end execution; Done = all story criteria and linked evidence accepted. The verification column does not erase completed fixes. P0 = critical correctness/promotion blockers; P1 = reliable delivery and operational readiness; P2 = platform alignment and ongoing documentation. Missing quality evidence always blocks the relevant gate.
 
@@ -25,10 +25,10 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B07](#b07) | P0 | Destination license gate | Verification | E1 Quality and security |
 | [B08](#b08) | P0 | Baseline regression adapter | Verification | E1 Quality and security |
 | [B09](#b09) | P1 | Durable Salesforce operation IDs | Verification | E2 Durable delivery and recovery |
-| [B10](#b10) | P1 | Recovery and reconciliation | In progress | E2 Durable delivery and recovery |
+| [B10](#b10) | P1 | Recovery and reconciliation | Verification | E2 Durable delivery and recovery |
 | [B11](#b11) | P1 | Pause and cancellation | In progress | E2 Durable delivery and recovery |
 | [B12](#b12) | P1 | Business approval continuation | Verification | E2 Durable delivery and recovery |
-| [B13](#b13) | P1 | Org-wide deployment locks | Backlog | E2 Durable delivery and recovery |
+| [B13](#b13) | P1 | Org-wide deployment locks | Verification | E2 Durable delivery and recovery |
 | [B14](#b14) | P1 | Existing metadata retrieval | Backlog | E3 Salesforce architecture and capabilities |
 | [B15](#b15) | P1 | Dependency and drift checks | Backlog | E3 Salesforce architecture and capabilities |
 | [B16](#b16) | P1 | Expanded metadata support | Backlog | E3 Salesforce architecture and capabilities |
@@ -301,11 +301,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B10 — Recovery and reconciliation
 
-**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E2 Durable delivery and recovery
+**Type:** Story · **Priority:** P1 · **Status:** Verification · **Epic:** E2 Durable delivery and recovery
 
 **User story:** As a operator, I want read-only reconciliation of interrupted operations so recovery uses actual Salesforce status.
 
-**Current evidence / gap:** In progress. A restricted MCP reconciliation mode now exposes only org inspection and exact saved-ID status reads; offline subprocess tests cover its boundary. Reviewer-requested authenticated worker dispatch and server-side result recording are implemented with simulated transport tests. Reviewer-only interrupted-request retirement is implemented: exact stopped-run verification or 24-hour unclaimed expiry, audited reason, revoked callbacks and retained history. Controlled recovery transitions, stale-lease handling and live rehearsal remain outstanding. Original audit outcome: CI/CD shows saved operation IDs, run/artifact identity and timestamps; unresolved starts are disabled. Authenticated status checks are implemented; controlled recovery transition and live rehearsal remain pending.
+**Current evidence / gap:** Controlled reviewer acceptance now checks terminal observations, exact artifact/journal and a stopped original runner. It preserves pause, clears stale approval, marks tests incomplete and permits only a new pipeline. No-ID intents remain blocked. Live fault injection remains.
 
 **Implementation tasks:** Add an authenticated reconciliation worker bound to the original org, operation, artifact and run; query saved IDs without deployment tools; implement audited recovery transitions. The journal UI already exists.
 
@@ -377,11 +377,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B13 — Org-wide deployment locks
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E2 Durable delivery and recovery
+**Type:** Story · **Priority:** P1 · **Status:** Verification · **Epic:** E2 Durable delivery and recovery
 
 **User story:** As a platform operator, I want exclusive target-org mutation so separate deliveries cannot collide.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Concurrent deliveries cannot mutate the same target through this platform.
+**Current evidence / gap:** Global org-ID locks now cover pipeline and direct sandbox mutations across workspaces. Atomic SQL acquisition, ownership/heartbeat history and terminal-state release are implemented. Expired leases do not unlock uncertain writes. PostgreSQL-compatible SQL verification passes; real concurrent/live verification remains.
 
 **Implementation tasks:** Implement durable org-ID locks with atomic acquisition, ownership, lease/heartbeat and audit history; prevent expiry from freeing an org with an unresolved write.
 
@@ -1001,3 +1001,5 @@ Additional gaps found during implementation should receive a new stable ID (star
 ## October 21 implementation checkpoint
 
 See [delivery controls](DELIVERY-CONTROLS.md) and [toolchain audit](TOOLCHAIN-AUDIT.md). 126 local tests and syntax checks passed before final documentation updates. No live Salesforce calls or production promotion were performed. The CLI credential command was corrected using official vendor documentation; Hosted/DX integration remains unimplemented.
+
+October 22: B10/B13 implementation now has controlled terminal recovery and global org locks. 127 local tests and syntax checks passed, plus the target-lock SQL verification script. Migration 004 is required; no live database changes were made.

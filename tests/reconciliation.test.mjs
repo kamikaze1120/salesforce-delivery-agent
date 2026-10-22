@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,sign} from 'node:crypto';
 import {hash} from '../lib/core.mjs';
-import {createReconciliation,claimReconciliation,recordReconciliation,reconciliationContext,retireReconciliation} from '../lib/reconciliation.mjs';
+import {createReconciliation,claimReconciliation,recordReconciliation,reconciliationContext,retireReconciliation,acceptReconciliation} from '../lib/reconciliation.mjs';
 import {verifyRunnerToken,nextStage} from '../lib/pipeline.mjs';
 import {canRecover} from '../lib/workflow.mjs';
 const id='0Af000000000001AAA',pid='12345678-1234-1234-1234-123456789abc',artifactHash='a'.repeat(64),trustedCommit='b'.repeat(40);
@@ -90,4 +90,14 @@ test('retirement rejects active, wrong, unknown or altered evidence without modi
  assert.throws(()=>retireReconciliation(d,'old',{id:'reviewer'},'Investigate the stopped status check worker.',{}),/current/);
  recordReconciliation(d,r.id,'456',observation(d));
  assert.throws(()=>retireReconciliation(d,r.id,{id:'reviewer'},'Investigate the stopped status check worker.',{}),/unobserved/);
+});
+
+test('reviewer recovery accepts only terminal observations from a stopped exact runner and never passes a stage',()=>{
+ const d=claimed(),r=d.pipeline.reconciliation;recordReconciliation(d,r.id,'456',observation(d));
+ const workflow={id:123,status:'completed',head_sha:trustedCommit,display_title:`Delivery ${pid}`};
+ for(const change of [w=>w.id=999,w=>w.status='in_progress',w=>w.head_sha='wrong']){const w=structuredClone(workflow);change(w);assert.throws(()=>acceptReconciliation(d,r.id,{id:'reviewer'},'Reviewed terminal recovery evidence.',w));}
+ d.businessApproval={old:true};acceptReconciliation(d,r.id,{id:'reviewer'},'Reviewed terminal recovery evidence.',workflow);
+ assert.equal(d.paused,true);assert.equal(d.reconciliationRequired,false);assert.equal(d.pipeline.stages[0].status,'blocked');assert.equal(d.businessApproval,undefined);assert.throws(()=>nextStage(d.pipeline,'qa'),/Previous/);
+ const before=hash(d);acceptReconciliation(d,r.id,{id:'reviewer'},'Retry lock release only.',workflow);assert.equal(hash(d),before);
+ const unfinished=claimed(),u=unfinished.pipeline.reconciliation;recordReconciliation(unfinished,u.id,'456',observation(unfinished,false));assert.throws(()=>acceptReconciliation(unfinished,u.id,{id:'reviewer'},'Reviewed terminal recovery evidence.',workflow),/terminal/);
 });

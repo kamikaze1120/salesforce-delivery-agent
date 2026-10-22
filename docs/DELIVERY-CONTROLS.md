@@ -37,3 +37,13 @@ Current policy is automation-required: manual notes are supplemental, visibly la
 ## Toolchain posture (B19/B36)
 
 The bridge remains project-owned MCP, not Salesforce Hosted/DX MCP. It now uses the current dedicated CLI token command with fixed arguments and suppressed credential output. See [the dependency audit](TOOLCHAIN-AUDIT.md) for unresolved runner vulnerabilities. No claim of security clearance or full production readiness is made.
+
+## Global target locks and controlled recovery (B10/B13)
+
+Apply `database/migrations/004_target_locks.sql` after migration 003 before using either the pipeline or direct sandbox validation/deployment. The setup preflight checks its version marker. No migration is applied automatically to your live database.
+
+A global Salesforce org-ID lock covers all workspaces, pipeline stages and direct sandbox operations through this application. The server must acquire it before issuing a write intent. Lease timestamps support diagnosis; expiry never transfers ownership. A lost worker or uncertain write retains its lock. Successful/failed/blocked terminal reports with no unresolved operation release it after the report is persisted. Direct sandbox operations release only after polling records a terminal result. This does not coordinate deployments made outside this platform.
+
+For a saved operation ID: pause, request the restricted read-only status workflow, then use **Accept terminal recovery**. The server verifies the original GitHub runner is stopped, every observed operation is terminal and the exact artifact/journal still matches. Acceptance records the reviewer and rationale, removes stale production approval, keeps the delivery paused and marks the stage blocked. It does not invent missing tests or continue a previously claimed stage. Resume and start a new reviewed pipeline when appropriate. **Retry verified lock release** can repeat a failed database unlock without replaying Salesforce writes.
+
+An intent without a saved Salesforce ID, a lost pre-claim checkpoint, or a nonterminal remote operation remains blocked for investigation. No force-unlock route is provided. SQL checks run against a credential-free PostgreSQL-compatible test engine in CI; real cross-process/live verification remains outstanding.
