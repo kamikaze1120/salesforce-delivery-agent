@@ -14,12 +14,13 @@ test('signed delivery callbacks must persist fresh destination license evidence 
  const now=Math.floor(Date.now()/1000),claims={iss:'https://token.actions.githubusercontent.com',aud:process.env.APP_ORIGIN,exp:now+300,nbf:now-1,iat:now,repository:'owner/repo',event_name:'workflow_dispatch',ref:'refs/heads/main',workflow_sha:sha,workflow_ref:'owner/repo/.github/workflows/salesforce-delivery.yml@refs/heads/main',sub:'repo:owner/repo:environment:dev',run_attempt:'1',run_id:'123'};
  const payload=[{alg:'RS256',kid:'test'},claims].map(x=>Buffer.from(JSON.stringify(x)).toString('base64url')).join('.');
  const req={headers:{authorization:'Bearer '+payload+'.'+sign('RSA-SHA256',Buffer.from(payload),privateKey).toString('base64url')}},base={workspaceId:wid,jobId:wid,pipelineId:pid,stage:'dev'};
- const old=global.fetch;global.fetch=async(url,opts={})=>{
+ let lockAvailable=true;const old=global.fetch;global.fetch=async(url,opts={})=>{
   const u=String(url),body=opts.body?JSON.parse(opts.body):null;
   if(u.includes('jwks'))return Response.json({keys:[jwk]});
   if(u.includes('/workspaces?'))return Response.json([{id:wid,connection_version:0}]);
   if(u.includes('/jobs?'))return Response.json([job]);
   if(u.includes('/connections?'))return Response.json([{encrypted_config:seal({owner:'owner',repo:'repo',token:'synthetic'},`${wid}:github`)}]);
+  if(u.includes('/rpc/acquire_target_org'))return Response.json(lockAvailable);
   if(u.includes('/rpc/claim_job')){job={...job,busy:true,version:job.version+1};return Response.json([job]);}
   if(u.includes('/rpc/finish_job')){job={...job,data:body.p_data,busy:false,version:job.version+1};return Response.json([job]);}
   if(u.endsWith('/actions/runs/123'))return Response.json({display_title:`Delivery ${pid}`,head_sha:sha});
@@ -32,6 +33,6 @@ test('signed delivery callbacks must persist fresh destination license evidence 
   let r=await runnerRequest(req,{...base,action:'qualityPreflight',inventory:{...inventory,orgId:'other'}});assert.equal(r.license.status,'blocked');await assert.rejects(intent,/license preflight/);
   r=await runnerRequest(req,{...base,action:'qualityPreflight',inventory});assert.equal(r.license.status,'passed');assert.equal(job.data.pipeline.stages[0].licensePreflight.orgId,target.orgId);
   job.data.pipeline.stages[0].licensePreflight.checkedAt=new Date(Date.now()-300001).toISOString();await assert.rejects(intent,/license preflight/);
-  await runnerRequest(req,{...base,action:'qualityPreflight',inventory});await intent();assert.equal(job.data.pipeline.stages[0].operations[0].phase,'intent');
+  await runnerRequest(req,{...base,action:'qualityPreflight',inventory});lockAvailable=false;await assert.rejects(intent,/org is locked/);assert.equal(job.data.pipeline.stages[0].operations.length,0);lockAvailable=true;await intent();assert.equal(job.data.pipeline.stages[0].operations[0].phase,'intent');
  }finally{global.fetch=old;}
 });

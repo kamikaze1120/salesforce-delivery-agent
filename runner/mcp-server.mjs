@@ -1,3 +1,4 @@
+import {cliAuthentication} from './cli-auth.mjs';
 // Project-owned MCP server: fixed Salesforce tools, no arbitrary shell or SOQL.
 import readline from 'node:readline';
 import {scanCapabilities} from '../lib/capabilities.mjs';
@@ -16,9 +17,7 @@ const policy=mcpPolicy(mode,target,manifest);
 // Recovery never loads a deployable artifact. Unknown modes fail before authentication.
 const artifacts=mode==='delivery'?JSON.parse(await readFile(process.env.DELIVERY_ARTIFACT_FILE,'utf8')):undefined;
 if(artifacts)assert(hash(artifacts.files)===artifacts.hash,'Artifact integrity check failed.');
-const auth=JSON.parse((await exec('sf',['org','display','--target-org','delivery-target','--json'],{maxBuffer:2e6})).stdout).result;
-const c={instanceUrl:origin(auth.instanceUrl,'Salesforce'),accessToken:auth.accessToken};
-assert(c.accessToken,'Salesforce authentication is missing.');
+const {auth,connection:c}=await cliAuthentication();
 const tools=[
   {name:'inspect_org',description:'Verify the configured org identity and edition.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
   {name:'inspect_capabilities',description:'Read destination license, limit and API-user capability inventory.',inputSchema:{type:'object',properties:{},additionalProperties:false}},

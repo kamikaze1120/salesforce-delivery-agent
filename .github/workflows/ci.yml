@@ -16,3 +16,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run build
+      - name: Verify durable org-lock SQL without external credentials
+        run: |
+          npm install --prefix "$RUNNER_TEMP/lock-tests" --ignore-scripts --no-audit @electric-sql/pglite@0.3.14
+          PGLITE_MODULE="$RUNNER_TEMP/lock-tests/node_modules/@electric-sql/pglite/dist/index.js" node scripts/verify-target-locks.mjs

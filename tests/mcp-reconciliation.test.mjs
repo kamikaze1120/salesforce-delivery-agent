@@ -47,7 +47,7 @@ test('real MCP subprocess limits tools, verifies org identity and reads only sav
  const dir=await mkdtemp(join(tmpdir(),'mcp-readonly-test-'));let client;
  try{
   // Synthetic CLI identity only. No Salesforce credentials or network are used.
-  await writeFile(join(dir,'sf'),'#!/bin/sh\nprintf \'%s\\n\' \'{"result":{"instanceUrl":"https://example.my.salesforce.com","accessToken":"synthetic-test-token"}}\'\n',{mode:0o700});
+  await writeFile(join(dir,'sf'),'#!/bin/sh\nprintf \'%s\\n\' \'{"status":0,"result":{"instanceUrl":"https://example.my.salesforce.com","accessToken":"synthetic-test-token"}}\'\n',{mode:0o700});
   await writeFile(join(dir,'target.json'),JSON.stringify(target));
   await writeFile(join(dir,'manifest.json'),JSON.stringify(manifest()));
   await writeFile(join(dir,'offline.mjs'),`

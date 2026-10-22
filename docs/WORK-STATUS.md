@@ -110,3 +110,27 @@ Publishing verification — 2026-10-20: all 93 local tests passed; JavaScript sy
 
 - Remote scanner correction: plugin 5.16.0 reports analyzer core 0.53.0 and PMD adapter 0.46.0. These are independent version namespaces; a mistaken equality check was removed and the actual observed combination added to regression coverage. Installation pins and version-presence checks remain enforced.
 - Newly discovered B36: real CLI installation reported 64 dependency vulnerabilities (16 moderate, 47 high, 1 critical); application-only install reported zero. Toolchain advisory triage and reviewed pin remediation remain outstanding. This is recorded separately from generated Salesforce security findings.
+
+
+## Checkpoint 9 — October 21, 2026
+
+Implemented production continuation (B12), Git ownership/removal checks (B30), and documented current architecture contracts (B34). Added assertion-level evidence, redacted browser diagnostics, constrained repair classification, consistent manual-test wording, owner setup preflight and CLI credential compatibility fixes (B19/B20/B25–B27/B31). The CLI dependency audit reproduces 64 findings; B36 remains unresolved with documented high/critical dispositions.
+
+126 local tests and syntax checks passed before documentation updates. Live pilot/rehearsal excluded per request. Remaining board: 13 backlog, 9 in progress, 12 verification, 2 live-blocked, 0 fully accepted Done. No new skill was created; the existing agent-building skill guided runtime boundaries. More implementation remains; this checkpoint does not claim the entire backlog is finished.
+
+
+## Checkpoint 10 — October 22, 2026
+
+PR #11 publishes checkpoint 9. Added global org locks (migration 004) across pipeline and direct sandbox writes, with no expiry takeover and verified-terminal release. Reviewer recovery now accepts observed terminal results from a stopped exact runner, preserves pause and forces a new pipeline for missing tests. 127 application tests plus credential-free SQL checks and syntax checks passed locally. No live migration or Salesforce call was performed.
+
+Board: 12 backlog, 8 in progress, 14 verification, 2 live-blocked, 0 Done. Remaining implementation is not complete. No new skill created.
+
+## Checkpoint 11 — browser resource policy
+
+B21 now has reviewed exact HTTPS Salesforce resource origins, blocked-request evidence, and disabled service workers. Network failures cannot appear as passing business scenarios. Live Lightning compatibility remains outstanding. Board: 11 backlog, 9 in progress, 14 verification, 2 live-blocked.
+
+Verification: 129 local tests, JavaScript syntax checks and whitespace checks passed. No live browser/Salesforce test or database migration was executed. Official MCP constraints and local DX MCP retirement are documented in DELIVERY-CONTROLS.md.
+
+## Checkpoint 12 — production identity and repair evidence
+
+Signed RSA/OIDC tests confirm the production continuation accepts only its exact workflow, protected environment, pinned commit and continuation run title. Old delivery workers, other continuations, re-runs and expired identities are rejected. Repair now also requires terminal deployment results matching durable operation IDs and exactly one result for every approved scenario with all mapped assertions present. 131 local application tests, syntax and whitespace checks passed. No new skill was created. Live checks remain excluded.

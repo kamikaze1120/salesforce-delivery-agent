@@ -189,3 +189,15 @@ A separate credential-free `Security scanner integration` workflow exercises the
 ### Interrupted operation recovery
 
 The CI/CD journal shows saved Salesforce operation evidence and blocks unresolved restarts. A restricted MCP reconciliation mode now allows org inspection and status reads for exact saved IDs without exposing write tools. Owners and reviewers can now request an authenticated, read-only GitHub recovery check after pausing and stopping the original runner. Results update the saved operation journal while the delivery remains paused. Reviewers can retire an interrupted read request after its claimed worker stops, or after 24 hours if it was never claimed, then request a fresh check. Retirement preserves unresolved deployment outcomes and the pause. Controlled recovery decisions and live verification remain pending. See [runner recovery](docs/RUNNER-RECOVERY.md) for the contract and limitations, and [B10](docs/BACKLOG.md#b10) for the remaining acceptance criteria.
+
+### October 21 delivery controls
+
+Business approval now dispatches a separate protected production continuation. Runner repositories must install `salesforce-production.yml` and review/pin the updated commit. New test suites map acceptance criteria to exact Apex methods or browser assertions. Git revisions track owned files and explicit removals; legacy deliveries without ownership records block safely. Workspace owners can run setup preflight from Connections.
+
+- [Setup and behavior changes](docs/DELIVERY-CONTROLS.md)
+- [Current versus target architecture](docs/ARCHITECTURE-DECISION-001.md)
+- [Unresolved runner dependency audit](docs/TOOLCHAIN-AUDIT.md)
+
+These changes do not establish live Salesforce readiness. The official Hosted/DX MCP adapter, org-wide locks and other open backlog items remain outstanding.
+
+**Database upgrade required for org locks:** apply [migration 004](database/migrations/004_target_locks.sql) after migration 003. Without it, new Salesforce mutations block. The lock coordinates workspaces by org ID and never expires an uncertain write automatically. [Controlled recovery](docs/DELIVERY-CONTROLS.md) explains how reviewers accept terminal observations without granting a test pass.
