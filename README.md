@@ -97,7 +97,7 @@ All settings are per workspace; there are no hardcoded customer accounts.
 | Salesforce development | My Domain login URL, environment kind, expected org ID for Developer Edition, External Client App client ID/secret, OAuth authorization |
 | Jira Cloud | Site URL, project key, issue type ID, account email, API token and any required field defaults |
 | GitHub CI/CD | Private Salesforce source repository, source folder, base branch, fine-grained token, trusted runner commit, four environment definitions |
-| Development LLM | OpenAI or Azure OpenAI API credentials and a JSON-capable Chat Completions model/deployment |
+| Development LLM | OpenAI, Azure OpenAI, or Groq API credentials and a JSON-capable Chat Completions model/deployment |
 
 Salesforce OAuth callback: `https://YOUR-APP/api/service?op=sfCallback`. Enable Web Server OAuth with `api` and `refresh_token` scopes, PKCE and client-secret validation. Rotated refresh tokens are persisted with a database revision claim; interrupted exchanges require reauthorization instead of token replay.
 
@@ -201,3 +201,7 @@ Business approval now dispatches a separate protected production continuation. R
 These changes do not establish live Salesforce readiness. The official Hosted/DX MCP adapter, org-wide locks and other open backlog items remain outstanding.
 
 **Database upgrade required for org locks:** apply [migration 004](database/migrations/004_target_locks.sql) after migration 003. Without it, new Salesforce mutations block. The lock coordinates workspaces by org ID and never expires an uncertain write automatically. [Controlled recovery](docs/DELIVERY-CONTROLS.md) explains how reviewers accept terminal observations without granting a test pass.
+
+### Groq development connection
+
+In Connections → Development LLM, select **Groq API**, enter a JSON-capable model such as `openai/gpt-oss-120b`, and paste your Groq API key. Leave Azure fields blank, save, then select **Test model connection**. The server uses the fixed `https://api.groq.com/openai/v1/chat/completions` endpoint; no custom endpoint is needed. Keys use the existing encrypted credential storage. Free-tier quotas and model availability are controlled by Groq; start with a small synthetic BRD. A successful connection test does not validate Salesforce code or license compatibility.
