@@ -203,3 +203,7 @@ These changes do not establish live Salesforce readiness. The official Hosted MC
 **Database upgrade required for org locks:** apply [migration 004](database/migrations/004_target_locks.sql) after migration 003. Without it, new Salesforce mutations block. The lock coordinates workspaces by org ID and never expires an uncertain write automatically. [Controlled recovery](docs/DELIVERY-CONTROLS.md) explains how reviewers accept terminal observations without granting a test pass.
 
 Metadata inventory reports object/schema/field limits, inaccessible probes, omitted matches and observed hashes. It remains partial: source bodies, Flow definitions, permissions, sharing and dependencies are not retrieved by this scan. See B14 in the backlog.
+
+### Immediate Salesforce integration roadmap
+
+[B37–B43](docs/BACKLOG.md#immediate-salesforce-integration-work--october-23-2026) prioritize configurable API scopes, token lifecycle, official Hosted MCP, Einstein AI, Visualforce, Lightning and controlled web sessions. Current API/token support is being extended; the additional adapters are planned. External Client App scope selection does not activate them or grant product licenses.
