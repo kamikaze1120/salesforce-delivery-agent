@@ -1,14 +1,14 @@
 # Delivery platform backlog — story board
 
-Updated: **2026-10-22 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
+Updated: **2026-10-23 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI and seven immediate Salesforce integration stories B37–B43. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
 
 This is a repository-maintained Kanban summary and Jira-style story catalog, not a connected Jira or GitHub Projects board. Story IDs are stable repository IDs, not Jira issue keys. Each card can be copied into an issue. Assignees, sprint commitments and estimates are **unassigned / not estimated**; dependencies below are proposed delivery sequencing, not proof that prerequisite work is complete.
 
 ## Board
 
-| Backlog — 11 | In progress — 9 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
+| Backlog — 17 | In progress — 10 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
 |---|---|---|---|---|
-| B14–B19, B22–B24, B28–B29 | B11, B20–B21, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
+| B15–B19, B22–B24, B28–B29, B37–B43 | B11, B14, B20–B21, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
 
 **Status policy:** Backlog = implementation remains; In progress = partial implementation exists; Verification = implementation/local regression evidence exists but remaining acceptance evidence must be checked; Blocked = external setup prevents end-to-end execution; Done = all story criteria and linked evidence accepted. The verification column does not erase completed fixes. P0 = critical correctness/promotion blockers; P1 = reliable delivery and operational readiness; P2 = platform alignment and ongoing documentation. Missing quality evidence always blocks the relevant gate.
 
@@ -29,7 +29,7 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B11](#b11) | P1 | Pause and cancellation | In progress | E2 Durable delivery and recovery |
 | [B12](#b12) | P1 | Business approval continuation | Verification | E2 Durable delivery and recovery |
 | [B13](#b13) | P1 | Org-wide deployment locks | Verification | E2 Durable delivery and recovery |
-| [B14](#b14) | P1 | Existing metadata retrieval | Backlog | E3 Salesforce architecture and capabilities |
+| [B14](#b14) | P1 | Existing metadata retrieval | In progress | E3 Salesforce architecture and capabilities |
 | [B15](#b15) | P1 | Dependency and drift checks | Backlog | E3 Salesforce architecture and capabilities |
 | [B16](#b16) | P1 | Expanded metadata support | Backlog | E3 Salesforce architecture and capabilities |
 | [B17](#b17) | P1 | Flow testing and activation | Backlog | E3 Salesforce architecture and capabilities |
@@ -52,6 +52,14 @@ This is a repository-maintained Kanban summary and Jira-style story catalog, not
 | [B34](#b34) | P2 | Agent/stack implementation alignment | Verification | E6 Platform and documentation |
 | [B35](#b35) | P2 | Documentation/onboarding | In progress | E6 Platform and documentation |
 | [B36](#b36) | P1 | Runner tooling dependency security | In progress | E1 Quality and security |
+
+| [B37](#b37) | P1 | Configurable Salesforce API authorization | Backlog — immediate | E7 Salesforce integrations |
+| [B38](#b38) | P1 | Refresh-token lifecycle and reauthorization | Backlog — immediate | E7 Salesforce integrations |
+| [B39](#b39) | P1 | Salesforce Hosted MCP integration | Backlog — immediate | E7 Salesforce integrations |
+| [B40](#b40) | P1 | Salesforce Einstein AI provider | Backlog — immediate | E7 Salesforce integrations |
+| [B41](#b41) | P1 | Visualforce development and UI verification | Backlog — immediate | E7 Salesforce integrations |
+| [B42](#b42) | P1 | Lightning UI development and verification | Backlog — immediate | E7 Salesforce integrations |
+| [B43](#b43) | P1 | Controlled Salesforce web-session access | Backlog — immediate | E7 Salesforce integrations |
 
 ## Working agreements and definition of done
 
@@ -402,11 +410,11 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 ### B14 — Existing metadata retrieval
 
-**Type:** Story · **Priority:** P1 · **Status:** Backlog · **Epic:** E3 Salesforce architecture and capabilities
+**Type:** Story · **Priority:** P1 · **Status:** In progress · **Epic:** E3 Salesforce architecture and capabilities
 
 **User story:** As a Salesforce architect, I want an accurate existing-org baseline so generated changes fit the current solution.
 
-**Current evidence / gap:** Backlog. Original audit outcome: Relevant source, Flows, permissions, sharing and dependencies are retrieved with explicit limits.
+**Current evidence / gap:** Bounded inventory now records omitted matches, truncated object/field/Apex lists, unknown access failures and observed schema hashes; prompts explicitly require clarification for affected gaps. Full source, Flow, permission, sharing and dependency retrieval remain outstanding.
 
 **Implementation tasks:** Retrieve relevant metadata and dependencies with explicit type, size and API limits; preserve source hashes and access failures; provide redacted structured context to design/generation.
 
@@ -996,10 +1004,171 @@ Dependencies can be designed together (for example B10/B13, B17/B29 and B20/B25)
 
 The audit stories support the requested BRD → requirements/Jira → design/mockup approval → Salesforce architecture → MCP → Dev → tests/repair → quality gate → QA → UAT → business approval → production flow. B32 validates the upstream BRD/Jira/mockup path; B33 validates promotion. B18/B07 cover license analysis and destination enforcement; B19 covers MCP; B26 covers bounded autonomous repair. B34 keeps the target multi-agent stack distinct from the implemented system. Copado is not the target deployment mechanism.
 
-Additional gaps found during implementation should receive a new stable ID (starting B37), a clear story and acceptance evidence rather than silently expanding a completed story. This catalog covers the original 35-item audit plus the newly observed tooling issue; it is not a guarantee that no further gaps will be found.
+Additional gaps found during implementation should receive a new stable ID (starting B44), a clear story and acceptance evidence rather than silently expanding a completed story. This catalog covers the original 35-item audit plus the newly observed tooling issue; it is not a guarantee that no further gaps will be found.
 
 ## October 21 implementation checkpoint
 
 See [delivery controls](DELIVERY-CONTROLS.md) and [toolchain audit](TOOLCHAIN-AUDIT.md). 126 local tests and syntax checks passed before final documentation updates. No live Salesforce calls or production promotion were performed. The CLI credential command was corrected using official vendor documentation; Hosted/DX integration remains unimplemented.
 
 October 22: B10/B13 implementation now has controlled terminal recovery and global org locks. 127 local tests and syntax checks passed, plus the target-lock SQL verification script. Migration 004 is required; no live database changes were made.
+
+## Immediate Salesforce integration work — October 23, 2026
+
+The seven capabilities refer to the seven scopes selected in the setup screenshot, including web. They are immediate implementation priorities, not seven completed integrations. B37/B38 build on existing API/OAuth functionality. B39 implements the existing B19 workstream; B41/B42 extend B16. Parent and child stories share evidence and must not double-count completion. Scope selection neither grants a license nor proves functionality.
+
+Sequence: B37 → B38 → B39/B40 → B41/B42 → B43, respecting existing dependencies and critical safety fixes. External Client App scopes can be prepared now, but future client changes may still require user consent. Live verification stays in B32/B33.
+
+<a id="b37"></a>
+
+### B37 — Configurable Salesforce API authorization
+
+**Type:** Story · **Priority:** P1 — immediate · **Status:** Backlog · **Epic:** E7 Salesforce integrations
+
+**Scope mapping:** `api`
+
+**User story:** As a workspace owner, I want reviewed connection capabilities so each workspace requests the API access its enabled features need.
+
+**Implementation tasks:** Add a server-validated capability-to-scope mapping and owner-facing selection; persist requested and granted scopes separately; invalidate verification when settings change. Existing API support remains the starting point.
+
+**Acceptance criteria / expected result:**
+
+- [ ] Unknown scopes are rejected.
+- [ ] missing grants block the affected feature.
+- [ ] saved selections cannot bypass org identity or release approvals.
+
+**Dependencies:** B18, B31.
+
+**Verification evidence:** Focused positive/negative integration tests, redacted sandbox results, current provider documentation and updated setup instructions. No live execution claimed.
+
+<a id="b38"></a>
+
+### B38 — Refresh-token lifecycle and reauthorization
+
+**Type:** Story · **Priority:** P1 — immediate · **Status:** Backlog · **Epic:** E7 Salesforce integrations
+
+**Scope mapping:** `refresh_token / offline_access`
+
+**User story:** As a user, I want durable authorization and clear renewal prompts so connection expiry does not silently interrupt delivery.
+
+**Implementation tasks:** Extend existing rotation/CAS handling with granted-scope evidence, revoked/expired token states, disconnect and feature-specific reauthorization UI. Never replay an ambiguous token exchange.
+
+**Acceptance criteria / expected result:**
+
+- [ ] Concurrent refresh does not reuse a rotated token.
+- [ ] revocation and expiry require reauthorization.
+- [ ] credentials remain encrypted and excluded from logs.
+
+**Dependencies:** B37, existing OAuth rotation controls.
+
+**Verification evidence:** Focused positive/negative integration tests, redacted sandbox results, current provider documentation and updated setup instructions. No live execution claimed.
+
+<a id="b39"></a>
+
+### B39 — Salesforce Hosted MCP integration
+
+**Type:** Story · **Priority:** P1 — immediate · **Status:** Backlog · **Epic:** E7 Salesforce integrations
+
+**Scope mapping:** `mcp_api`
+
+**User story:** As a delivery user, I want supported Salesforce Hosted MCP tools connected to the architecture and delivery workflow.
+
+**Implementation tasks:** Implement the official client adapter under B19: External Client App/PKCE authentication, enabled-server discovery, tool schema validation, supported-endpoint configuration, allowlisted tools and audited execution. Distinguish read-only grounding from deploy-capable tools; do not infer deployment support.
+
+**Acceptance criteria / expected result:**
+
+- [ ] Disabled servers, missing entitlement/scopes and unknown tools fail closed.
+- [ ] read-only discovery works in the sandbox.
+- [ ] writes retain existing policy and approval gates.
+
+**Dependencies:** B19 implementation parent, B14, B18, B37–B38.
+
+**Verification evidence:** Focused positive/negative integration tests, redacted sandbox results, current provider documentation and updated setup instructions. No live execution claimed.
+
+<a id="b40"></a>
+
+### B40 — Salesforce Einstein AI provider
+
+**Type:** Story · **Priority:** P1 — immediate · **Status:** Backlog · **Epic:** E7 Salesforce integrations
+
+**Scope mapping:** `einstein_gpt_api`
+
+**User story:** As a workspace owner, I want Salesforce-hosted Einstein services available as a configurable AI provider.
+
+**Implementation tasks:** Verify the intended supported Einstein/Models API and its exact scope and licensing requirements; add provider selection, structured-output adapter, BRD/story/architecture generation integration, usage accounting and error handling. Keep existing providers configurable.
+
+**Acceptance criteria / expected result:**
+
+- [ ] An entitled sandbox completes a synthetic structured-output request.
+- [ ] unavailable features explain verified alternatives.
+- [ ] invalid output cannot become deployable metadata or test evidence.
+
+**Dependencies:** B18, B37–B38; confirmed API, entitlement and usage policy.
+
+**Verification evidence:** Focused positive/negative integration tests, redacted sandbox results, current provider documentation and updated setup instructions. No live execution claimed.
+
+<a id="b41"></a>
+
+### B41 — Visualforce development and UI verification
+
+**Type:** Story · **Priority:** P1 — immediate · **Status:** Backlog · **Epic:** E7 Salesforce integrations
+
+**Scope mapping:** `visualforce`
+
+**User story:** As a Salesforce developer, I want reviewed Visualforce pages and controllers generated, deployed and tested when a BRD requires them.
+
+**Implementation tasks:** Extend B16 metadata writers/validators for ApexPage and ApexComponent with reviewed controllers and permissions; add preview/review and persona-aware Playwright assertions. Use OAuth scope only where page access requires it.
+
+**Acceptance criteria / expected result:**
+
+- [ ] Supported pages/components validate and deploy in Dev.
+- [ ] CRUD/FLS, escaping, page access and regression checks pass.
+- [ ] unsupported markup and unsafe code block.
+
+**Dependencies:** B16 implementation parent, B20–B23, B37.
+
+**Verification evidence:** Focused positive/negative integration tests, redacted sandbox results, current provider documentation and updated setup instructions. No live execution claimed.
+
+<a id="b42"></a>
+
+### B42 — Lightning UI development and verification
+
+**Type:** Story · **Priority:** P1 — immediate · **Status:** Backlog · **Epic:** E7 Salesforce integrations
+
+**Scope mapping:** `lightning`
+
+**User story:** As a business reviewer, I want Lightning UI changes linked to approved mockups and tested as representative users.
+
+**Implementation tasks:** Extend existing LWC support with explicit supported metadata, navigation/exposure configuration, reviewed OAuth/session access where required, and testable locator contracts. Broader Lightning metadata support belongs to B16.
+
+**Acceptance criteria / expected result:**
+
+- [ ] Mockup approval binds generated components.
+- [ ] persona access and UI assertions are evidenced.
+- [ ] scope selection alone never reports UI deployment or test success.
+
+**Dependencies:** B16, B20–B23, B29, B37.
+
+**Verification evidence:** Focused positive/negative integration tests, redacted sandbox results, current provider documentation and updated setup instructions. No live execution claimed.
+
+<a id="b43"></a>
+
+### B43 — Controlled Salesforce web-session access
+
+**Type:** Story · **Priority:** P1 — immediate · **Status:** Backlog · **Epic:** E7 Salesforce integrations
+
+**Scope mapping:** `web`
+
+**User story:** As a tester, I want scoped browser access for approved Salesforce business scenarios.
+
+**Implementation tasks:** Implement an optional web-session adapter with supported authentication, per-persona encrypted session lifecycle, exact origin policy, expiry/revocation handling and redacted evidence. Do not expose OAuth tokens in frontend state, URLs or logs.
+
+**Acceptance criteria / expected result:**
+
+- [ ] Session isolation and expiry tests pass.
+- [ ] unrelated origins are blocked.
+- [ ] production smoke remains separately approved and read-only.
+- [ ] no browser-based metadata deployment.
+
+**Dependencies:** B21–B24, B37–B38.
+
+**Verification evidence:** Focused positive/negative integration tests, redacted sandbox results, current provider documentation and updated setup instructions. No live execution claimed.
