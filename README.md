@@ -15,6 +15,10 @@
 
 > **Release status:** v0.4 adds mockup review, test generation, a Salesforce MCP bridge and a gated GitHub Actions pipeline. Automated tests pass locally. The four-org pipeline has **not** been verified end to end against live accounts. Configure and validate non-production environments before enabling production.
 
+## Live setup checkpoint — October 26, 2026
+
+Database, target locks, Salesforce, Jira and Groq passed the latest live setup check. CI/CD remains disabled pending protected environments, per-org JWT credentials and complete target configuration. The new **Salesforce setup verification** workflow performs a read-only non-production authentication/MCP check. Follow [environment readiness](docs/ENVIRONMENT-READINESS.md) for the exact remaining steps and limits.
+
 ## What you can do
 
 | Start with | The studio prepares | You control |
@@ -51,7 +55,7 @@ The separate GitHub runner installs explicitly pinned Salesforce CLI and Playwri
 
 1. Import this repository into Vercel.
 2. Set **Framework: Other**, **Root: ./**, **Build: npm run build**, **Output: public**, **Node: 22.x**.
-3. Create a Supabase project. For a new database, run `database/schema.sql` once. For an existing v0.3 database, run `database/migrations/003_pipeline.sql`—do not rerun the complete schema.
+3. Create a Supabase project. For a new database, run `database/schema.sql` once. For an existing v0.3 database, run `database/migrations/003_pipeline.sql`—do not rerun the complete schema. For both new and existing databases, apply `database/migrations/004_target_locks.sql` after the base/pipeline schema.
 4. Add the settings below to the intended Vercel environment and redeploy.
 5. Create and confirm users in Supabase Auth. Sign in, create a workspace, and configure its connections.
 

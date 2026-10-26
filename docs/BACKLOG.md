@@ -4,6 +4,10 @@ Updated: **2026-10-22 (America/Chicago)**. Scope: the original **35 audit backlo
 
 This is a repository-maintained Kanban summary and Jira-style story catalog, not a connected Jira or GitHub Projects board. Story IDs are stable repository IDs, not Jira issue keys. Each card can be copied into an issue. Assignees, sprint commitments and estimates are **unassigned / not estimated**; dependencies below are proposed delivery sequencing, not proof that prerequisite work is complete.
 
+## October 26 readiness checkpoint
+
+B31 now includes a protected-main, non-production read-only JWT/MCP verification workflow and an explicit disabled-pipeline diagnostic. Branch checks require code review and the reconciliation workflow. Workspace selection persists per user to prevent checks accidentally running against an older workspace. Database/target-lock migrations and Salesforce/Jira/Groq connections passed live preflight; end-to-end runner and deployment evidence is still pending. See [ENVIRONMENT-READINESS.md](ENVIRONMENT-READINESS.md). No story is promoted to Done by this checkpoint.
+
 ## Board
 
 | Backlog — 11 | In progress — 9 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |

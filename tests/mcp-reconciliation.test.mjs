@@ -67,6 +67,10 @@ test('real MCP subprocess limits tools, verifies org identity and reads only sav
   const list=await client.request('tools/list');assert.deepEqual(list.tools.map(t=>t.name),reconciliationTools);
   for(const name of ['deploy_metadata','validate_metadata','run_apex_tests'])await assert.rejects(client.request('tools/call',{name,arguments:{}}),/MCP operation failed/);
   await assert.rejects(client.request('tools/call',{name:'deployment_status',arguments:{id:other}}),/MCP operation failed/);
+  client.close();client=new SalesforceMcp({...env,DELIVERY_MCP_MODE:'setup',DELIVERY_RECONCILIATION_FILE:undefined});
+  await client.initialize();assert.equal((await client.call('inspect_org')).Id,target.orgId);
+  assert.deepEqual((await client.request('tools/list')).tools.map(t=>t.name),['inspect_org']);
+  for(const name of ['deploy_metadata','validate_metadata','run_apex_tests','deployment_status'])await assert.rejects(client.request('tools/call',{name,arguments:{id}}),/MCP operation failed/);
   client.close();client=new SalesforceMcp({...env,TEST_ORG_ID:'00D000000000002AAA'});
   await client.initialize();
   await assert.rejects(client.call('deployment_status',{id}),/MCP operation failed/);
