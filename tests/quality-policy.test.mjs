@@ -112,7 +112,7 @@ test('pipeline snapshots quality policy only from the exact protected runner com
   const u=String(url);
   if(u.endsWith('/git/ref/heads/main'))return Response.json({object:{sha}});
   if(u.endsWith('/branches/main'))return Response.json({protected:true});
-  if(u.endsWith('/branches/main/protection'))return Response.json({allow_force_pushes:{enabled:false},allow_deletions:{enabled:false},enforce_admins:{enabled:true},required_status_checks:{contexts:['check']}});
+  if(u.endsWith('/branches/main/protection'))return Response.json({allow_force_pushes:{enabled:false},allow_deletions:{enabled:false},enforce_admins:{enabled:true},required_status_checks:{contexts:['check']},required_pull_request_reviews:{required_approving_review_count:1}});
   if(u.includes('/environments/'))return Response.json({protection_rules:[{type:'required_reviewers',reviewers:[{id:1}],prevent_self_review:true}],deployment_branch_policy:{protected_branches:true}});
   if(u.includes('/actions/workflows/'))return Response.json({state:'active'});
   if(u.includes('/contents/quality/policies/')){contentPath=u;return missing?new Response('',{status:404}):Response.json({encoding:'base64',content:Buffer.from(JSON.stringify(reviewed)).toString('base64')});}

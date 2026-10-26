@@ -1,18 +1,24 @@
 import {assert,origin,uuid} from '../lib/core.mjs';
 
 export const deliveryTools=['inspect_org','validate_metadata','deploy_metadata','deployment_status','run_apex_tests','inspect_capabilities','inspect_apex_source'];
+export const setupTools=['inspect_org'];
 export const reconciliationTools=['inspect_org','deployment_status'];
 const deploymentId=id=>typeof id==='string'&&/^0Af[A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?$/.test(id);
 export function mcpMode(value){
  const mode=value===undefined?'delivery':value;
- assert(['delivery','reconciliation'].includes(mode),'Unsupported MCP execution mode.');
+ assert(['delivery','reconciliation','setup'].includes(mode),'Unsupported MCP execution mode.');
  return mode;
 }
 // A manifest is a constrained snapshot, NOT authentication or authorization.
 // A future authenticated worker must obtain it from the persisted server journal.
 export function mcpPolicy(modeValue,target,manifest){
- const mode=mcpMode(modeValue),allowed=new Set(mode==='delivery'?deliveryTools:reconciliationTools);
+ const mode=mcpMode(modeValue),allowed=new Set(mode==='delivery'?deliveryTools:mode==='setup'?setupTools:reconciliationTools);
  const ids=new Set();
+ if(mode==='setup'){
+  assert(['dev','qa','uat'].includes(target?.name)&&['sandbox','developer'].includes(target.kind),'Setup verification is non-production only.');
+  assert(/^00D[A-Za-z0-9]{12}(?:[A-Za-z0-9]{3})?$/.test(target.orgId),'Expected setup org ID required.');
+  assert(origin(target.url,'Salesforce')===target.url,'Exact setup origin required.');
+ }
  if(mode==='reconciliation'){
   assert(manifest&&manifest.version===1,'A versioned reconciliation manifest is required.');
   uuid(manifest.pipelineId);

@@ -12,9 +12,10 @@ The default order follows the product requirement: Dev → QA → UAT → Busine
 
 Copy these files from a reviewed Delivery Studio release to the Salesforce source repository:
 
-- `.github/workflows/salesforce-delivery.yml`
-- Entire `runner/` directory
-- `lib/core.mjs`, `lib/integrations.mjs`, `lib/store.mjs` (MCP bridge dependencies)
+- `.github/workflows/salesforce-delivery.yml`, `salesforce-production.yml`, `salesforce-reconciliation.yml`, and `salesforce-setup.yml`
+- Entire `runner/` and `lib/` directories (including transitive imports)
+- `package.json` and `package-lock.json`; keep the runtime dependency lockfile
+- Reviewed tests, CI checks, and policy/setup documentation
 
 Use a protected branch such as `main`. Review all copied code, pin a tested Node/runtime/toolchain, and record the resulting 40-character commit SHA. Do not place runner logic on generated feature branches, run pull-request code with production secrets, or change the workflow’s name or path without updating identity validation. The pipeline fails if the configured trusted branch head moves until the new reviewed SHA is saved.
 
@@ -34,6 +35,8 @@ Set these repository variables:
 | `DELIVERY_ENVIRONMENTS` | `{"dev":"dev","qa":"qa","uat":"uat","production":"production"}`; values are your GitHub environment names |
 | `SALESFORCE_CLI_VERSION` | Exact reviewed `@salesforce/cli` version, no `latest` or version ranges |
 | `PLAYWRIGHT_VERSION` | Exact reviewed `playwright` version, no ranges |
+| `CODE_ANALYZER_VERSION` | Exact reviewed Code Analyzer v5 plugin version |
+| `DELIVERY_SETUP_TARGETS` | Reviewed non-production target map; see [readiness guide](ENVIRONMENT-READINESS.md) |
 
 The runner uses the hosted Ubuntu image’s Node.js runtime (Node 22+ required). For reproducibility, organizations should additionally pin their reviewed runner image and Node setup action. Review dependencies and update pinned versions through pull requests.
 
@@ -82,7 +85,7 @@ Paste this structure into **Connections → GitHub CI/CD → CI/CD configuration
 
 `maxRepairs` is 0–3. Zero disables automatic repairs. `kind: "developer"` is allowed only for a verified non-production Developer Edition org. All four org IDs must differ. `environment` must match both the GitHub environment and `DELIVERY_ENVIRONMENTS` mapping. Saving configuration invalidates existing approvals; create new deliveries after changing account bindings.
 
-Run **Check connection**. The server verifies the runner SHA, active workflow, protected branch and environment rules. It does not prove the Salesforce JWT login or browser session works; the first stage preflight does that. Apply `database/migrations/003_pipeline.sql` to an existing database before starting a pipeline.
+Run **Check connection**. The server verifies the runner SHA, active workflow, protected branch and environment rules. It does not prove the Salesforce JWT login or browser session works; the first stage preflight does that. Apply `database/migrations/003_pipeline.sql` to an existing database, then `004_target_locks.sql` before starting a pipeline. Run **Salesforce setup verification** from protected `main` to check non-production JWT/MCP identity without a deployment. See [ENVIRONMENT-READINESS.md](ENVIRONMENT-READINESS.md).
 
 ## 6. Human and automatic gates
 
@@ -113,4 +116,4 @@ Before production: run a synthetic BRD through all non-production stages, exerci
 
 ## Expanded quality and business gates
 
-Read [DELIVERY-FLOW.md](DELIVERY-FLOW.md) before enabling the runner. The shipped workflow currently lacks the required quality-evidence producers and will stop at the expanded gate. Do not substitute a manually authored successful report. After verified adapters are installed, UAT success creates the release report in the app. Approve that exact report in the app before approving the production environment job in GitHub. Account bindings remain locked during this approval wait. Re-pin the reviewed runner SHA after changing workflow or adapters.
+Read [DELIVERY-FLOW.md](DELIVERY-FLOW.md) before enabling the runner. The shipped runner includes constrained quality adapters, but each delivery still needs its reviewed project-specific quality policies, runtime baselines and live evidence. Unsupported metadata and missing evidence block promotion. Do not substitute a manually authored successful report. After all gates pass, UAT success creates the release report in the app. Approve that exact report in the app before approving the production environment job in GitHub. Account bindings remain locked during this approval wait. Re-pin the reviewed runner SHA after changing workflow or adapters.

@@ -134,3 +134,11 @@ Verification: 129 local tests, JavaScript syntax checks and whitespace checks pa
 ## Checkpoint 12 — production identity and repair evidence
 
 Signed RSA/OIDC tests confirm the production continuation accepts only its exact workflow, protected environment, pinned commit and continuation run title. Old delivery workers, other continuations, re-runs and expired identities are rejected. Repair now also requires terminal deployment results matching durable operation IDs and exactly one result for every approved scenario with all mapped assertions present. 131 local application tests, syntax and whitespace checks passed. No new skill was created. Live checks remain excluded.
+
+## Checkpoint 13 — October 26, 2026
+
+- Live preflight reconfirmed database, target locks, Salesforce, Jira and Groq passing in the configured workspace. Earlier failing database output was stale.
+- Added non-production setup workflow, restricted MCP identity-only mode, protected-branch/configuration checks and temporary credential cleanup. No Salesforce deployment/test operation is available in setup mode.
+- Pipeline verification now requires approving code review and active reconciliation workflow. Improved disabled-pipeline remediation, report timestamp guidance and per-user workspace persistence.
+- Updated installation manifest, migration instructions and readiness/backlog documentation. Local validation: 138 tests passed, syntax and whitespace checks passed; real MCP subprocess tested with offline transport. Remote CI and deployment evidence belongs to the publishing PR.
+- Full CI/CD activation, live JWT/setup execution and deployment rehearsal remain blocked on target orgs/credentials, enforced review protections, reviewed toolchain and release-specific quality baselines. No production deployment performed.
