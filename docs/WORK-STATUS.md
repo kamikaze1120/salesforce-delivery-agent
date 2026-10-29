@@ -154,3 +154,9 @@ Signed RSA/OIDC tests confirm the production continuation accepts only its exact
 - October 26 live preflight already passed database, migration 004, Salesforce, Jira and Groq. Reapplying migrations from old failure reports is not appropriate without newer contradictory evidence. No Salesforce deployment or production release was performed in this checkpoint.
 - See the current [backlog](BACKLOG.md), [recovery status](RECOVERY-STATUS-2026-10-29.md), and [Salesforce roadmap](SALESFORCE-INTEGRATION-ROADMAP.md).
 
+
+## Checkpoint — October 29: sampled local Apex source hashes
+
+- PR #22 (`2595ebb`) adds a bounded, read-only local Apex source hash sample to the Salesforce metadata inventory and direct drift comparator. No Apex source body is included in the model/report. Provider-inaccessible, truncated and malformed observations are explicitly marked unknown or partial and block the guarded direct path. GitHub App checks run 103 and the Vercel preview passed.
+- Sampled source hashes are **not** a complete org metadata dependency baseline. Other Apex, Flows, permission sets, sharing, object relationships and externally modified dependencies remain unverified; protected CI/CD still needs its own target pre-write drift gate.
+- Local Salesforce disconnect clears this application's token storage and invalidates approvals through connection replacement. It does **not** call Salesforce's revoke endpoint. A Salesforce administrator must revoke the provider-side app grant separately if full revocation is required.
