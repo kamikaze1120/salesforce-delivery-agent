@@ -5,11 +5,11 @@ import {verifyDirectMetadataDrift,requireNoDirectDrift} from '../lib/direct-meta
 const inventory=(name='Account')=>({
  objects:[{name,label:name,custom:false}],
  schemas:[{name,status:'observed',fields:[{name:'Name',type:'string',required:true,referenceTo:[]}],availableFields:1,returnedFields:1}],
- apexClasses:[],apexSourceHashes:[],
+ apexClasses:[],apexSourceHashes:[],flowDefinitions:[],
  metadataInventory:{version:1,limits:{objects:400,schemas:8,fieldsPerObject:120,apexClasses:200},
   evidence:{objects:{status:'observed',available:1,returned:1},
    selection:{status:'observed',matched:1,selected:[name],omitted:[]},
-   apex:{status:'observed',returned:0},apexSourceHashes:{status:'observed',returned:0}},
+   apex:{status:'observed',returned:0},apexSourceHashes:{status:'observed',returned:0},flows:{status:'observed',returned:0}},
   notRetrieved:['Complete Apex source','Flow definitions','permission sets','sharing rules','metadata dependencies']}
 });
 const approved=()=>({org:{id:'00DTEST'},...inventory()});
