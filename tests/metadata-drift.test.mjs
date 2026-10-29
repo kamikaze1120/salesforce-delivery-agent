@@ -140,3 +140,15 @@ test('unknown sampled Apex source blocks even if observed objects agree',()=>{
  current.metadataInventory.evidence.apexSourceHashes={status:'unknown'};
  assert.equal(compareMetadataBaselines(approved,current).blocking,true);
 });
+
+
+test('permission-set identity drift blocks and missing access cannot be treated as no permissions',()=>{
+ const a=baseline(),b=structuredClone(a);
+ a.permissionSets=[{name:'Case_Access'}];b.permissionSets=[{name:'Case_Manage'}];
+ a.metadataInventory.evidence.permissionSets={status:'observed',returned:1};b.metadataInventory.evidence.permissionSets={status:'observed',returned:1};
+ const drift=compareMetadataBaselines(a,b);
+ assert.equal(drift.blocking,true);
+ assert.ok(drift.differences.some(d=>d.path==='permissionSets.Case_Access'));
+ b.metadataInventory.evidence.permissionSets={status:'unknown'};
+ assert.ok(compareMetadataBaselines(a,b).unverifiable.includes('current.permissionSets'));
+});
