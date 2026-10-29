@@ -104,3 +104,10 @@ No production deployment was performed during this recovery session.
 ## Additional B14/B15 source evidence
 
 PR [#22](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/22), merged as `2595ebb`, adds a capped sample of local Apex source hashes to metadata discovery and direct sandbox drift checks. Raw source is not returned. Truncation, permission denial and unknown scope block the direct gate; full Apex source coverage, Flow/permission/sharing dependencies and the protected runner pre-write check remain pending. GitHub App checks run 103 and Vercel preview passed. Local disconnect is a removal of the app's saved authorization, not Salesforce provider-side token revocation. No live Salesforce write occurred.
+
+## B14/B15 continuation — bounded inventory and runner safety
+
+- App PR [#24](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/24), merged `41a2dea`, retrieves bounded Flow names and active version IDs; the metadata drift check detects version/name changes. CI and Vercel preview passed.
+- App PR [#25](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/25), merged `7792d22`, records bounded non-profile permission-set names and blocks unknown/partial observations. CI and Vercel preview passed.
+- Private source runner PR [#3](https://github.com/kamikaze1120/salesforce-delivery-source/pull/3), merged `2c03525`, checks a fresh read-only catalog fingerprint before each stage's validation and deployment requests, with offline regression tests passing. This snapshot does not prove a release was matched to a full approved dependency baseline and cannot substitute for protected reviewer decisions.
+- No changes to live Salesforce metadata, UAT or Production were made by these code merges. B14/B15 remain **In progress** pending complete metadata/dependency coverage and live rehearsal.
