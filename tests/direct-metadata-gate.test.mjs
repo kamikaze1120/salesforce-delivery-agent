@@ -16,7 +16,7 @@ const approved=()=>({org:{id:'00DTEST'},...inventory()});
 const request=async path=>{
  if(path==='/sobjects')return {sobjects:[{name:'Account',label:'Account',custom:false}]};
  if(path==='/sobjects/Account/describe')return {fields:[{name:'Name',type:'string',nillable:false,referenceTo:[]}]};
- if(path.startsWith('/tooling/query'))return {records:[],done:true};
+ if(path.startsWith('/tooling/query')||path.startsWith('/query'))return {records:[],done:true};
  throw Error('unexpected request');
 };
 test('current Salesforce metadata permits direct sandbox validation only when matching',async()=>{
