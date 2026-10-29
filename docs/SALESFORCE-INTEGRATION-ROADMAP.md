@@ -18,6 +18,10 @@ Recommended sequence: **B37 → B38 → B39/B40 → B41/B42 → B43**. Live veri
 
 ---
 
+## October 29 implementation evidence
+
+PR [#19](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/19) implements the least-privilege core (`api`, `refresh_token`) allowlist, binds requested grants to the OAuth PKCE state, and distinguishes provider-observed from unknown/insufficient grants. PR [#20](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/20) adds refresh-state handling and UI grant visibility/controlled disconnect. App CI and Vercel previews passed before merges. These are foundations only; full B37/B38 completion depends on dynamic feature-scoped authorization, authoritative live grant observation, real revocation/race tests and reviewed operational controls. Optional Hosted MCP, Einstein and browser scopes are deliberately not requested for unimplemented features.
+
 ## B37 — Configurable Salesforce API authorization
 
 **Scope mapping:** `api`
