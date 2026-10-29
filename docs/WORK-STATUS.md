@@ -142,3 +142,15 @@ Signed RSA/OIDC tests confirm the production continuation accepts only its exact
 - Pipeline verification now requires approving code review and active reconciliation workflow. Improved disabled-pipeline remediation, report timestamp guidance and per-user workspace persistence.
 - Updated installation manifest, migration instructions and readiness/backlog documentation. Local validation: 138 tests passed, syntax and whitespace checks passed; real MCP subprocess tested with offline transport. Remote CI and deployment evidence belongs to the publishing PR.
 - Full CI/CD activation, live JWT/setup execution and deployment rehearsal remain blocked on target orgs/credentials, enforced review protections, reviewed toolchain and release-specific quality baselines. No production deployment performed.
+
+
+## Checkpoint — October 29, 2026: metadata safety and OAuth lifecycle
+
+- PR #15 (`e804abf`) recovered bounded metadata inventory; PR #16 (`3b68bcb`) established canonical, bounded drift comparisons. PR #17 (`2aa6ead`) recovered setup documentation and B37–B43 roadmap. Stale PR #12 was closed, not merged.
+- PR #18 (`b2c0ce7`) enforced re-observation before **direct sandbox** validation/deployment. Inaccessible or truncated observations, changed metadata, unsupported baselines and changed target identity block. GitHub App checks run 95 succeeded, and the PR Vercel preview succeeded.
+- PR #19 (`56113ca`) bound least-privilege core API/refresh scopes to the OAuth PKCE state and persisted requested versus observed/unknown grant evidence. App checks run 97 and Vercel preview succeeded.
+- PR #20 (`eb6aec1`) added explicit expiry/reauthorization handling, owner-confirmed disconnection with connection-version invalidation, and redacted authorization evidence in the UI. App checks run 99 and Vercel preview succeeded.
+- Work is **partial**, not complete: B14 lacks Apex/Flow/permission/dependency retrieval; B15 protected CI runner remains ungated by this direct-operation check; B37 lacks feature-configurable grants and live observation; B38 lacks live revocation/rotation/disconnect evidence. Protected runner execution, toolchain advisories, live synthetic deployment, four-org promotion, and all production approvals are outstanding.
+- October 26 live preflight already passed database, migration 004, Salesforce, Jira and Groq. Reapplying migrations from old failure reports is not appropriate without newer contradictory evidence. No Salesforce deployment or production release was performed in this checkpoint.
+- See the current [backlog](BACKLOG.md), [recovery status](RECOVERY-STATUS-2026-10-29.md), and [Salesforce roadmap](SALESFORCE-INTEGRATION-ROADMAP.md).
+
