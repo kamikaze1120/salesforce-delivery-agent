@@ -100,3 +100,7 @@ No production deployment was performed during this recovery session.
 - **PR #19 / `56113ca`:** a server-owned core OAuth scope allowlist, PKCE state binding and redacted provider grant evidence (including explicit unknown if omitted). GitHub App checks run 97 and Vercel preview succeeded. Optional Hosted MCP/Einstein/web access is not requested before implementation.
 - **PR #20 / `eb6aec1`:** connection expiry safeguards, refresh-scope evidence re-evaluation, owner-only disconnect and UI authorization status. GitHub App checks run 99 and Vercel preview succeeded. No connection was actually disconnected by the code change.
 - The B01–B43 board was brought up to date without marking any story Done. No non-production Salesforce deployment or production release occurred.
+
+## Additional B14/B15 source evidence
+
+PR [#22](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/22), merged as `2595ebb`, adds a capped sample of local Apex source hashes to metadata discovery and direct sandbox drift checks. Raw source is not returned. Truncation, permission denial and unknown scope block the direct gate; full Apex source coverage, Flow/permission/sharing dependencies and the protected runner pre-write check remain pending. GitHub App checks run 103 and Vercel preview passed. Local disconnect is a removal of the app's saved authorization, not Salesforce provider-side token revocation. No live Salesforce write occurred.
