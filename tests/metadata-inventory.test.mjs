@@ -8,11 +8,12 @@ test('inventory exposes all enforced limits including done=true Apex LIMIT trunc
   calls++;
   if(path==='/sobjects')return {sobjects:Array.from({length:401},(_,i)=>({name:'Thing'+i,label:'Thing',custom:true,secret:'omit'}))};
   if(path.includes('/describe'))return {fields:Array.from({length:121},(_,i)=>({name:'F'+i,type:'string',nillable:true,referenceTo:[],defaultValue:'sensitive'}))};
+  if(decodeURIComponent(path).includes('FROM FlowDefinition'))return {done:true,records:[]};
   if(decodeURIComponent(path).includes('LIMIT 21'))return {done:true,records:Array.from({length:21},(_,i)=>({Name:'Local'+i,Body:'private source '+i}))};
   assert.match(decodeURIComponent(path),/LIMIT 201$/);
   return {done:true,records:Array.from({length:201},(_,i)=>({Name:'Test'+i,Body:'secret'}))};
  },'Thing');
- assert.equal(calls,11);
+ assert.equal(calls,12);
  assert.equal(result.objects.length,400);
  assert.equal(result.schemas.length,8);
  assert.equal(result.schemas[0].fields.length,120);
@@ -71,4 +72,16 @@ test('Apex source fingerprints remain redacted and stable while source changes a
  const after=await metadataInventory(request,'Safe');
  assert.notEqual(before.apexSourceHashes[0].hash,after.apexSourceHashes[0].hash);
  assert.ok(!JSON.stringify(after).includes('public static'));
+});
+
+
+test('Flow identity observations are capped and redact provider records',async()=>{
+ const result=await metadataInventory(async path=>{
+  if(path==='/sobjects')return {sobjects:[]};
+  if(decodeURIComponent(path).includes('FROM FlowDefinition'))return {done:true,records:[{DeveloperName:'Intake',ActiveVersionId:null,Extra:'private text'}]};
+  return {done:true,records:[]};
+ },'Flow Intake');
+ assert.deepEqual(result.flowDefinitions,[{name:'Intake',activeVersionId:null}]);
+ assert.equal(result.metadataInventory.evidence.flows.status,'observed');
+ assert.ok(!JSON.stringify(result).includes('private text'));
 });
