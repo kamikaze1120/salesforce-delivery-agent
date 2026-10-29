@@ -107,3 +107,16 @@ test('malformed or duplicate baseline evidence fails closed',()=>{
  unsupported.metadataInventory.version=2;
  assert.throws(()=>metadataBaselineFingerprint(unsupported),error=>error?.status===409&&/supported Salesforce metadata baseline/.test(error.message));
 });
+
+
+test('partial observations and missing BRD selection block even with identical rows',()=>{
+ const partial=baseline();
+ partial.metadataInventory.evidence.objects.status='partial';
+ const result=compareMetadataBaselines(partial,structuredClone(partial));
+ assert.equal(result.blocking,true);
+ assert.ok(result.unverifiable.includes('current.objects'));
+ const unselected=baseline();
+ unselected.metadataInventory.evidence.selection.status='unknown';
+ unselected.metadataInventory.evidence.selection.selected=[];
+ assert.equal(compareMetadataBaselines(unselected,structuredClone(unselected)).blocking,true);
+});
