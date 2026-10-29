@@ -1,6 +1,6 @@
 # Delivery platform backlog — story board
 
-Updated: **2026-10-22 (America/Chicago)**. Scope: the original **35 audit backlog items**, preserving B01–B35, plus B36 discovered during quality-adapter CI. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
+Updated: **2026-10-29 (America/Chicago)**. Scope: the original **35 audit backlog items**, B36 discovered during quality-adapter CI, and B37–B43 Salesforce expansion stories. Source: independent audit of main `a064749` (2026-10-12), updated through recovery release `947e4a7` and the B05–B08 quality-adapter implementation checkpoint.
 
 This is a repository-maintained Kanban summary and Jira-style story catalog, not a connected Jira or GitHub Projects board. Story IDs are stable repository IDs, not Jira issue keys. Each card can be copied into an issue. Assignees, sprint commitments and estimates are **unassigned / not estimated**; dependencies below are proposed delivery sequencing, not proof that prerequisite work is complete.
 
@@ -10,11 +10,15 @@ B31 now includes a protected-main, non-production read-only JWT/MCP verification
 
 ## Board
 
-| Backlog — 11 | In progress — 9 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
+| Backlog — 14 | In progress — 13 | Verification — 14 | Blocked: live setup — 2 | Done — 0 |
 |---|---|---|---|---|
-| B14–B19, B22–B24, B28–B29 | B11, B20–B21, B25–B27, B31, B35–B36 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
+| B16–B19, B22–B24, B28–B29, B39–B43 | B11, B14–B15, B20–B21, B25–B27, B31, B35–B38 | B01–B10, B12–B13, B30, B34 | B32, B33 | No story declared fully verified |
 
 **Status policy:** Backlog = implementation remains; In progress = partial implementation exists; Verification = implementation/local regression evidence exists but remaining acceptance evidence must be checked; Blocked = external setup prevents end-to-end execution; Done = all story criteria and linked evidence accepted. The verification column does not erase completed fixes. P0 = critical correctness/promotion blockers; P1 = reliable delivery and operational readiness; P2 = platform alignment and ongoing documentation. Missing quality evidence always blocks the relevant gate.
+
+## October 29 recovery and current implementation evidence
+
+PRs [#15](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/15) and [#16](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/16) added bounded metadata inventory and drift comparison. [#18](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/18) wired a fail-closed re-read to direct sandbox validation/deployment; [#19](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/19) added redacted OAuth grant evidence; [#20](https://github.com/kamikaze1120/salesforce-delivery-agent/pull/20) added authorization lifecycle visibility and safe disconnect. All three latest PRs passed GitHub App checks and Vercel previews before merging. None ran a live Salesforce deploy or completed protected runner promotion. B14/B15/B37/B38 are **In progress**, not Done. B37–B43 details and remaining acceptance criteria are in [SALESFORCE-INTEGRATION-ROADMAP.md](SALESFORCE-INTEGRATION-ROADMAP.md).
 
 ## Story index
 
@@ -33,8 +37,8 @@ B31 now includes a protected-main, non-production read-only JWT/MCP verification
 | [B11](#b11) | P1 | Pause and cancellation | In progress | E2 Durable delivery and recovery |
 | [B12](#b12) | P1 | Business approval continuation | Verification | E2 Durable delivery and recovery |
 | [B13](#b13) | P1 | Org-wide deployment locks | Verification | E2 Durable delivery and recovery |
-| [B14](#b14) | P1 | Existing metadata retrieval | Backlog | E3 Salesforce architecture and capabilities |
-| [B15](#b15) | P1 | Dependency and drift checks | Backlog | E3 Salesforce architecture and capabilities |
+| [B14](#b14) | P1 | Existing metadata retrieval | In progress | E3 Salesforce architecture and capabilities |
+| [B15](#b15) | P1 | Dependency and drift checks | In progress | E3 Salesforce architecture and capabilities |
 | [B16](#b16) | P1 | Expanded metadata support | Backlog | E3 Salesforce architecture and capabilities |
 | [B17](#b17) | P1 | Flow testing and activation | Backlog | E3 Salesforce architecture and capabilities |
 | [B18](#b18) | P1 | License analysis engine | Backlog | E3 Salesforce architecture and capabilities |
@@ -56,6 +60,13 @@ B31 now includes a protected-main, non-production read-only JWT/MCP verification
 | [B34](#b34) | P2 | Agent/stack implementation alignment | Verification | E6 Platform and documentation |
 | [B35](#b35) | P2 | Documentation/onboarding | In progress | E6 Platform and documentation |
 | [B36](#b36) | P1 | Runner tooling dependency security | In progress | E1 Quality and security |
+| [B37](SALESFORCE-INTEGRATION-ROADMAP.md#b37--configurable-salesforce-api-authorization) | P1 | Configurable Salesforce API authorization | In progress | E3 Salesforce architecture and capabilities |
+| [B38](SALESFORCE-INTEGRATION-ROADMAP.md#b38--refresh-token-lifecycle-and-reauthorization) | P1 | Refresh-token lifecycle and reauthorization | In progress | E3 Salesforce architecture and capabilities |
+| [B39](SALESFORCE-INTEGRATION-ROADMAP.md#b39--salesforce-hosted-mcp-integration) | P1 | Salesforce Hosted MCP integration | Backlog | E3 Salesforce architecture and capabilities |
+| [B40](SALESFORCE-INTEGRATION-ROADMAP.md#b40--salesforce-einstein-ai-provider) | P1 | Salesforce Einstein AI provider | Backlog | E3 Salesforce architecture and capabilities |
+| [B41](SALESFORCE-INTEGRATION-ROADMAP.md#b41--visualforce-development-and-ui-verification) | P1 | Visualforce development and UI verification | Backlog | E3 Salesforce architecture and capabilities |
+| [B42](SALESFORCE-INTEGRATION-ROADMAP.md#b42--lightning-ui-development-and-verification) | P1 | Lightning UI development and verification | Backlog | E4 Testing and repair |
+| [B43](SALESFORCE-INTEGRATION-ROADMAP.md#b43--controlled-salesforce-web-session-access) | P1 | Controlled Salesforce web-session access | Backlog | E4 Testing and repair |
 
 ## Working agreements and definition of done
 

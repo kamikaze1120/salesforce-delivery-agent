@@ -42,9 +42,9 @@ Merged as `3b68bcb` after App checks and Vercel passed.
 - Its metadata implementation was rebuilt on current `main` in PR #15.
 - Its live-setup guidance and B37–B43 roadmap were recovered separately so newer Groq and readiness work was not overwritten.
 
-## Work in the current documentation PR
+## Documentation merged in PR #17
 
-The recovery documentation PR contains:
+The recovery documentation PR #17, merged as `2aa6ead`, contains:
 
 - `LIVE-SALESFORCE-SETUP.md` aligned with the current read-only setup workflow and separate runner JWT credentials;
 - `SALESFORCE-INTEGRATION-ROADMAP.md` with stable stories B37–B43 for API authorization, token lifecycle, Hosted MCP, Einstein, Visualforce, Lightning and controlled web sessions; and
@@ -57,7 +57,7 @@ These documents do not enable scopes, licenses, environments or deployments by t
 | Area | Current state | Next executable work |
 |---|---|---|
 | B14 metadata retrieval | Partial | Retrieve reviewed Apex/Flow/permission/sharing/dependency evidence with explicit limits and hashes. |
-| B15 drift gate | Foundation merged | Re-read the exact target before a write, compare to the approved baseline, persist evidence and invalidate affected approvals. |
+| B15 drift gate | Direct sandbox gate merged in PR #18 | Add full metadata/dependency coverage, pre-write verification in protected CI, and complete affected-approval invalidation. |
 | B16 expanded writers | Backlog | Add schema-aware writers and fixtures for approved metadata types. |
 | B17 Flow testing | Backlog | Implement version-specific Flow execution, activation and restoration evidence. |
 | B18 license engine | Backlog | Add versioned, source-backed entitlement rules and alternatives. |
@@ -68,7 +68,8 @@ These documents do not enable scopes, licenses, environments or deployments by t
 | B32 synthetic pilot | Live blocked | Requires a reviewed synthetic release and functioning Dev runner setup. |
 | B33 four-org rehearsal | Live blocked | Requires distinct Dev, QA, UAT and Production identities plus protected reviewers. |
 | B36 toolchain advisories | In progress | Resolve and retest the recorded Salesforce CLI dependency findings before enabling secret-bearing runners. |
-| B37–B43 Salesforce upgrades | Restored roadmap | Implement in the sequence B37 → B38 → B39/B40 → B41/B42 → B43. |
+| B37–B38 Salesforce OAuth | Partial implementation merged in PRs #19–#20 | Complete feature-specific permissions, live grant, revocation and refresh verification. |
+| B39–B43 Salesforce upgrades | Roadmap | Implement Hosted MCP, Einstein, Visualforce, Lightning and controlled sessions after required adapters and evidence. |
 
 ## External setup still required
 
@@ -83,12 +84,19 @@ The following cannot be closed by repository-only changes:
 
 ## Recommended execution order
 
-1. Wire B15 into the pre-validation/pre-deployment path and test stale-approval invalidation.
+1. Extend B15 from the merged direct sandbox gate to the protected runner, with full dependency checks and stale-approval invalidation.
 2. Expand B14 enough to cover the metadata that B15 must protect.
-3. Implement B37–B38 authorization lifecycle controls.
+3. Finish B37–B38 configuration, scope and revocation tests on top of the merged OAuth foundations.
 4. Complete protected source/environment/JWT setup and ingest authenticated setup evidence.
 5. Run the B32 synthetic Dev pilot, including failure and recovery paths.
 6. Continue B16–B24 and B39–B43 according to the approved pilot requirements.
 7. Run B33 only after four distinct targets and independent reviewers are in place.
 
 No production deployment was performed during this recovery session.
+
+## Continuation in this session — October 29
+
+- **PR #18 / `b2c0ce7`:** pre-validation/pre-deployment direct sandbox metadata drift gate, including fail-closed truncated/unknown evidence. GitHub App checks run 95 and Vercel preview succeeded. Protected CI promotion is separate and still requires its own gate.
+- **PR #19 / `56113ca`:** a server-owned core OAuth scope allowlist, PKCE state binding and redacted provider grant evidence (including explicit unknown if omitted). GitHub App checks run 97 and Vercel preview succeeded. Optional Hosted MCP/Einstein/web access is not requested before implementation.
+- **PR #20 / `eb6aec1`:** connection expiry safeguards, refresh-scope evidence re-evaluation, owner-only disconnect and UI authorization status. GitHub App checks run 99 and Vercel preview succeeded. No connection was actually disconnected by the code change.
+- The B01–B43 board was brought up to date without marking any story Done. No non-production Salesforce deployment or production release occurred.
