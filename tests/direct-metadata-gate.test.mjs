@@ -10,7 +10,7 @@ const inventory=(name='Account')=>({
   evidence:{objects:{status:'observed',available:1,returned:1},
    selection:{status:'observed',matched:1,selected:[name],omitted:[]},
    apex:{status:'observed',returned:0},apexSourceHashes:{status:'observed',returned:0},flows:{status:'observed',returned:0}},
-  notRetrieved:['Complete Apex source','Flow definitions','permission sets','sharing rules','metadata dependencies']}
+  notRetrieved:['Complete Apex source','Flow graph and dependencies','permission sets','sharing rules','metadata dependencies']}
 });
 const approved=()=>({org:{id:'00DTEST'},...inventory()});
 const request=async path=>{
