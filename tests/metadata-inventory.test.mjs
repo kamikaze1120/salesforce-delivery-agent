@@ -8,14 +8,18 @@ test('inventory exposes all enforced limits including done=true Apex LIMIT trunc
   calls++;
   if(path==='/sobjects')return {sobjects:Array.from({length:401},(_,i)=>({name:'Thing'+i,label:'Thing',custom:true,secret:'omit'}))};
   if(path.includes('/describe'))return {fields:Array.from({length:121},(_,i)=>({name:'F'+i,type:'string',nillable:true,referenceTo:[],defaultValue:'sensitive'}))};
+  if(decodeURIComponent(path).includes('LIMIT 21'))return {done:true,records:Array.from({length:21},(_,i)=>({Name:'Local'+i,Body:'private source '+i}))};
   assert.match(decodeURIComponent(path),/LIMIT 201$/);
   return {done:true,records:Array.from({length:201},(_,i)=>({Name:'Test'+i,Body:'secret'}))};
  },'Thing');
- assert.equal(calls,10);
+ assert.equal(calls,11);
  assert.equal(result.objects.length,400);
  assert.equal(result.schemas.length,8);
  assert.equal(result.schemas[0].fields.length,120);
  assert.equal(result.metadataInventory.evidence.apex.status,'partial');
+ assert.equal(result.metadataInventory.evidence.apexSourceHashes.status,'partial');
+ assert.equal(result.apexSourceHashes.length,20);
+ assert.ok(result.apexSourceHashes.every(s=>/^[a-f0-9]{64}$/.test(s.hash)));
  assert.equal(result.metadataInventory.evidence.selection.omitted.length,393);
  assert.equal(result.schemas[0].status,'partial');
  assert.equal(result.metadataInventory.status,'partial');
@@ -49,4 +53,22 @@ test('baseline hashes are stable and change when observed field definitions chan
  type='boolean';
  const c=await metadataInventory(read,'Account');
  assert.notEqual(a.metadataInventory.hash,c.metadataInventory.hash);
+});
+
+
+test('Apex source fingerprints remain redacted and stable while source changes are detected',async()=>{
+ let body='class Safe {}';
+ const request=async path=>{
+  if(path==='/sobjects')return {sobjects:[]};
+  if(decodeURIComponent(path).includes('LIMIT 21'))return {done:true,records:[{Name:'Safe',Body:body}]};
+  return {done:true,records:[]};
+ };
+ const before=await metadataInventory(request,'Safe');
+ assert.equal(before.metadataInventory.evidence.apexSourceHashes.status,'observed');
+ assert.equal(before.apexSourceHashes.length,1);
+ assert.ok(!JSON.stringify(before).includes('class Safe'));
+ body='class Safe { public static void run() {} }';
+ const after=await metadataInventory(request,'Safe');
+ assert.notEqual(before.apexSourceHashes[0].hash,after.apexSourceHashes[0].hash);
+ assert.ok(!JSON.stringify(after).includes('public static'));
 });

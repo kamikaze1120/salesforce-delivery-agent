@@ -120,3 +120,23 @@ test('partial observations and missing BRD selection block even with identical r
  unselected.metadataInventory.evidence.selection.selected=[];
  assert.equal(compareMetadataBaselines(unselected,structuredClone(unselected)).blocking,true);
 });
+
+
+test('observed Apex body hash changes block direct metadata drift and never reveal source',()=>{
+ const approved=baseline(),current=structuredClone(approved);
+ approved.apexSourceHashes=[{name:'Handler',hash:'a'.repeat(64)}];
+ current.apexSourceHashes=[{name:'Handler',hash:'b'.repeat(64)}];
+ approved.metadataInventory.evidence.apexSourceHashes={status:'observed',returned:1};
+ current.metadataInventory.evidence.apexSourceHashes={status:'observed',returned:1};
+ const result=compareMetadataBaselines(approved,current);
+ assert.equal(result.blocking,true);
+ assert.ok(result.differences.some(d=>d.path==='apexSourceHashes.Handler'));
+ assert.ok(!JSON.stringify(result).includes('class Handler'));
+});
+
+test('unknown sampled Apex source blocks even if observed objects agree',()=>{
+ const approved=baseline(),current=structuredClone(approved);
+ approved.metadataInventory.evidence.apexSourceHashes={status:'unknown'};
+ current.metadataInventory.evidence.apexSourceHashes={status:'unknown'};
+ assert.equal(compareMetadataBaselines(approved,current).blocking,true);
+});
