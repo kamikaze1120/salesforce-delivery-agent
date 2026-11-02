@@ -4,6 +4,7 @@ create table public.workspaces (
   name text not null check (length(name) between 1 and 100),
   owner_id uuid not null references auth.users(id),
   connection_version integer not null default 0,
+  sod_mode text not null default 'warn' check (sod_mode in ('warn','enforce')),
   created_at timestamptz not null default now()
 );
 create table public.members (
