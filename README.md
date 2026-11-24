@@ -1,211 +1,243 @@
-<div align="center">
+<p align="center">
+  <img src="./.github/readme/hero.svg" width="100%" alt="Delivery Studio — a BRD flows through gated pipeline stages toward a human approval gate">
+</p>
 
-# Delivery Studio
-### From a BRD to a reviewed Salesforce release
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&amp;weight=600&amp;size=18&amp;duration=2600&amp;pause=700&amp;color=F4C65A&amp;center=true&amp;vCenter=true&amp;width=850&amp;height=42&amp;lines=BRD+in.+Reviewed+Salesforce+metadata+out.;Requirements+%E2%86%92+architecture+%E2%86%92+metadata+%E2%86%92+tests.;A+model+response+is+never+accepted+as+test+evidence.;Dev+org+only.+Production+is+hard-disabled+in+the+app." alt="Typing summary of Delivery Studio">
+</p>
 
-**Clarify → Mock up → Build → Test → Promote**
+<p align="center">
+  <a href="https://salesforce-delivery-agent.vercel.app"><img src="https://img.shields.io/badge/LIVE%20DEMO-open%20the%20studio-F4C65A?style=for-the-badge&amp;labelColor=15103A&amp;logo=vercel&amp;logoColor=white" alt="Live demo"></a>
+</p>
 
-![Version](https://img.shields.io/badge/version-0.4.0-2563eb)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Runtime](https://img.shields.io/badge/node-22-blue)
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.4.0-BD3CFF?style=for-the-badge&amp;labelColor=15103A" alt="Version 0.4.0">
+  <img src="https://img.shields.io/github/last-commit/kamikaze1120/salesforce-delivery-agent?style=for-the-badge&amp;labelColor=15103A&amp;color=F4C65A" alt="Last commit">
+  <a href="https://github.com/kamikaze1120/salesforce-delivery-agent/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/kamikaze1120/salesforce-delivery-agent/ci.yml?branch=main&amp;style=for-the-badge&amp;labelColor=15103A&amp;label=app%20checks" alt="App checks"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/kamikaze1120/salesforce-delivery-agent?style=for-the-badge&amp;labelColor=15103A&amp;color=F4C65A" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/node-22.x-4fc3ff?style=for-the-badge&amp;labelColor=15103A" alt="Node 22">
+</p>
 
-[Quick start](#quick-start) · [Connect accounts](#connect-your-accounts) · [CI/CD setup](docs/PIPELINE.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md)
+**Delivery Studio** is a governed Salesforce delivery agent. You give it a business requirements document (BRD). It produces a requirement-linked plan, follow-up questions, Jira stories, a reviewed architecture, concept mockups, allowlisted Salesforce metadata, and requirement-linked tests. It then validates and tests that exact package, and makes a bounded repair when a non-production stage fails. A human approves every gate.
 
-</div>
+<p align="center"><sub><code>BRD → SDLC</code> ✦ <code>HUMAN APPROVAL</code> ✦ <code>SALESFORCE MCP</code> ✦ <code>JIRA</code> ✦ <code>GITHUB ACTIONS</code> ✦ <code>SUPABASE</code></sub></p>
 
-> **Release status:** v0.4 adds mockup review, test generation, a Salesforce MCP bridge and a gated GitHub Actions pipeline. Automated tests pass locally. The four-org pipeline has **not** been verified end to end against live accounts. Configure and validate non-production environments before enabling production.
+> [!WARNING]
+> **Pilot scope. Read this first.**
+> - The web app only connects to a Salesforce **sandbox** or an **explicitly verified Developer Edition** org. Production and unverified orgs are refused. Only the **Dev** org has been verified live.
+> - **Production promotion is hard-disabled in the app** and returns `403`. The repository includes a gated GitHub Actions path (Dev → QA → UAT → business approval → production), but the saved pipeline configuration is **disabled**. It has **never** been run end to end against live orgs.
+> - Passing unit tests or a green Vercel build does **not** mean the app is ready for Salesforce production. See [environment readiness](docs/ENVIRONMENT-READINESS.md).
 
-## Live setup checkpoint — October 26, 2026
+<h2 align="center">✦ HOW A DELIVERY FLOWS ✦</h2>
+<p align="center"><sub>EVERY ARROW INTO A STAGE PASSES A HUMAN GATE</sub></p>
 
-Database, target locks, Salesforce, Jira and Groq passed the latest live setup check. CI/CD remains disabled pending protected environments, per-org JWT credentials and complete target configuration. The new **Salesforce setup verification** workflow performs a read-only non-production authentication/MCP check. Follow [environment readiness](docs/ENVIRONMENT-READINESS.md) for the exact remaining steps and limits.
+```mermaid
+flowchart LR
+  BRD["📄 BRD<br/>text / Markdown"] --> REQ["Requirements<br/>stories · questions · test cases"]
+  REQ -->|plan approval| ARCH["Architecture<br/>license-aware"]
+  ARCH --> MOCK["Mockups<br/>revise · approve"]
+  MOCK -->|design approval| GEN["Metadata generation<br/>allowlisted paths"]
+  GEN -->|code review| VAL["Validate<br/>RunLocalTests · rollbackOnError"]
+  VAL --> TEST["Tests<br/>Apex · declarative Playwright"]
+  TEST --> GATE{"Quality gate<br/>coverage · security · perf<br/>license · regression"}
+  GATE -->|fail, budget left| REP["Bounded repair<br/>frozen tests + original BRD"]
+  REP --> VAL
+  GATE -->|pass| DEV["✅ Dev org<br/>human-approved deploy"]
+  DEV -.->|disabled in pilot| PROD["⛔ Production"]
 
-## What you can do
-
-| Start with | The studio prepares | You control |
-|---|---|---|
-| A BRD and your Salesforce metadata | Requirement-linked plan, follow-up questions and Jira stories | Business rules and plan approval |
-| An approved plan | AI concept mockups and revisions | Mockup approval before code generation |
-| An approved design | Apex, objects, draft Flows, permission sets and LWC metadata | Code and test-expectation review |
-| A reviewed release | Validation, deployment and tests across your environments | UAT and production approvals in GitHub |
-| An observed non-production failure | A bounded AI repair using the original BRD and frozen tests | Repair budget, pause, evidence and escalation |
-
-**Default deployment order:** Salesforce Dev → QA → UAT → Business approval → Production. QA/Dev/UAT are named, separate Salesforce orgs—not environments hosted by Vercel. Stage order is fixed. Dev can be a sandbox or an explicitly verified Developer Edition org. Developer Edition can substitute for a non-production sandbox only when explicitly selected and verified by org ID and edition.
-
-Copado is no longer required. Old Copado connection records are retained for compatibility but are not used by the pipeline.
-
-## Quick start
-
-Use Node.js 22, download or clone this repository, and run:
-
-```sh
-npm ci --ignore-scripts
-npm run dev
+  classDef gold fill:#071331,stroke:#B17A23,color:#ffe293
+  classDef purple fill:#13052d,stroke:#BD3CFF,color:#fff0b7
+  classDef sky fill:#04061d,stroke:#4fc3ff,color:#c9ecff
+  classDef off fill:#1a0a12,stroke:#ff5f6d,color:#ffd3d6,stroke-dasharray:4 4
+  class BRD,REQ,ARCH,MOCK gold
+  class GEN,VAL,TEST,REP purple
+  class GATE,DEV sky
+  class PROD off
 ```
 
-Open `http://localhost:3000` and choose **Open sample workspace**. No credentials are needed for the sample. Install the locked dependencies first; the server uses a structural XML parser for Salesforce results and metadata policy checks. The sample is a fixture, not a live LLM or deployment.
+<table>
+  <tr>
+    <td width="33%" valign="top">🧭 <b>Clarify</b><br><sub>Reads the original BRD and asks blocking questions. Builds Jira stories and structured test cases that cover every acceptance criterion.</sub></td>
+    <td width="33%" valign="top">🏛️ <b>Architect + mock up</b><br><sub>Code generation needs an approved Salesforce architecture first. Concept mockups go through revisions and an approval.</sub></td>
+    <td width="33%" valign="top">🧱 <b>Generate</b><br><sub>Writes Apex, custom objects, draft Flows, permission sets, LWC, triggers, tabs and Lightning apps, with strict metadata path checks.</sub></td>
+  </tr>
+  <tr>
+    <td valign="top">🧪 <b>Validate + test</b><br><sub>Validates the exact package with <code>RunLocalTests</code>, <code>rollbackOnError</code>, and warnings treated as failures. Then runs Apex and declarative browser tests.</sub></td>
+    <td valign="top">🛡️ <b>Quality gate</b><br><sub>Unknown or incomplete evidence blocks promotion. Evidence comes from observed results only, never from model claims or uploaded pass files.</sub></td>
+    <td valign="top">🔁 <b>Bounded repair</b><br><sub>Has a repair budget and a pause switch. It cannot touch tests, requirements, mockups or permission sets. Ambiguous writes stop the automation.</sub></td>
+  </tr>
+  <tr>
+    <td valign="top">👥 <b>Separation of duties</b><br><sub>A configurable rule (warn by default, or enforce) checks that the person who approves is not the author or a previous approver.</sub></td>
+    <td valign="top">🔔 <b>Attention feed</b><br><sub>Role-aware in-app notifications for questions and review decisions waiting on you.</sub></td>
+    <td valign="top">🧾 <b>Review aid + release report</b><br><sub>A per-file change summary for code review, and a traceable release report after UAT.</sub></td>
+  </tr>
+</table>
+
+<h2 align="center">◈ TRY IT IN 60 SECONDS ◈</h2>
+<p align="center"><sub>NO CREDENTIALS NEEDED FOR THE SAMPLE</sub></p>
 
 ```sh
-npm test
-npm run build
+git clone https://github.com/kamikaze1120/salesforce-delivery-agent.git
+cd salesforce-delivery-agent
+npm ci --ignore-scripts   # Node.js 22
+npm run dev               # http://localhost:3000
 ```
 
-The separate GitHub runner installs explicitly pinned Salesforce CLI and Playwright versions. It runs generated Salesforce metadata, not arbitrary model-generated shell or JavaScript test code.
+Choose **Open sample workspace**. The sample is a fixture. It makes no live LLM calls and does no deployments.
 
-## Deploy the web app to Vercel
+```sh
+npm test        # node --test: 204 test cases across 41 files
+npm run build   # runs scripts/check.mjs
+```
 
-1. Import this repository into Vercel.
-2. Set **Framework: Other**, **Root: ./**, **Build: npm run build**, **Output: public**, **Node: 22.x**.
-3. Create a Supabase project. For a new database, run `database/schema.sql` once. For an existing v0.3 database, run `database/migrations/003_pipeline.sql`—do not rerun the complete schema. For both new and existing databases, apply `database/migrations/004_target_locks.sql` after the base/pipeline schema.
-4. Add the settings below to the intended Vercel environment and redeploy.
-5. Create and confirm users in Supabase Auth. Sign in, create a workspace, and configure its connections.
+<h2 align="center">◆ GROUNDING AND SAFETY ◆</h2>
+<p align="center"><sub>LIMITS ON UNSUPPORTED BEHAVIOR</sub></p>
 
-| Vercel variable | Purpose |
+"Zero hallucinations" cannot be guaranteed. Instead, the studio grounds the work in exact BRD excerpts, requirement IDs, reviewed mockups, frozen test expectations, strict metadata paths, verified target identities, a signed runner identity, and **actual** Salesforce and Playwright results. **A model response is never accepted as test evidence.**
+
+- **Runner identity**: signed GitHub OIDC tokens, bound to the audience, repository, workflow, exact SHA, branch, environment and run.
+- **MCP bridge**: exposes only org inspection, validation and deployment of the immutable package, status polling and named Apex tests. It offers no arbitrary shell, SOQL or tool execution.
+- **Browser tests**: Playwright interprets an approved declarative plan and never runs model-generated JavaScript. Traffic is limited to the configured Salesforce hosts. Production browser tests must be read-only.
+- **Out of scope**: Flows stay in Draft. Activation, destructive changes, data migration, managed packages and broad org administration are not automated. There is no automatic production repair or rollback.
+- **Agent contracts** ([config/agent-contracts.json](config/agent-contracts.json)): no agent approves production, edits acceptance criteria to make a test pass, or retries an ambiguous write.
+
+<h2 align="center">✦ ARCHITECTURE ✦</h2>
+<p align="center"><sub>A ZERO-FRAMEWORK NODE APP, A TRUSTED RUNNER AND YOUR ACCOUNTS</sub></p>
+
+```mermaid
+flowchart LR
+  UI["public/<br/>vanilla JS SPA"] --> API["/api/service<br/>lib/handler.mjs"]
+  API --> DB[("Supabase<br/>auth · workspaces · encrypted creds")]
+  API --> LLM["Your LLM<br/>OpenAI · Azure OpenAI · Groq"]
+  API --> JIRA["Jira Cloud"]
+  API --> SF["Salesforce Dev org<br/>OAuth (PKCE)"]
+  API -->|dispatch| GHA["GitHub Actions<br/>trusted runner/"]
+  GHA -->|OIDC-bound evidence| API
+  GHA --> MCP["Restricted MCP bridge"] --> SF
+
+  classDef gold fill:#071331,stroke:#B17A23,color:#ffe293
+  classDef purple fill:#13052d,stroke:#BD3CFF,color:#fff0b7
+  classDef sky fill:#04061d,stroke:#4fc3ff,color:#c9ecff
+  class UI,API gold
+  class GHA,MCP purple
+  class DB,LLM,JIRA,SF sky
+```
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=nodejs,js,html,css,supabase,vercel,githubactions&amp;theme=dark" alt="Node.js, JavaScript, HTML, CSS, Supabase, Vercel, GitHub Actions">
+</p>
+<p align="center"><sub>Node.js 22 (<code>node:http</code>, one dependency: <code>fast-xml-parser</code>) · Supabase · Vercel · GitHub Actions · pinned Salesforce CLI, Code Analyzer and Playwright on the runner</sub></p>
+
+<h2 align="center">◈ DEPLOY + CONNECT ◈</h2>
+<p align="center"><sub>EVERYTHING IS PER WORKSPACE. NO HARDCODED CUSTOMER ACCOUNTS</sub></p>
+
+<details>
+<summary><b>☁️ Deploy the web app to Vercel</b></summary>
+
+<br>
+
+1. Import this repository into Vercel. Set **Framework: Other**, **Root: ./**, **Build: `npm run build`**, **Output: `public`**, **Node: 22.x**.
+2. Create a Supabase project.
+   - New database: run `database/schema.sql` once.
+   - Existing v0.3 database: run `database/migrations/003_pipeline.sql`. Do **not** rerun the full schema.
+   - Then apply `004_target_locks.sql` (without it, new Salesforce mutations are blocked). Apply `005_separation_of_duties.sql` to enable separation-of-duties modes.
+3. Add the variables below to the intended Vercel environment and redeploy.
+4. Create and confirm users in Supabase Auth, sign in, create a workspace, and configure its connections.
+
+Merging into `main` triggers the Vercel production build of the **web app only**. Salesforce metadata promotion is a separate, gated pipeline.
+
+</details>
+
+<details>
+<summary><b>⚙️ Environment variables</b> (names only)</summary>
+
+<br>
+
+| Variable | Purpose |
 |---|---|
 | `APP_ORIGIN` | Exact HTTPS web-app origin, no trailing slash |
 | `SUPABASE_URL` | Hosted Supabase project origin |
 | `SUPABASE_ANON_KEY` | Supabase Auth public/anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only database credential; never expose to the browser |
-| `ENCRYPTION_KEY` | Random 32 bytes, encoded as base64; preserve securely with database backups |
-| `SALESFORCE_API_VERSION` | Optional; defaults to `65.0`; verify it against your orgs |
-| `ALLOW_SIGNUP` | Optional; `true` enables self-registration; disabled by default |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only database credential. Never expose it to the browser |
+| `ENCRYPTION_KEY` | 32 random bytes, base64. Keep it with your database backups |
+| `SALESFORCE_API_VERSION` | Optional. Defaults to `65.0`. Check it against your orgs |
+| `ALLOW_SIGNUP` | Optional. `true` enables self-registration (off by default) |
 | `SIGNUP_EMAIL_DOMAINS` | Optional comma-separated signup domain allowlist |
+| `PORT` | Optional local port (default `3000`) |
 
-Generate an encryption key locally with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"`. Store it in your secret manager and Vercel, not Git or a ticket. Use `.env.local` for local credentials. Never share production credentials with untrusted previews.
+Generate a key with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"`. Store it in a secret manager and in Vercel, never in Git. Use `.env.local` locally.
 
-## Branches and releases
+</details>
 
-`main` is the single integration branch for this application. The previous version branches were already merged; the audit safety changes were merged in PR #3. Completed branches are removed after their work is preserved in `main`.
+<details>
+<summary><b>🔌 Connections</b></summary>
 
-For each new change, use one short-lived branch and pull request, run the required checks, merge, then delete the branch. This provides a reviewable diff and Vercel preview without keeping permanent version branches. Keep main protected against force pushes and deletion; do not bypass required checks.
+<br>
 
-Merging application changes into `main` triggers the connected Vercel production build. Check that deployment's commit and Ready status before treating the release as live. This deploys the **web application** only. Salesforce metadata promotion uses the separate delivery pipeline, target-org checks and business approval gates.
-
-## Current implementation checkpoint
-
-| Area | Verified behavior | Remaining work |
-|---|---|---|
-| Application safety | 75 local tests passed at the audit checkpoint; runner routing and structural XML checks corrected | Live account integration rehearsal |
-| Apex security | Real Code Analyzer CI accepted a clean fixture and detected the unsafe injection fixture | Broader metadata policies and runtime authorization tests |
-| Interrupted runs | Durable intents, operation IDs, immutable outcomes and replay prevention | B10 authenticated reconciliation and reviewer interface |
-| Pause | Checks before deployment submissions and test actions | Cancellation of operations already accepted by Salesforce |
-| Promotion | Required evidence gates block unsupported or unknown results | Reviewed per-plan quality policies, Flow adapter and four-org rehearsal |
-
-Use [the backlog](docs/BACKLOG.md) for all 35 items and [work status](docs/WORK-STATUS.md) for evidence. A successful Vercel build does not mean Salesforce promotion is ready.
-
-## Connect your accounts
-
-All settings are per workspace; there are no hardcoded customer accounts.
-
-| Connection | Required setup |
+| Connection | Setup |
 |---|---|
-| Salesforce development | My Domain login URL, environment kind, expected org ID for Developer Edition, External Client App client ID/secret, OAuth authorization |
-| Jira Cloud | Site URL, project key, issue type ID, account email, API token and any required field defaults |
-| GitHub CI/CD | Private Salesforce source repository, source folder, base branch, fine-grained token, trusted runner commit, four environment definitions |
-| Development LLM | OpenAI, Azure OpenAI, or Groq API credentials and a JSON-capable Chat Completions model/deployment |
+| **Salesforce (development)** | My Domain login URL, environment kind, expected org ID for Developer Edition, External Client App client ID/secret, OAuth |
+| **Jira Cloud** | Site URL, project key, issue type ID, account email, API token, required field defaults |
+| **GitHub CI/CD** | Private Salesforce source repo, source folder, base branch, fine-grained token, trusted runner commit, environment definitions |
+| **Development LLM** | OpenAI, Azure OpenAI or Groq credentials and a JSON-capable Chat Completions model |
 
-Salesforce OAuth callback: `https://YOUR-APP/api/service?op=sfCallback`. Enable Web Server OAuth with `api` and `refresh_token` scopes, PKCE and client-secret validation. Rotated refresh tokens are persisted with a database revision claim; interrupted exchanges require reauthorization instead of token replay.
+- **Salesforce OAuth callback**: `https://YOUR-APP/api/service?op=sfCallback`. Turn on Web Server OAuth with the `api` and `refresh_token` scopes, PKCE and client-secret validation. Rotated refresh tokens are saved with a revision claim. An interrupted exchange requires reauthorization rather than replaying the token.
+- **Groq**: choose *Groq API*, enter a JSON-capable model (for example `openai/gpt-oss-120b`), paste the key and click *Test model connection*. The endpoint is fixed to `api.groq.com/openai/v1/chat/completions`.
+- **License-aware planning**: *Workspace setup → Salesforce → Refresh license & capability report* collects edition, license inventories (capped at 200 rows), API limits and CRUD flags. A denied probe is reported as **unknown**, not "unlicensed."
+- **Pipeline credentials** are separate from web OAuth. Each GitHub environment uses certificate-based JWT secrets (`SF_CLIENT_ID`, `SF_USERNAME`, `SF_JWT_PRIVATE_KEY`). See [docs/PIPELINE.md](docs/PIPELINE.md).
 
-Pipeline authentication is separate: configure certificate-based JWT integration credentials and optional dedicated browser-test sessions in **each GitHub environment**, including production. The existing web OAuth app does not automatically grant those permissions. See [the complete CI/CD setup guide](docs/PIPELINE.md).
+</details>
 
-The Salesforce source repository is separate from the repository hosting this application. Install the trusted workflow, `runner/` and its required `lib/` modules into that repository, protect the runner branch, and pin its reviewed commit. Generated feature code goes to an isolated `sfda/<delivery-id>` branch. The runner receives the exact package from the authenticated application and does not execute generated repository scripts.
+<details>
+<summary><b>🏃 Runner, quality gates and recovery</b></summary>
 
-## Deliver a feature
+<br>
 
-1. Create a delivery from plain text or Markdown BRD content. PDF/Word conversion is not included.
-2. Analyze the original BRD and answer blocking questions. Approve the plan.
-3. Open **Mockup**, generate concept screens, request revisions, then approve the current design.
-4. Create all Jira stories, generate metadata, and review the code.
-5. Open **Test evidence**, generate and approve requirement-linked test scripts. Resolve manual-only scenarios before starting automatic promotion.
-6. Approve the implementation and commit it to the isolated feature branch.
-7. Open **CI/CD** and start the reviewed pipeline. Review the real runner evidence and GitHub environment approval requests.
-8. Approve UAT and production through GitHub. Verify business behavior and retain release evidence.
+- **Runner install**: copy the trusted workflows, `runner/` and the `lib/` modules it needs into the private Salesforce source repo. Protect that repo's branch and pin the reviewed commit. Generated code goes to an isolated `sfda/<delivery-id>` branch. The runner gets the exact package from the authenticated app and never runs generated repository scripts.
+- **Workflows here**: `ci.yml` (app checks), `security-integration.yml` (credential-free scanner test on clean and unsafe synthetic Apex), `salesforce-setup.yml` (read-only setup verification; no production target), `salesforce-delivery.yml`, `salesforce-production.yml`, `salesforce-reconciliation.yml`.
+- **Security preflight (B05)**: pin `CODE_ANALYZER_VERSION` to an exact reviewed 5.x.y release (never `latest`). It scans all Apex with PMD Security rules before any validation, rejects suppression markers, and requires reviewed CRUD/FLS/sharing cases as well. See [SECURITY-GATE.md](docs/SECURITY-GATE.md).
+- **Quality adapters (B05–B08)**: changed-class coverage, measured performance budgets, destination-license checks and pinned regression baselines, all under a per-plan policy. Changed-Flow checks stay blocked (B17). See [QUALITY-POLICIES.md](docs/QUALITY-POLICIES.md).
+- **Interrupted runs**: intents, operation IDs and outcomes are saved durably, so ambiguous responses block replay and automatic repair. Pause is checked before every submission and test step, but it cannot cancel work Salesforce has already accepted. Read-only reconciliation goes through a restricted MCP mode. Org-wide target locks never auto-expire an uncertain write. See [RUNNER-RECOVERY.md](docs/RUNNER-RECOVERY.md) and [DELIVERY-CONTROLS.md](docs/DELIVERY-CONTROLS.md).
 
-A successful non-production repair creates a new artifact and Git commit, preserves approved tests, and restarts from Dev. UAT/production approvals apply again to that new run. Repairs cannot change permission-set files, test classes, requirement text, mockups, or acceptance expectations. No-op repairs, ambiguity, exhausted budget, authentication failures and unknown write outcomes stop the automation. There is no automatic production repair or rollback; a failed production release needs investigation.
+</details>
 
-## Grounding and safety boundaries
+<h2 align="center">◆ STATUS ◆</h2>
+<p align="center"><sub>HONEST CHECKPOINT</sub></p>
 
-“Zero hallucinations” cannot be guaranteed. This system limits unsupported behavior through exact BRD excerpts, requirement IDs, reviewed mockups, frozen test expectations, strict metadata paths, verified target identities, signed runner identity, and actual Salesforce/Playwright results. A model response is never accepted as test evidence.
+| Area | Verified | Still open |
+|---|---|---|
+| Live setup (Oct 26, 2026) | Database, target locks, Salesforce Dev, Jira and Groq passed the preflight | Protected environments, per-org JWT credentials, QA/UAT orgs |
+| Apex security | Real Code Analyzer CI accepts a clean fixture and catches an unsafe injection fixture | Broader metadata policies, runtime authorization tests |
+| Interrupted runs | Durable intents, operation IDs, immutable outcomes, replay prevention | Controlled recovery decisions, live verification |
+| Promotion | Evidence gates block unsupported or unknown results | Flow adapter (B17), live four-org rehearsal |
 
-- GitHub runner identity uses signed OIDC with audience, repository, workflow, exact SHA, branch, environment and run binding.
-- UAT/production environments require reviewers with self-review prevented. Every environment must restrict deployment to protected branches.
-- The MCP bridge exposes only org inspection, immutable-package validation/deployment, status polling and named Apex tests. It does not expose arbitrary shell, SOQL or unrestricted tool execution.
-- Playwright interprets an approved declarative test plan. It does not evaluate model-generated JavaScript. Browser traffic is restricted to the configured Salesforce login and Lightning hosts; unsupported CDN/SSO dependencies fail closed and require reviewed adapter changes.
-- Production browser tests must be read-only. Write-based browser scenarios currently block production; use read-only smoke assertions for a full four-stage run.
-- Salesforce validation and deployment always use `RunLocalTests`, `rollbackOnError` and warnings-as-failures. Validation is not a substitute for business acceptance.
-- Generated Flows remain Draft. Activation, destructive changes, data migration, managed packages and broad org administration are outside the current automation scope.
+The backlog has items **B01–B43**: the 35 original audit items, B36 from quality-adapter CI, and B37–B43 Salesforce expansion stories. Each one has acceptance criteria, dependencies and required evidence: [docs/BACKLOG.md](docs/BACKLOG.md) · [docs/WORK-STATUS.md](docs/WORK-STATUS.md).
 
-## Documentation and project policies
+<details>
+<summary><b>📚 Documentation map</b></summary>
+
+<br>
 
 | Need | Read |
 |---|---|
-| Full backend credentials, runner installation and four-org configuration | [CI/CD setup](docs/PIPELINE.md) |
-| Existing web app setup | [Setup](docs/SETUP.md) |
-| Trust boundaries and repair flow | [Architecture](docs/ARCHITECTURE.md) |
-| Tested behavior and live gaps | [Verification](docs/VERIFICATION.md) |
-| Upgrade an existing database | [Upgrade](docs/UPGRADE.md) |
-| Contribute changes | [Contributing](CONTRIBUTING.md) |
-| Community expectations | [Code of conduct](CODE_OF_CONDUCT.md) |
-| Vulnerability reporting | [Security policy](SECURITY.md) |
-| Usage and distribution terms | [MIT license](LICENSE) |
+| End-to-end flow and implementation matrix | [DELIVERY-FLOW.md](docs/DELIVERY-FLOW.md) |
+| Backend credentials, runner install, four-org config | [PIPELINE.md](docs/PIPELINE.md) |
+| Web app setup · DB upgrades | [SETUP.md](docs/SETUP.md) · [UPGRADE.md](docs/UPGRADE.md) |
+| Trust boundaries and repair flow | [ARCHITECTURE.md](docs/ARCHITECTURE.md) · [ADR-001](docs/ARCHITECTURE-DECISION-001.md) |
+| Agent responsibilities and target stack | [AGENTS-AND-STACK.md](docs/AGENTS-AND-STACK.md) |
+| Tested behavior and live gaps | [VERIFICATION.md](docs/VERIFICATION.md) · [ENVIRONMENT-READINESS.md](docs/ENVIRONMENT-READINESS.md) |
+| Metadata drift · toolchain audit | [METADATA-DRIFT.md](docs/METADATA-DRIFT.md) · [TOOLCHAIN-AUDIT.md](docs/TOOLCHAIN-AUDIT.md) |
+| Contributing · conduct · security | [CONTRIBUTING.md](CONTRIBUTING.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [SECURITY.md](SECURITY.md) |
 
-The MIT license covers this project’s code. Salesforce, GitHub, Vercel, Supabase, model providers and Playwright have their own terms and licenses. No provider subscription or service charge is included.
+Copado is no longer used by the pipeline. Old connection records are kept only for compatibility ([COPADO-CONNECTOR.md](docs/COPADO-CONNECTOR.md)).
 
-### License-aware planning
+</details>
 
-Salesforce authorization now collects an evidence report: org edition (including Developer Edition), the connected user's license when available, user/feature/package license inventories, API limits and effective object CRUD flags. Refresh it under **Workspace setup → Salesforce → Refresh license & capability report**. BRD analysis obtains a new snapshot and asks blocking questions about unverified licensed features, with alternatives to investigate.
+<h2 align="center">✦ LICENSE ✦</h2>
 
-A denied probe is **unknown**, not “unlicensed.” Inventories are capped at 200 rows and disclose truncation. License fields are discovered before querying; unavailable counts are never invented. Inventory does not establish assignment to every user. CRUD access does not establish metadata deployment permission. Exact-package validation and destination-specific testing remain mandatory. These reports cannot verify commercial contracts or promise zero hallucinations; the current requirement assessment is model-assisted, not a complete deterministic entitlement rules engine.
+<p align="center">MIT — see <a href="LICENSE">LICENSE</a>. Salesforce, GitHub, Vercel, Supabase, model providers and Playwright have their own terms. No provider subscription is included.</p>
 
-### Revised delivery architecture (October 2026)
-
-The authoritative flow and implementation matrix are in [Delivery flow](docs/DELIVERY-FLOW.md). Jira story creation and GitHub Actions CI/CD are core integrations. Copado is not used. New deliveries require a resolved, approved Salesforce architecture before code generation. After UAT, the app generates a traceable release report; a reviewer records business approval before the production runner can claim its package. Approve the report in the app **before** releasing the protected production job in GitHub.
-
-**Current rollout blocker:** the expanded quality gate deliberately blocks promotion until the trusted runner supplies coverage, security, performance, license, regression, business and Flow applicability/results evidence. B05–B08 adapters now execute reviewed policies for their documented supported scope; Flow execution and live verification remain outstanding. Do not enable this pipeline for production simply because web-app unit tests pass. See the implementation matrix for remaining work.
-
-### Specialized agents and target stack
-
-[Agent responsibilities and stack decisions](docs/AGENTS-AND-STACK.md) separates the existing implementation from the target React/Next.js, FastAPI and LangGraph architecture. [Agent contracts](config/agent-contracts.json) define responsibilities and tool boundaries. Requirement analysis now creates structured test cases alongside stories, covering every acceptance criterion; executable test generation must preserve their expected outcomes.
-
-### Quality adapter progress
-
-The runner derives changed-Apex-class coverage and acceptance-case execution coverage from observed results. It does not accept external pass files. Security combines isolated Apex scanning, constrained metadata policy and reviewed runtime access cases. Performance evaluates measured Apex/bulk and browser budgets. Destination-license checks run before each metadata operation; baseline regression uses independently reviewed tests with pinned sources. All require a per-plan policy from the trusted runner commit. Changed-Flow checks remain blocked pending B17. See [quality policy setup](docs/QUALITY-POLICIES.md). No complete end-to-end Salesforce pipeline is claimed.
-
-## Implementation backlog
-
-The [backlog board and story catalog](docs/BACKLOG.md) tracks the original 35 audit items plus newly discovered work across six epics. Each Jira-style story includes priority, status, implementation tasks, acceptance criteria, dependencies, required evidence and expected results. The Kanban summary separates backlog, in-progress work, verification and live-setup blockers. [Work status](docs/WORK-STATUS.md) records verified checkpoints and live-verification limits. Passing web-app checks does not establish Salesforce production readiness.
-
-
-### Security preflight setup (B05, limited pilot scope)
-
-Before enabling a Salesforce pipeline, set `CODE_ANALYZER_VERSION` in each GitHub environment to an exact reviewed **5.x.y** release of `@salesforce/plugin-code-analyzer`, alongside the existing CLI and Playwright version variables. The runner requires Java 11+ and installs the scanner before environment credentials are used. Do not use `latest`.
-
-Security checks run **before any Salesforce validation or deployment**. The policy scans all Apex source using PMD rules tagged Security, rejects suppression markers, and fails on every reported security severity. Unknown, incomplete or inconsistent evidence blocks the stage. Generated scanner configuration is never executed.
-
-Restricted private custom objects with simple fields and constrained permission sets now have structural security policies. Flows, LWC, profiles, triggers and more complex metadata remain blocked pending expanded coverage. A clean static scan alone cannot pass the security gate: reviewed allow/deny CRUD/FLS/sharing cases must also execute. Configure all gates using [reviewed quality policies](docs/QUALITY-POLICIES.md). See [security policy details](docs/SECURITY-GATE.md) and [backlog](docs/BACKLOG.md).
-
-### Interrupted runs and pause behavior
-
-The runner saves each validation/deployment intent before submission, its Salesforce operation ID before polling, and the terminal outcome before continuing. Lost or ambiguous responses block replay and automatic repair. A passing stage report must match those saved operation IDs. Pause checks run before validation, deployment, each Apex scenario and each browser step; outcome reporting and read-only polling of an already submitted deployment remain available while paused. Pause cannot undo or cancel an operation already accepted by Salesforce, and there is a small race between permission checks and external submission. Do not treat it as emergency cancellation. See [runner recovery](docs/RUNNER-RECOVERY.md).
-
-A separate credential-free `Security scanner integration` workflow exercises the pinned real scanner against clean and intentionally unsafe synthetic Apex. Its result is distinct from unit tests and web preview deployment. It needs no Salesforce credentials and performs no Salesforce writes.
-
-
-### Interrupted operation recovery
-
-The CI/CD journal shows saved Salesforce operation evidence and blocks unresolved restarts. A restricted MCP reconciliation mode now allows org inspection and status reads for exact saved IDs without exposing write tools. Owners and reviewers can now request an authenticated, read-only GitHub recovery check after pausing and stopping the original runner. Results update the saved operation journal while the delivery remains paused. Reviewers can retire an interrupted read request after its claimed worker stops, or after 24 hours if it was never claimed, then request a fresh check. Retirement preserves unresolved deployment outcomes and the pause. Controlled recovery decisions and live verification remain pending. See [runner recovery](docs/RUNNER-RECOVERY.md) for the contract and limitations, and [B10](docs/BACKLOG.md#b10) for the remaining acceptance criteria.
-
-### October 21 delivery controls
-
-Business approval now dispatches a separate protected production continuation. Runner repositories must install `salesforce-production.yml` and review/pin the updated commit. New test suites map acceptance criteria to exact Apex methods or browser assertions. Git revisions track owned files and explicit removals; legacy deliveries without ownership records block safely. Workspace owners can run setup preflight from Connections.
-
-- [Setup and behavior changes](docs/DELIVERY-CONTROLS.md)
-- [Current versus target architecture](docs/ARCHITECTURE-DECISION-001.md)
-- [Unresolved runner dependency audit](docs/TOOLCHAIN-AUDIT.md)
-
-These changes do not establish live Salesforce readiness. The official Hosted/DX MCP adapter, org-wide locks and other open backlog items remain outstanding.
-
-**Database upgrade required for org locks:** apply [migration 004](database/migrations/004_target_locks.sql) after migration 003. Without it, new Salesforce mutations block. The lock coordinates workspaces by org ID and never expires an uncertain write automatically. [Controlled recovery](docs/DELIVERY-CONTROLS.md) explains how reviewers accept terminal observations without granting a test pass.
-
-### Groq development connection
-
-In Connections → Development LLM, select **Groq API**, enter a JSON-capable model such as `openai/gpt-oss-120b`, and paste your Groq API key. Leave Azure fields blank, save, then select **Test model connection**. The server uses the fixed `https://api.groq.com/openai/v1/chat/completions` endpoint; no custom endpoint is needed. Keys use the existing encrypted credential storage. Free-tier quotas and model availability are controlled by Groq; start with a small synthetic BRD. A successful connection test does not validate Salesforce code or license compatibility.
+<p align="center">
+  <sub><code>◉ HUMAN-GOVERNED DELIVERY // GILDED ORBIT</code></sub><br>
+  <sub>Built by <a href="https://github.com/kamikaze1120">@kamikaze1120</a></sub>
+</p>
