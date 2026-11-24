@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">Delivery Studio — Salesforce delivery agent</title>
+  <desc id="desc">Animated night-sky banner with a cloud-shaped delivery pipeline: a BRD page flows through gated stage nodes toward a locked human-approval gate beside the Delivery Studio title.</desc>
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#020317"/>
+      <stop offset=".52" stop-color="#071238"/>
+      <stop offset="1" stop-color="#13052d"/>
+    </linearGradient>
+    <radialGradient id="purpleCloud">
+      <stop stop-color="#d43cff" stop-opacity=".64"/>
+      <stop offset=".34" stop-color="#8d22ff" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#4215a7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="goldCloud">
+      <stop stop-color="#ffe69b" stop-opacity=".5"/>
+      <stop offset=".3" stop-color="#f0ad38" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#b76f08" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="skyCloud">
+      <stop stop-color="#4fc3ff" stop-opacity=".36"/>
+      <stop offset="1" stop-color="#4fc3ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#a96b18"/>
+      <stop offset=".28" stop-color="#ffe293"/>
+      <stop offset=".55" stop-color="#f4bb4d"/>
+      <stop offset=".82" stop-color="#fff0b7"/>
+      <stop offset="1" stop-color="#b87519"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ffffff" stop-opacity=".14"/>
+      <stop offset=".45" stop-color="#af75ff" stop-opacity=".07"/>
+      <stop offset="1" stop-color="#f6c35b" stop-opacity=".05"/>
+    </linearGradient>
+    <pattern id="stars" width="150" height="110" patternUnits="userSpaceOnUse">
+      <circle cx="13" cy="18" r="1.2" fill="#fff7d4" opacity=".9"/>
+      <circle cx="61" cy="36" r=".7" fill="#d7b5ff" opacity=".76"/>
+      <circle cx="112" cy="17" r=".9" fill="#fff" opacity=".72"/>
+      <circle cx="140" cy="68" r="1.1" fill="#ffd972" opacity=".8"/>
+      <circle cx="83" cy="91" r=".55" fill="#fff" opacity=".58"/>
+      <circle cx="31" cy="100" r=".75" fill="#c68cff" opacity=".78"/>
+    </pattern>
+    <filter id="blur" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dy="18" stdDeviation="20" flood-color="#000017" flood-opacity=".8"/></filter>
+    <clipPath id="clip"><rect width="1200" height="420" rx="30"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <rect width="1200" height="420" fill="url(#night)"/>
+    <ellipse cx="270" cy="140" rx="330" ry="210" fill="url(#purpleCloud)" filter="url(#blur)">
+      <animate attributeName="rx" values="300;370;300" dur="14s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values=".6;1;.6" dur="9s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="990" cy="280" rx="300" ry="190" fill="url(#goldCloud)" filter="url(#blur)">
+      <animate attributeName="ry" values="160;220;160" dur="16s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="930" cy="110" rx="240" ry="150" fill="url(#skyCloud)" filter="url(#blur)">
+      <animate attributeName="opacity" values=".5;1;.5" dur="10s" repeatCount="indefinite"/>
+    </ellipse>
+    <rect x="-150" width="1500" height="520" fill="url(#stars)" opacity=".78">
+      <animateTransform attributeName="transform" type="translate" values="0 0;150 0" dur="46s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- Cloud outline -->
+    <path transform="translate(150 14) scale(.86)" d="M770 120c0-34 30-58 62-52 14-30 52-44 84-28 22-26 66-26 88 2 34-6 64 20 62 54 26 8 40 36 30 60H756c-18-10-14-34 14-36z" fill="#4fc3ff" fill-opacity=".05" stroke="#4fc3ff" stroke-opacity=".4" stroke-width="1.5" stroke-dasharray="4 6">
+      <animate attributeName="stroke-dashoffset" values="0;-40" dur="6s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- BRD page -->
+    <g transform="translate(726 196)">
+      <path d="M0 0H34L46 12V58H0Z" fill="#0b1236" stroke="url(#gold)" stroke-width="1.5"/>
+      <path d="M34 0V12H46" fill="none" stroke="#f4bb4d" stroke-width="1.2"/>
+      <path d="M8 22H38M8 31H38M8 40H30" stroke="#ffe293" stroke-opacity=".6" stroke-width="2"/>
+      <text x="23" y="76" fill="#ffe7a2" text-anchor="middle" font-family="'JetBrains Mono', Consolas, monospace" font-size="10" letter-spacing="1">BRD</text>
+    </g>
+
+    <!-- Pipeline track -->
+    <path id="track" d="M786 225H1130" fill="none" stroke="url(#gold)" stroke-width="2" stroke-opacity=".6"/>
+    <path d="M786 225H1130" fill="none" stroke="#4fc3ff" stroke-width="2" stroke-dasharray="6 10" stroke-opacity=".7">
+      <animate attributeName="stroke-dashoffset" values="0;-32" dur="1.6s" repeatCount="indefinite"/>
+    </path>
+    <g font-family="'JetBrains Mono', Consolas, monospace" font-size="9.5" letter-spacing=".8" text-anchor="middle">
+      <g transform="translate(812 225)"><circle r="13" fill="#0b1236" stroke="#f4bb4d" stroke-width="1.5"/><text y="4" fill="#ffe7a2">R</text><text y="34" fill="#d9c7f2">REQS</text></g>
+      <g transform="translate(866 225)"><circle r="13" fill="#0b1236" stroke="#f4bb4d" stroke-width="1.5"/><text y="4" fill="#ffe7a2">A</text><text y="-22" fill="#d9c7f2">ARCH</text></g>
+      <g transform="translate(920 225)"><circle r="13" fill="#0b1236" stroke="#f4bb4d" stroke-width="1.5"/><text y="4" fill="#ffe7a2">M</text><text y="34" fill="#d9c7f2">META</text></g>
+      <g transform="translate(974 225)"><circle r="13" fill="#0b1236" stroke="#4fc3ff" stroke-width="1.5"/><text y="4" fill="#c9ecff">T</text><text y="-22" fill="#d9c7f2">TEST</text></g>
+      <g transform="translate(1028 225)"><circle r="13" fill="#0b1236" stroke="#4fc3ff" stroke-width="1.5"/><text y="4" fill="#c9ecff">Q</text><text y="34" fill="#d9c7f2">GATE</text></g>
+      <!-- bounded repair loop -->
+      <path d="M1028 238C1028 290 920 290 920 238" fill="none" stroke="#cb55ff" stroke-width="1.4" stroke-dasharray="3 5" opacity=".75">
+        <animate attributeName="stroke-dashoffset" values="0;16" dur="1.4s" repeatCount="indefinite"/>
+      </path>
+      <text x="974" y="298" fill="#e6ccff">BOUNDED REPAIR</text>
+    </g>
+    <!-- Human approval gate -->
+    <g transform="translate(1100 225)">
+      <rect x="-20" y="-26" width="40" height="52" rx="8" fill="#1d1732" stroke="url(#gold)" stroke-width="2"/>
+      <path d="M-8 -6V-12A8 8 0 0 1 8 -12V-6" fill="none" stroke="#ffe293" stroke-width="2.4"/>
+      <rect x="-11" y="-6" width="22" height="17" rx="3" fill="#f4bb4d"/>
+      <circle cy="2" r="2.6" fill="#1d1732"/>
+      <circle r="30" fill="none" stroke="#f4bb4d" stroke-width="1.2" opacity=".6">
+        <animate attributeName="r" values="28;40;28" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".6;0;.6" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <text y="46" fill="#ffe7a2" text-anchor="middle" font-family="'JetBrains Mono', Consolas, monospace" font-size="9.5" letter-spacing=".8">HUMAN</text>
+    </g>
+    <!-- traveling packet -->
+    <circle r="5" fill="#fff0b7" filter="url(#glow)">
+      <animateMotion dur="5s" repeatCount="indefinite" path="M786 225H1076"/>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.9;1" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Glass panel -->
+    <g filter="url(#shadow)">
+      <rect x="56" y="52" width="620" height="316" rx="28" fill="#060a25" fill-opacity=".58" stroke="url(#gold)" stroke-opacity=".82"/>
+      <rect x="68" y="64" width="596" height="292" rx="22" fill="url(#glass)" stroke="#d38cff" stroke-opacity=".26"/>
+    </g>
+    <path d="M96 102H262" stroke="url(#gold)" stroke-width="2"/>
+    <circle cx="96" cy="102" r="5" fill="#4fc3ff" filter="url(#glow)">
+      <animate attributeName="opacity" values=".3;1;.3" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+    <text x="278" y="107" fill="#f9d777" font-family="'JetBrains Mono', Consolas, monospace" font-size="13" letter-spacing="3">BRD → GOVERNED SDLC</text>
+    <text x="92" y="178" fill="url(#gold)" font-family="'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="2">Delivery Studio</text>
+    <text x="98" y="222" fill="#fff9e8" font-family="'JetBrains Mono', Consolas, monospace" font-size="16" font-weight="700" letter-spacing="3">SALESFORCE DELIVERY AGENT</text>
+    <text x="98" y="262" fill="#d9c7f2" font-family="'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="17">From a requirements document to reviewed Salesforce metadata.</text>
+
+    <g transform="translate(98 296)">
+      <rect width="132" height="40" rx="20" fill="#0b2236" fill-opacity=".8" stroke="#4fc3ff" stroke-opacity=".7"/>
+      <circle cx="20" cy="20" r="5" fill="#4fc3ff" filter="url(#glow)"><animate attributeName="opacity" values=".3;1;.3" dur="1.4s" repeatCount="indefinite"/></circle>
+      <text x="34" y="25" fill="#c9ecff" font-family="'JetBrains Mono', Consolas, monospace" font-size="11.5" letter-spacing="1.2">DEV ORG</text>
+    </g>
+    <g transform="translate(244 296)">
+      <rect width="168" height="40" rx="20" fill="#1d1732" fill-opacity=".8" stroke="#f3c454" stroke-opacity=".65"/>
+      <text x="20" y="25" fill="#ffe7a2" font-family="'JetBrains Mono', Consolas, monospace" font-size="11.5" letter-spacing="1.2">HUMAN APPROVAL</text>
+    </g>
+    <g transform="translate(426 296)">
+      <rect width="196" height="40" rx="20" fill="#111331" fill-opacity=".8" stroke="#9f62ff" stroke-opacity=".66"/>
+      <text x="20" y="25" fill="#dcc9ff" font-family="'JetBrains Mono', Consolas, monospace" font-size="11.5" letter-spacing="1.2">PROD: DISABLED</text>
+    </g>
+
+    <rect width="1200" height="420" rx="30" fill="none" stroke="url(#gold)" stroke-width="2"/>
+    <rect x="10" y="10" width="1180" height="400" rx="23" fill="none" stroke="#c44fff" stroke-opacity=".16"/>
+    <rect y="-40" width="1200" height="30" fill="#f7cf68" opacity=".045"><animate attributeName="y" values="-40;450" dur="8s" repeatCount="indefinite"/></rect>
+  </g>
+</svg>
